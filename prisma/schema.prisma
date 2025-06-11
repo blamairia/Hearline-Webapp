@@ -1,0 +1,510 @@
+// ----------------------------
+// 1. DATASOURCE & GENERATOR
+// ----------------------------
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["referentialActions"]
+}
+
+// ----------------------------
+// 2. MODELS & RELATIONS
+// ----------------------------
+
+model User {
+  id                  String              @id @default(cuid())
+  name                String?
+  email               String?             @unique
+  emailVerified       DateTime?
+  image               String?
+  role                UserRole            @default(USER)
+  organizationId      String?
+  createdAt           DateTime            @default(now())
+  updatedAt           DateTime            @updatedAt
+
+  // Relations
+  organization        Organization?       @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  accounts            Account[]
+  sessions            Session[]
+  subscriptions       Subscription[]
+  invoices            Invoice[]
+  TeamMembership      TeamMembership[]
+  createdTeams        Team[]              @relation("TeamAdmin")
+  notifications       Notification[]
+  payments            Payment[]           @relation("UserPayments")
+  couponRedemptions   CouponRedemption[]  @relation("UserCouponRedemptions")
+  auditLogs           AuditLog[]          @relation("UserAuditLogs")
+}
+
+model Account {
+  id                String    @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String?   @db.Text
+  access_token      String?   @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String?   @db.Text
+  session_state     String?
+  
+  user              User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model VerificationToken {
+  identifier String
+  token      String   @unique
+  expires    DateTime
+
+  @@unique([identifier, token])
+}
+
+model SubscriptionPlan {
+  id               String        @id @default(cuid())
+  name             String        @unique
+  displayName      String
+  description      String?
+  price            Int
+  currency         String        @default("usd")
+  billingCycle     BillingCycle  @default(MONTHLY)
+  features         Json
+  trialDays        Int?
+  stripePriceId    String?       @unique
+  paypalPlanId     String?       @unique
+  paddleProductId  String?       @unique
+  isActive         Boolean       @default(true)
+  isArchived       Boolean       @default(false)
+  isPopular        Boolean       @default(false)
+  displayOrder     Int?
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  subscriptions    Subscription[]
+  coupons          Coupon[]      @relation("PlanCoupons")
+}
+
+model Subscription {
+  id                           String                      @id @default(cuid())
+  userId                       String
+  planId                       String
+  teamId                       String?
+  status                       SubscriptionStatus         @default(PENDING_PAYMENT)
+  startDate                    DateTime
+  endDate                      DateTime?
+  trialStartDate               DateTime?
+  trialEndDate                 DateTime?
+  cancelledAt                  DateTime?
+  cancellationReason           String?
+  cancellationEffectiveDate    DateTime?
+  autoRenew                    Boolean                    @default(true)
+  paymentProvider              PaymentProvider?
+  paymentProviderSubscriptionId String?
+  priceAtRenewal               Int?
+  currencyAtRenewal            String?
+  billingCycleAtRenewal        BillingCycle?
+  offlinePaymentReference      String?
+  offlinePaymentNotes          String?                    @db.Text
+  createdAt                    DateTime                   @default(now())
+  updatedAt                    DateTime                   @updatedAt
+
+  user                         User                        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan                         SubscriptionPlan           @relation(fields: [planId], references: [id], onDelete: Cascade)
+  team                         Team?                      @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  invoices                     Invoice[]
+  addons                       SubscriptionAddonInstance[]
+  usageRecords                 SubscriptionUsageRecord[]
+  couponRedemptions            CouponRedemption[]         @relation("SubscriptionCouponRedemptions")
+
+  @@index([userId])
+  @@index([planId])
+  @@index([teamId])
+  @@index([status])
+  @@index([paymentProviderSubscriptionId])
+}
+
+model SubscriptionAddon {
+  id               String        @id @default(cuid())
+  name             String        @unique
+  displayName      String
+  description      String?
+  price            Int
+  currency         String        @default("usd")
+  billingCycle     BillingCycle
+  type             AddonType     @default(RECURRING)
+  features         Json?
+  stripePriceId    String?       @unique
+  isActive         Boolean       @default(true)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  instances        SubscriptionAddonInstance[]
+}
+
+model SubscriptionAddonInstance {
+  id                 String            @id @default(cuid())
+  subscriptionId     String
+  addonId            String
+  quantity           Int               @default(1)
+  priceAtPurchase    Int
+  currencyAtPurchase String
+  startDate          DateTime
+  endDate            DateTime?
+  status             AddonStatus       @default(ACTIVE)
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  subscription       Subscription      @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  addon              SubscriptionAddon @relation(fields: [addonId], references: [id], onDelete: Cascade)
+
+  @@index([subscriptionId])
+  @@index([addonId])
+}
+
+model Invoice {
+  id                          String               @id @default(cuid())
+  userId                      String
+  subscriptionId              String?
+  teamId                      String?
+  invoiceNumber               String               @unique
+  status                      InvoiceStatus        @default(DRAFT)
+  amountDue                   Int
+  amountPaid                  Int      @default(0)
+  amountRemaining             Int
+  currency                    String
+  issueDate                   DateTime             @default(now())
+  dueDate                     DateTime?
+  paidAt                      DateTime?
+  closedAt                    DateTime?
+  description                 String?              @db.Text
+  paymentProvider             PaymentProvider?
+  paymentProviderInvoiceId    String?
+  paymentAttemptCount         Int                  @default(0)
+  lastPaymentError            String?              @db.Text
+  offlinePaymentMethod        String?
+  offlinePaymentReference     String?
+  pdfUrl                      String?
+  notes                       String?              @db.Text
+  createdAt                   DateTime             @default(now())
+  updatedAt                   DateTime             @updatedAt
+
+  user                        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  subscription                Subscription?        @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  team                        Team?                @relation(fields: [teamId], references: [id], onDelete: SetNull)
+
+  items                       InvoiceItem[]
+  payments                    Payment[]
+  couponRedemptions           CouponRedemption[]   @relation("InvoiceCouponRedemptions")
+
+  @@index([userId])
+  @@index([subscriptionId])
+  @@index([teamId])
+  @@index([status])
+  @@index([invoiceNumber])
+}
+
+model InvoiceItem {
+  id             String             @id @default(cuid())
+  invoiceId      String
+  productId      String?
+  productType    String?
+  description    String
+  quantity       Int                @default(1)
+  unitPrice      Int
+  totalAmount    Int
+  discountAmount Int      @default(0)
+  taxAmount      Int      @default(0)
+  periodStartDate DateTime?
+  periodEndDate   DateTime?
+  metadata       Json?
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  invoice        Invoice            @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  usageRecords   SubscriptionUsageRecord[] @relation("UsageInvoiceItem")
+
+  @@index([invoiceId])
+}
+
+model Payment {
+  id                            String          @id @default(cuid())
+  invoiceId                     String
+  userId                        String
+  amount                        Int
+  currency                      String
+  status                        PaymentStatus   @default(PENDING)
+  paymentMethodUsed             String?
+  paymentProvider               PaymentProvider?
+  paymentProviderTransactionId  String?         @unique
+  processedAt                   DateTime        @default(now())
+  providerRespondedAt           DateTime?
+  failureReason                 String?         @db.Text
+  refundAmount                  Int?
+  refundReason                  String?         @db.Text
+  metadata                      Json?
+  createdAt                     DateTime        @default(now())
+  updatedAt                     DateTime        @updatedAt
+
+  invoice                       Invoice         @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  user                          User            @relation("UserPayments", fields: [userId], references: [id], onDelete: NoAction)
+
+  @@index([invoiceId])
+  @@index([userId])
+  @@index([paymentProviderTransactionId])
+  @@index([status])
+}
+
+model Team {
+  id            String           @id @default(cuid())
+  name          String
+  slug          String?          @unique
+  adminId       String
+  billingEmail  String?
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+
+  admin         User             @relation("TeamAdmin", fields: [adminId], references: [id], onDelete: Cascade)
+  members       TeamMembership[]
+  subscriptions Subscription[]
+  invoices      Invoice[]
+}
+
+model TeamMembership {
+  id        String    @id @default(cuid())
+  teamId    String
+  userId    String
+  role      TeamRole  @default(MEMBER)
+  joinedAt  DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  team      Team      @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([userId])
+}
+
+model Organization {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @default(now())
+  users     User[]
+}
+
+model Coupon {
+  id                    String             @id @default(cuid())
+  code                  String             @unique
+  description           String?
+  discountType          DiscountType       @default(PERCENTAGE)
+  discountValue         Float
+  maxRedemptions        Int?
+  maxRedemptionsPerUser Int      @default(1)
+  validFrom             DateTime?
+  validUntil            DateTime?
+  isActive              Boolean            @default(true)
+  minPurchaseAmount     Int?
+  createdAt             DateTime           @default(now())
+  updatedAt             DateTime           @updatedAt
+
+  applicablePlans       SubscriptionPlan[] @relation("PlanCoupons")
+  redemptions           CouponRedemption[]
+}
+
+model CouponRedemption {
+  id                      String        @id @default(cuid())
+  couponId                String
+  userId                  String
+  invoiceId               String?
+  subscriptionId          String?
+  redeemedAt              DateTime      @default(now())
+  discountAmountApplied   Int
+  createdAt               DateTime      @default(now())
+  updatedAt               DateTime      @default(now())
+
+  coupon                  Coupon        @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user                    User          @relation("UserCouponRedemptions", fields: [userId], references: [id], onDelete: NoAction)
+  invoice                 Invoice?      @relation("InvoiceCouponRedemptions", fields: [invoiceId], references: [id], onDelete: SetNull)
+  subscription            Subscription? @relation("SubscriptionCouponRedemptions", fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([couponId])
+  @@index([userId])
+  @@index([invoiceId])
+  @@index([subscriptionId])
+}
+
+model SubscriptionUsageRecord {
+  id               String        @id @default(cuid())
+  subscriptionId   String
+  featureSlug      String
+  quantityUsed     Float
+  recordDate       DateTime
+  description      String?
+  invoiceItemId    String?
+  createdAt        DateTime      @default(now())
+
+  subscription     Subscription             @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  invoiceItem      InvoiceItem?             @relation("UsageInvoiceItem", fields: [invoiceItemId], references: [id], onDelete: SetNull)
+
+  @@index([subscriptionId])
+  @@index([featureSlug])
+  @@index([recordDate])
+}
+
+model Notification {
+  id                 String           @id @default(cuid())
+  userId             String
+  type               NotificationType  @default(GENERAL)
+  title              String
+  message            String           @db.Text
+  isRead             Boolean          @default(false)
+  readAt             DateTime?
+  link               String?
+  relatedEntityType  String?
+  relatedEntityId    String?
+  createdAt          DateTime         @default(now())
+  updatedAt          DateTime         @default(now())
+
+  user               User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([isRead])
+}
+
+model AuditLog {
+  id                String    @id @default(cuid())
+  timestamp         DateTime  @default(now())
+  userId            String?
+  action            String
+  targetEntityType  String?
+  targetEntityId    String?
+  details           Json?
+  ipAddress         String?
+  userAgent         String?   @db.Text
+
+  user              User?     @relation("UserAuditLogs", fields: [userId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([action])
+  @@index([targetEntityType, targetEntityId])
+}
+
+// ----------------------------
+// 3. ENUMS
+// ----------------------------
+enum UserRole {
+  USER
+  ADMIN
+  SUPER_ADMIN
+  SUPPORT_STAFF
+}
+
+enum BillingCycle {
+  ONCE
+  DAILY
+  WEEKLY
+  MONTHLY
+  QUARTERLY
+  SEMI_ANNUALLY
+  YEARLY
+  BIENNIALLY
+}
+
+enum SubscriptionStatus {
+  TRIALING
+  ACTIVE
+  PENDING_PAYMENT
+  PENDING_ACTIVATION
+  PAST_DUE
+  UNPAID
+  CANCELLED
+  EXPIRED
+  INCOMPLETE
+  INCOMPLETE_EXPIRED
+  PAUSED
+  DEACTIVATED
+}
+
+enum AddonStatus {
+  ACTIVE
+  CANCELLED
+  EXPIRED
+}
+
+enum AddonType {
+  RECURRING
+  ONE_TIME
+}
+
+enum InvoiceStatus {
+  DRAFT
+  OPEN
+  PAID
+  VOID
+  UNCOLLECTIBLE
+  PENDING_CONFIRMATION
+  REFUNDED
+  PARTIALLY_REFUNDED
+  FAILED
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+  PARTIALLY_REFUNDED
+  CHARGEBACK
+  AWAITING_ACTION
+}
+
+enum PaymentProvider {
+  STRIPE
+  PAYPAL
+  PADDLE
+  OFFLINE_CASH
+  OFFLINE_BANK_TRANSFER
+  OFFLINE_CHECK
+  APPLE_IAP
+  GOOGLE_PLAY_BILLING
+  OTHER
+}
+
+enum TeamRole {
+  OWNER
+  ADMIN
+  MEMBER
+  BILLING_MANAGER
+  GUEST
+}
+
+enum DiscountType {
+  PERCENTAGE
+  FIXED_AMOUNT
+}
+
+enum NotificationType {
+  GENERAL
+  BILLING_ALERT
+  SUBSCRIPTION_UPDATE
+  NEW_FEATURE
+  SECURITY_ALERT
+  USAGE_ALERT
+}

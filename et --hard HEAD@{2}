@@ -1,0 +1,79 @@
+[33m3e95b39[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m)[m HEAD@{0}: commit: Add missing src/lib files under landing-website
+[33m3cb0c81[m HEAD@{1}: checkout: moving from master to main
+[33m6de9b40[m[33m ([m[1;31morigin/master[m[33m, [m[1;31morigin/HEAD[m[33m, [m[1;32mmaster[m[33m)[m HEAD@{2}: commit: ecg edit submitting
+[33mb3916a3[m HEAD@{3}: commit: edit fucked up
+[33m2ba9c8c[m HEAD@{4}: commit: edit visit ecg plotting
+[33m82feec4[m HEAD@{5}: commit: plot working in new visit page
+[33m54ab633[m HEAD@{6}: commit: plot working in new visit page
+[33md5cd0b2[m HEAD@{7}: commit: plot working in new visit page
+[33md4964af[m HEAD@{8}: commit: ecg analysis works
+[33m7244601[m HEAD@{9}: commit: mixed but not working yet
+[33m220140d[m HEAD@{10}: reset: moving to HEAD~1
+[33mc52c8ca[m HEAD@{11}: commit: ecg edit form working temporary
+[33m220140d[m HEAD@{12}: commit: refactor
+[33mbf1e523[m HEAD@{13}: commit: edit visit ecg report
+[33m67c3c80[m HEAD@{14}: commit: create new visit finished
+[33m2a2d560[m HEAD@{15}: commit: ECG graph polished in add new visit
+[33m6f7b3ce[m HEAD@{16}: commit: added scg graph
+[33m916b6eb[m HEAD@{17}: commit: User search in visit creation polished
+[33mcac10ef[m HEAD@{18}: commit: optimised medicament search
+[33me490931[m HEAD@{19}: commit: search medicament working in create visit
+[33m9daf71f[m HEAD@{20}: commit: readme for admin panel
+[33m4496bb5[m HEAD@{21}: commit: prototype v1.0
+[33m3d0f1be[m HEAD@{22}: commit: invoice in sub details print fantastic
+[33ma251594[m HEAD@{23}: commit: sub works
+[33m1a8db7f[m HEAD@{24}: commit: invoice generation and printing working
+[33m5a376d8[m HEAD@{25}: commit: api for subscription activation work
+[33mb1dd627[m HEAD@{26}: commit: Perfect! The build completed successfully. The warnings about dynamic server usage are expected for API routes that require authentication. Let me create a comprehensive summary of what we've accomplished:
+[33m7d5119a[m HEAD@{27}: commit: added new drizzle and adapted to it login / register works file
+[33m3c61de3[m HEAD@{28}: commit: improved db schema starting over
+[33mc074a84[m HEAD@{29}: commit: sub cancel , auto renew working
+[33ma00cf36[m HEAD@{30}: commit: subscription template gemini working
+[33mad7ff49[m HEAD@{31}: commit: subscriptions partially working
+[33m29b9556[m HEAD@{32}: commit: subscription creation work , subscription management static created
+[33mb54d41c[m HEAD@{33}: commit: added pricing page and payment simulation not working
+[33m57c223b[m HEAD@{34}: commit: subscription and invoice and pricing prototype
+[33mcb1e420[m HEAD@{35}: commit: all the dashboard api test point working and prisma models corrected
+[33mf6f1652[m HEAD@{36}: commit: prisma corrected , dashboard not working
+[33med661dd[m HEAD@{37}: commit: dashboard api templates not working just boiler plate for fetching data
+[33m5833d2c[m HEAD@{38}: commit: templates for fetching data
+[33mab73182[m HEAD@{39}: commit: new dashboard template everything works
+[33m3abd1e8[m HEAD@{40}: commit: the request demp works
+[33me8cad65[m HEAD@{41}: commit: conact api is working , demo api working , forms don't send email
+[33m2c76dab[m HEAD@{42}: commit: full fledge website
+[33m9b4dd87[m HEAD@{43}: commit: prototype working
+[33m16c658b[m HEAD@{44}: commit: prototype working
+[33m9577dcb[m HEAD@{45}: commit: initial index setup
+[33mf4c3044[m HEAD@{46}: commit: made readme and presentation
+[33mb592db4[m HEAD@{47}: commit: added new env and switched db
+[33m6050020[m HEAD@{48}: commit (merge): Merge branch 'master' of https://github.com/blamairia/Hearline-Webapp
+[33m3a91314[m HEAD@{49}: commit: v1.1
+[33m4b02214[m HEAD@{50}: commit: fixed the search drop down for medicament in both edit and create visit form
+[33m891bb02[m HEAD@{51}: pull --tags origin master: Merge made by the 'ort' strategy.
+[33m1de0765[m HEAD@{52}: commit: render added port
+[33m704ece2[m HEAD@{53}: commit: V1.0.0 first fully functioning prototype
+[33me83e755[m HEAD@{54}: commit: almost kolch ghalta la
+[33mfdaede1[m HEAD@{55}: commit: raja3na kolch yemchi ta l ecg li tnahaw ghir user management matemchich
+[33mfce57f3[m HEAD@{56}: commit: dashboard initialized , ecg history table have a problem it is empty and user management
+[33m6b66055[m HEAD@{57}: commit: register , login working and dashboard for doctor is working and fantastic looking only user management is not working for now and there is no profile or logout buttons
+[33m0e714de[m HEAD@{58}: commit: zedna doctor add , added it into appointments and settings and alse base in side bar
+[33m36f0a01[m HEAD@{59}: commit: zedna settings complet ghalta la
+[33m8c5ecb6[m HEAD@{60}: commit: print prototype working
+[33m906646d[m HEAD@{61}: commit: zedna l edit ta appointment
+[33mda9f8a3[m HEAD@{62}: commit: recherche ghalta la in add apointment
+[33m22fdfb6[m HEAD@{63}: commit: appointments history working with create appointment form
+[33m864c9a0[m HEAD@{64}: commit: wow wow ecg
+[33mb29db95[m HEAD@{65}: commit: all syntax resolved
+[33m0db3a2a[m HEAD@{66}: commit: yemchi patient table w details ghalta la
+[33m722d596[m HEAD@{67}: commit: yemchi visits table
+[33m158197d[m HEAD@{68}: commit: kolch machi ghalta la search and real time validation fully work!
+[33m11e3bfe[m HEAD@{69}: commit: prescription and patient search working
+[33m5b92c49[m HEAD@{70}: commit: edit visit working partially
+[33mbb26e47[m HEAD@{71}: commit: visit prescription and document add buttons are working , seperated the js to seperate static folder
+[33m4c86c28[m HEAD@{72}: commit: visit finally working with the new side bar , visit form and details working , visit is only showing warning
+[33mc24e889[m HEAD@{73}: commit: fucked up
+[33m4bfb1ce[m HEAD@{74}: commit: base side bar working
+[33m375ba5e[m HEAD@{75}: commit: side bar style perfect so beutiful
+[33m98806fb[m HEAD@{76}: commit: visit details working with ecg analysis report
+[33m158f689[m HEAD@{77}: commit: visit working with real time analysis
+[33m408fa0d[m HEAD@{78}: commit (initial): initial setup
