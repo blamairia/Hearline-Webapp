@@ -15,6 +15,7 @@ from typing import List, Optional
 
 from src.models.complete_models import Prescription
 from src.core.database import db_manager
+from src.ui.styles import AppColors, AppStyles
 
 class PrescriptionsTableWidget(QWidget):
     """Widget for displaying and managing prescriptions table"""
@@ -34,10 +35,13 @@ class PrescriptionsTableWidget(QWidget):
         """Setup the user interface"""
         layout = QVBoxLayout(self)
         
+        # Apply comprehensive styling to the whole widget
+        self.setStyleSheet(AppStyles.APP_STYLE)
+        
         # Title
         title_label = QLabel("💊 Prescriptions Management")
         title_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        title_label.setStyleSheet("color: #2196F3; margin: 10px;")
+        title_label.setStyleSheet(f"color: {AppColors.PRIMARY}; margin: 10px;")
         layout.addWidget(title_label)
         
         # Search and filter section
@@ -116,6 +120,8 @@ class PrescriptionsTableWidget(QWidget):
         self.prescriptions_table.setAlternatingRowColors(True)
         self.prescriptions_table.setSortingEnabled(True)
         
+        # Apply table styling
+        self.prescriptions_table.setStyleSheet(AppStyles.get_table_style())
         # Make table headers bold
         header = self.prescriptions_table.horizontalHeader()
         header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)

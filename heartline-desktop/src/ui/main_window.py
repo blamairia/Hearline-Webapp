@@ -16,9 +16,10 @@ from PyQt6.QtCore import Qt, QTimer, pyqtSignal
 from PyQt6.QtGui import QAction, QIcon, QPixmap, QFont
 
 from ..core.database import db_manager
+from .styles import AppColors, AppStyles
 from .components.navigation import NavigationPanel
 from .components.dashboard import DashboardWidget
-from .components.patients import PatientManagementWidget
+from .patient_management import PatientManagementWidget
 from .components.appointments import AppointmentWidget
 from .components.visits import VisitManagementWidget
 from .components.ecg_analysis import ECGAnalysisWidget
@@ -270,31 +271,30 @@ class MainWindow(QMainWindow):
     
     def apply_styling(self):
         """Apply custom styling to the main window"""
-        self.setStyleSheet("""
-            QMainWindow {
-                background-color: #f5f5f5;
-            }
-            QToolBar {
-                background-color: white;
-                border-bottom: 1px solid #e0e0e0;
+        # Apply the comprehensive app style
+        self.setStyleSheet(AppStyles.APP_STYLE + f"""
+            QToolBar {{
+                background-color: {AppColors.SURFACE};
+                border-bottom: 1px solid {AppColors.BORDER};
                 padding: 4px;
-            }
-            QToolBar QPushButton {
-                background-color: #2196F3;
+            }}
+            QToolBar QPushButton {{
+                background-color: {AppColors.PRIMARY};
                 color: white;
                 border: none;
                 border-radius: 4px;
                 padding: 8px 16px;
                 margin: 2px;
                 font-weight: bold;
-            }
-            QToolBar QPushButton:hover {
-                background-color: #1976D2;
-            }
-            QStatusBar {
-                background-color: white;
-                border-top: 1px solid #e0e0e0;
-            }
+            }}
+            QToolBar QPushButton:hover {{
+                background-color: {AppColors.PRIMARY_DARK};
+            }}
+            QStatusBar {{
+                background-color: {AppColors.SURFACE};
+                border-top: 1px solid {AppColors.BORDER};
+                color: {AppColors.TEXT};
+            }}
         """)
     
     def show_login(self):

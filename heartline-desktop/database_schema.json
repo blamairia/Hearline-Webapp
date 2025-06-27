@@ -529,6 +529,104 @@
           "primary_key": false,
           "autoincrement": false
         },
+        "city": {
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "state": {
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "zip_code": {
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "country": {
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "chronic_conditions": {
+          "type": "TEXT",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "family_history": {
+          "type": "TEXT",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "height": {
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "weight": {
+          "type": "INTEGER",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "blood_type": {
+          "type": "VARCHAR(10)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "ssn": {
+          "type": "VARCHAR(20)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "id_number": {
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "insurance_group": {
+          "type": "VARCHAR(100)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "preferred_language": {
+          "type": "VARCHAR(50)",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
+        "notes": {
+          "type": "TEXT",
+          "nullable": true,
+          "default": null,
+          "primary_key": false,
+          "autoincrement": false
+        },
         "created_at": {
           "type": "TIMESTAMP",
           "nullable": true,

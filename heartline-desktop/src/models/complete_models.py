@@ -30,18 +30,40 @@ class Patient(Base):
     email = Column(String(120), nullable=True, unique=True)
     medical_history = Column(Text, nullable=True)
 
+    # Enhanced address fields
+    city = Column(String(100), nullable=True)
+    state = Column(String(50), nullable=True)
+    zip_code = Column(String(20), nullable=True)
+    country = Column(String(100), nullable=True)
+
     # Enhanced fields for desktop
     allergies = Column(Text, nullable=True)
     current_medications = Column(Text, nullable=True)
+    chronic_conditions = Column(Text, nullable=True)
+    family_history = Column(Text, nullable=True)
+    
+    # Physical information
+    height = Column(Integer, nullable=True)  # in cm
+    weight = Column(Integer, nullable=True)  # in kg
+    blood_type = Column(String(10), nullable=True)
+    
+    # Additional identification
+    ssn = Column(String(20), nullable=True)
+    id_number = Column(String(50), nullable=True)
     
     # Insurance information
     insurance_provider = Column(String(255), nullable=True)
     insurance_number = Column(String(100), nullable=True)
+    insurance_group = Column(String(100), nullable=True)
     
     # Emergency contact
     emergency_contact_name = Column(String(200), nullable=True)
     emergency_contact_phone = Column(String(20), nullable=True)
     emergency_contact_relationship = Column(String(50), nullable=True)
+    
+    # Preferences
+    preferred_language = Column(String(50), nullable=True)
+    notes = Column(Text, nullable=True)
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

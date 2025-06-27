@@ -30,6 +30,9 @@ class NavigationPanel(QWidget):
         layout.setContentsMargins(0, 0, 0, 0)
         layout.setSpacing(0)
         
+        # Apply comprehensive styling
+        self.setStyleSheet(AppStyles.APP_STYLE)
+        
         # Header section
         header_frame = QFrame()
         header_frame.setStyleSheet(f"""

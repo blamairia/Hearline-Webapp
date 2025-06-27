@@ -15,6 +15,7 @@ from typing import List, Optional
 
 from src.models.complete_models import User
 from src.core.database import db_manager
+from src.ui.styles import AppColors, AppStyles
 
 class UsersTableWidget(QWidget):
     """Widget for displaying and managing users table"""
@@ -34,10 +35,13 @@ class UsersTableWidget(QWidget):
         """Setup the user interface"""
         layout = QVBoxLayout(self)
         
+        # Apply comprehensive styling to the whole widget
+        self.setStyleSheet(AppStyles.APP_STYLE)
+        
         # Title
         title_label = QLabel("👤 Users Management")
         title_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        title_label.setStyleSheet("color: #2196F3; margin: 10px;")
+        title_label.setStyleSheet(f"color: {AppColors.PRIMARY}; margin: 10px;")
         layout.addWidget(title_label)
         
         # Search and filter section
@@ -123,6 +127,8 @@ class UsersTableWidget(QWidget):
         self.users_table.setAlternatingRowColors(True)
         self.users_table.setSortingEnabled(True)
         
+        # Apply table styling
+        self.users_table.setStyleSheet(AppStyles.get_table_style())
         # Make table headers bold
         header = self.users_table.horizontalHeader()
         header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)

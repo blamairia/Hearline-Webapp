@@ -25,8 +25,10 @@ class AppColors:
     BACKGROUND = "#FFFFFF"     # White
     BACKGROUND_SECONDARY = "#F5F5F5"  # Light gray
     BACKGROUND_ACCENT = "#FAFAFA"     # Very light gray
+    SURFACE = "#FFFFFF"        # Surface color (same as background)
     
     # Text Colors
+    TEXT = "#212121"           # Primary text color (same as TEXT_PRIMARY)
     TEXT_PRIMARY = "#212121"    # Dark gray/black
     TEXT_SECONDARY = "#757575"  # Medium gray
     TEXT_DISABLED = "#BDBDBD"   # Light gray
@@ -97,6 +99,208 @@ class AppColors:
 class AppStyles:
     """Centralized styling templates"""
     
+    # Main application style with all common widgets
+    APP_STYLE = f"""
+        QWidget {{
+            background-color: {AppColors.BACKGROUND};
+            color: {AppColors.TEXT_PRIMARY};
+            font-family: 'Segoe UI', Arial, sans-serif;
+        }}
+        
+        QLineEdit {{
+            background-color: {AppColors.INPUT_BACKGROUND};
+            border: 1px solid {AppColors.INPUT_BORDER};
+            border-radius: 4px;
+            padding: 8px;
+            color: {AppColors.TEXT_PRIMARY};
+            font-size: 12px;
+        }}
+        QLineEdit:focus {{
+            border-color: {AppColors.INPUT_FOCUS};
+        }}
+        
+        QTextEdit {{
+            background-color: {AppColors.INPUT_BACKGROUND};
+            border: 1px solid {AppColors.INPUT_BORDER};
+            border-radius: 4px;
+            padding: 8px;
+            color: {AppColors.TEXT_PRIMARY};
+            font-size: 12px;
+        }}
+        QTextEdit:focus {{
+            border-color: {AppColors.INPUT_FOCUS};
+        }}
+        
+        QComboBox {{
+            background-color: {AppColors.INPUT_BACKGROUND};
+            border: 1px solid {AppColors.INPUT_BORDER};
+            border-radius: 4px;
+            padding: 8px;
+            color: {AppColors.TEXT_PRIMARY};
+            font-size: 12px;
+        }}
+        QComboBox:focus {{
+            border-color: {AppColors.INPUT_FOCUS};
+        }}
+        QComboBox::drop-down {{
+            border: none;
+            background-color: {AppColors.PRIMARY};
+            border-radius: 2px;
+        }}
+        QComboBox::down-arrow {{
+            border: none;
+            background-color: transparent;
+        }}
+        QComboBox QAbstractItemView {{
+            background-color: {AppColors.INPUT_BACKGROUND};
+            border: 1px solid {AppColors.INPUT_BORDER};
+            color: {AppColors.TEXT_PRIMARY};
+            selection-background-color: {AppColors.PRIMARY_LIGHT};
+            selection-color: {AppColors.TEXT_PRIMARY};
+        }}
+        
+        QSpinBox, QDateEdit {{
+            background-color: {AppColors.INPUT_BACKGROUND};
+            border: 1px solid {AppColors.INPUT_BORDER};
+            border-radius: 4px;
+            padding: 8px;
+            color: {AppColors.TEXT_PRIMARY};
+            font-size: 12px;
+        }}
+        
+        QGroupBox {{
+            font-weight: bold;
+            color: {AppColors.TEXT_PRIMARY};
+            border: 2px solid {AppColors.BORDER};
+            border-radius: 4px;
+            margin-top: 1ex;
+            background: transparent;
+        }}
+        QGroupBox::title {{
+            subcontrol-origin: margin;
+            left: 10px;
+            padding: 0 5px 0 5px;
+            color: {AppColors.PRIMARY};
+        }}
+        
+        QTabWidget::pane {{
+            border: 1px solid {AppColors.BORDER};
+            background: {AppColors.BACKGROUND};
+        }}
+        QTabBar::tab {{
+            background: {AppColors.BACKGROUND_SECONDARY};
+            color: {AppColors.TEXT_PRIMARY};
+            padding: 8px 12px;
+            margin: 1px;
+        }}
+        QTabBar::tab:selected {{
+            background: {AppColors.PRIMARY};
+            color: {AppColors.TEXT_ON_PRIMARY};
+        }}
+        
+        QScrollArea {{
+            background: {AppColors.BACKGROUND};
+            border: none;
+        }}
+        
+        QFrame {{
+            background: {AppColors.BACKGROUND};
+            border: none;
+        }}
+    """
+    
+    # Dialog specific style
+    DIALOG_STYLE = f"""
+        QDialog {{
+            background-color: {AppColors.BACKGROUND};
+            color: {AppColors.TEXT_PRIMARY};
+        }}
+        {APP_STYLE}
+    """
+    
+    # Button style constants
+    PRIMARY_BUTTON_STYLE = f"""
+        QPushButton {{
+            background-color: {AppColors.BUTTON_PRIMARY};
+            color: {AppColors.TEXT_ON_PRIMARY};
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }}
+        QPushButton:hover {{
+            background-color: {AppColors.BUTTON_PRIMARY_HOVER};
+        }}
+        QPushButton:pressed {{
+            background-color: {AppColors.PRIMARY_DARK};
+        }}
+        QPushButton:disabled {{
+            background-color: {AppColors.TEXT_DISABLED};
+            color: {AppColors.BACKGROUND};
+        }}
+    """
+    
+    SECONDARY_BUTTON_STYLE = f"""
+        QPushButton {{
+            background-color: {AppColors.BUTTON_SECONDARY};
+            color: {AppColors.TEXT_ON_PRIMARY};
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }}
+        QPushButton:hover {{
+            background-color: {AppColors.BUTTON_SECONDARY_HOVER};
+        }}
+    """
+    
+    SUCCESS_BUTTON_STYLE = f"""
+        QPushButton {{
+            background-color: {AppColors.BUTTON_SUCCESS};
+            color: {AppColors.TEXT_ON_PRIMARY};
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }}
+        QPushButton:hover {{
+            background-color: #45a049;
+        }}
+    """
+    
+    WARNING_BUTTON_STYLE = f"""
+        QPushButton {{
+            background-color: {AppColors.BUTTON_WARNING};
+            color: {AppColors.TEXT_ON_PRIMARY};
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }}
+        QPushButton:hover {{
+            background-color: #e68900;
+        }}
+    """
+    
+    DANGER_BUTTON_STYLE = f"""
+        QPushButton {{
+            background-color: {AppColors.BUTTON_DANGER};
+            color: {AppColors.TEXT_ON_PRIMARY};
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 12px;
+        }}
+        QPushButton:hover {{
+            background-color: #da190b;
+        }}
+    """
+
     @staticmethod
     def get_table_style() -> str:
         """Get standard table widget styling"""

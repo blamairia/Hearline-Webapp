@@ -33,10 +33,13 @@ class WaitingListTableWidget(QWidget):
         """Set up the table UI"""
         layout = QVBoxLayout(self)
         
+        # Apply comprehensive styling to the whole widget
+        self.setStyleSheet(AppStyles.APP_STYLE)
+        
         # Title
         title_label = QLabel("⏳ Waiting List Management")
         title_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        title_label.setStyleSheet("color: #2196F3; margin: 10px;")
+        title_label.setStyleSheet(f"color: {AppColors.PRIMARY}; margin: 10px;")
         layout.addWidget(title_label)
         
         # Search and filter section
@@ -97,6 +100,8 @@ class WaitingListTableWidget(QWidget):
         self.table.setAlternatingRowColors(True)
         self.table.setSortingEnabled(True)
         
+        # Apply table styling
+        self.table.setStyleSheet(AppStyles.get_table_style())
         # Make table headers bold
         header = self.table.horizontalHeader()
         header.setDefaultAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -232,6 +237,9 @@ class WaitingListManagementWidget(QWidget):
     def setup_ui(self):
         """Setup the UI for waiting list management"""
         layout = QVBoxLayout(self)
+        
+        # Apply comprehensive styling to the whole widget
+        self.setStyleSheet(AppStyles.APP_STYLE)
         
         # Add the waiting list table
         self.waiting_list_table = WaitingListTableWidget()
