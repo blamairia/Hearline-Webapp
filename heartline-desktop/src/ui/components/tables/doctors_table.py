@@ -80,7 +80,7 @@ class DoctorsTableWidget(QWidget):
         
         # Edit button
         self.edit_btn = QPushButton("✏️ Edit Doctor")
-        self.edit_btn.clicked.connect(self.edit_doctor)
+        self.edit_btn.clicked.connect(self.edit_selected_doctor)
         self.edit_btn.setEnabled(False)  # Disabled until selection
         filter_layout.addWidget(self.edit_btn)
         
@@ -317,7 +317,7 @@ class DoctorsTableWidget(QWidget):
             
             # Apply status filter
             if should_show and status_filter != "All":
-                status_item = self.table.item(row, 9)  # Status column
+                status_item = self.table.item(row, 14)  # Status column (index 14)
                 if status_item:
                     if status_filter == "Active" and status_item.text() != "Active":
                         should_show = False

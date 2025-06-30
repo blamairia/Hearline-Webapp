@@ -28,6 +28,12 @@ class DoctorDialog(QDialog):
     
     def __init__(self, doctor_id: Optional[int] = None, parent=None):
         super().__init__(parent)
+        
+        # Validate doctor_id
+        if doctor_id is not None:
+            if not isinstance(doctor_id, int) or doctor_id <= 0:
+                raise ValueError(f"Invalid doctor_id: {doctor_id} (type: {type(doctor_id)})")
+        
         self.doctor_id = doctor_id
         self.doctor_data = None  # Store extracted data
         self.is_editing = doctor_id is not None
@@ -268,6 +274,8 @@ class DoctorDialog(QDialog):
     def load_doctor(self):
         """Load doctor data for editing"""
         try:
+            print(f"Loading doctor with ID: {self.doctor_id} (type: {type(self.doctor_id)})")  # Debug
+            
             with db_manager.get_session() as session:
                 doctor = session.query(Doctor).filter(Doctor.id == self.doctor_id).first()
                 if not doctor:
