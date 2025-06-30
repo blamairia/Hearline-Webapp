@@ -16,6 +16,7 @@ from typing import List, Optional, Dict
 from src.models.complete_models import Doctor
 from src.core.database import db_manager
 from src.ui.styles import AppColors, AppStyles
+from src.ui.doctor_management.dialogs.doctor_dialog import DoctorDialog
 
 class DoctorsTableWidget(QWidget):
     """Widget for displaying and managing doctors table"""
@@ -77,6 +78,12 @@ class DoctorsTableWidget(QWidget):
         self.add_btn.clicked.connect(self.add_doctor)
         filter_layout.addWidget(self.add_btn)
         
+        # Edit button
+        self.edit_btn = QPushButton("✏️ Edit Doctor")
+        self.edit_btn.clicked.connect(self.edit_doctor)
+        self.edit_btn.setEnabled(False)  # Disabled until selection
+        filter_layout.addWidget(self.edit_btn)
+        
         layout.addWidget(filter_frame)
         
         # Table
@@ -93,7 +100,8 @@ class DoctorsTableWidget(QWidget):
         """Setup the table widget"""
         headers = [
             "ID", "First Name", "Last Name", "Specialty", "Phone", 
-            "Email", "License", "Experience", "Fee", "Status", "Created"
+            "Email", "License", "Experience", "Education", "Certifications",
+            "Fee", "Office", "Address", "Emergency Contact", "Status", "Updated", "Created"
         ]
         
         self.table.setColumnCount(len(headers))
@@ -109,9 +117,15 @@ class DoctorsTableWidget(QWidget):
         header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)          # Email
         header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)  # License
         header.setSectionResizeMode(7, QHeaderView.ResizeMode.ResizeToContents)  # Experience
-        header.setSectionResizeMode(8, QHeaderView.ResizeMode.ResizeToContents)  # Fee
-        header.setSectionResizeMode(9, QHeaderView.ResizeMode.ResizeToContents)  # Status
-        header.setSectionResizeMode(10, QHeaderView.ResizeMode.ResizeToContents) # Created
+        header.setSectionResizeMode(8, QHeaderView.ResizeMode.Stretch)          # Education
+        header.setSectionResizeMode(9, QHeaderView.ResizeMode.Stretch)          # Certifications
+        header.setSectionResizeMode(10, QHeaderView.ResizeMode.ResizeToContents) # Fee
+        header.setSectionResizeMode(11, QHeaderView.ResizeMode.ResizeToContents) # Office
+        header.setSectionResizeMode(12, QHeaderView.ResizeMode.Stretch)         # Address
+        header.setSectionResizeMode(13, QHeaderView.ResizeMode.ResizeToContents) # Emergency Contact
+        header.setSectionResizeMode(14, QHeaderView.ResizeMode.ResizeToContents) # Status
+        header.setSectionResizeMode(15, QHeaderView.ResizeMode.ResizeToContents) # Updated
+        header.setSectionResizeMode(16, QHeaderView.ResizeMode.ResizeToContents) # Created
         
         # Set row selection behavior
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -157,9 +171,17 @@ class DoctorsTableWidget(QWidget):
                         'email': doctor.email,
                         'license_number': doctor.license_number,
                         'years_of_experience': doctor.years_of_experience,
+                        'education': doctor.education,
+                        'certifications': doctor.certifications,
                         'consultation_fee': doctor.consultation_fee,
+                        'office_number': doctor.office_number,
+                        'address': doctor.address,
+                        'emergency_contact': doctor.emergency_contact,
+                        'bio': doctor.bio,
+                        'schedule_notes': doctor.schedule_notes,
                         'is_active': doctor.is_active,
-                        'created_at': doctor.created_at
+                        'created_at': doctor.created_at,
+                        'updated_at': doctor.updated_at
                     }
                     self.doctors.append(doctor_data)
                     if doctor.specialty:
@@ -216,12 +238,39 @@ class DoctorsTableWidget(QWidget):
             self.table.setItem(row, 6, QTableWidgetItem(doctor['license_number'] or ""))
             
             # Years of Experience
-            experience = str(doctor['years_of_experience']) if doctor['years_of_experience'] else ""
+            experience = f"{doctor['years_of_experience']} years" if doctor['years_of_experience'] else ""
             self.table.setItem(row, 7, QTableWidgetItem(experience))
+            
+            # Education (truncated for display)
+            education = doctor['education'] or ""
+            if len(education) > 50:
+                education = education[:50] + "..."
+            self.table.setItem(row, 8, QTableWidgetItem(education))
+            
+            # Certifications (truncated for display)
+            certifications = doctor['certifications'] or ""
+            if len(certifications) > 50:
+                certifications = certifications[:50] + "..."
+            self.table.setItem(row, 9, QTableWidgetItem(certifications))
             
             # Consultation Fee
             fee = f"${doctor['consultation_fee']:.2f}" if doctor['consultation_fee'] else ""
-            self.table.setItem(row, 8, QTableWidgetItem(fee))
+            self.table.setItem(row, 10, QTableWidgetItem(fee))
+            
+            # Office Number
+            self.table.setItem(row, 11, QTableWidgetItem(doctor['office_number'] or ""))
+            
+            # Address (truncated for display)
+            address = doctor['address'] or ""
+            if len(address) > 30:
+                address = address[:30] + "..."
+            self.table.setItem(row, 12, QTableWidgetItem(address))
+            
+            # Emergency Contact
+            emergency_contact = doctor['emergency_contact'] or ""
+            if len(emergency_contact) > 25:
+                emergency_contact = emergency_contact[:25] + "..."
+            self.table.setItem(row, 13, QTableWidgetItem(emergency_contact))
             
             # Status
             status_text = "Active" if doctor['is_active'] else "Inactive" if doctor['is_active'] is False else ""
@@ -230,11 +279,15 @@ class DoctorsTableWidget(QWidget):
                 item.setBackground(Qt.GlobalColor.green)
             elif doctor['is_active'] is False:
                 item.setBackground(Qt.GlobalColor.lightGray)
-            self.table.setItem(row, 9, item)
+            self.table.setItem(row, 14, item)
+            
+            # Updated At
+            updated_str = doctor['updated_at'].strftime("%Y-%m-%d") if doctor['updated_at'] else ""
+            self.table.setItem(row, 15, QTableWidgetItem(updated_str))
             
             # Created At
             created_str = doctor['created_at'].strftime("%Y-%m-%d") if doctor['created_at'] else ""
-            self.table.setItem(row, 10, QTableWidgetItem(created_str))
+            self.table.setItem(row, 16, QTableWidgetItem(created_str))
     
     def filter_table(self):
         """Filter table based on search input and filters"""
@@ -274,22 +327,47 @@ class DoctorsTableWidget(QWidget):
             self.table.setRowHidden(row, not should_show)
     
     def on_item_double_clicked(self, item):
-        """Handle item double click"""
+        """Handle item double click - edit doctor"""
         row = item.row()
         doctor_id = int(self.table.item(row, 0).text())
-        self.doctor_edit_requested.emit(doctor_id)
+        self.edit_doctor(doctor_id)
     
     def on_selection_changed(self):
         """Handle selection change"""
         current_row = self.table.currentRow()
-        if current_row >= 0:
+        has_selection = current_row >= 0
+        
+        # Enable/disable edit button based on selection
+        self.edit_btn.setEnabled(has_selection)
+        
+        if has_selection:
             doctor_id = int(self.table.item(current_row, 0).text())
             self.doctor_selected.emit(doctor_id)
     
+    def edit_doctor(self, doctor_id: Optional[int] = None):
+        """Edit selected doctor"""
+        if doctor_id is None:
+            doctor_id = self.get_selected_doctor_id()
+        
+        if doctor_id is None:
+            QMessageBox.warning(self, "No Selection", "Please select a doctor to edit.")
+            return
+            
+        dialog = DoctorDialog(doctor_id=doctor_id, parent=self)
+        dialog.doctor_saved.connect(self.load_doctors)  # Refresh table when doctor is saved
+        dialog.exec()
+
     def add_doctor(self):
         """Add new doctor"""
-        # This will be implemented when we add CRUD functionality
-        QMessageBox.information(self, "Add Doctor", "Add doctor functionality will be implemented in the next phase.")
+        dialog = DoctorDialog(parent=self)
+        dialog.doctor_saved.connect(self.load_doctors)  # Refresh table when doctor is saved
+        dialog.exec()
+    
+    def edit_selected_doctor(self):
+        """Edit the currently selected doctor"""
+        doctor_id = self.get_selected_doctor_id()
+        if doctor_id:
+            self.edit_doctor(doctor_id)
     
     def get_selected_doctor_id(self) -> Optional[int]:
         """Get the ID of currently selected doctor"""

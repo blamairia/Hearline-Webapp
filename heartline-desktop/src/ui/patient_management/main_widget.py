@@ -69,9 +69,6 @@ class PatientManagementWidget(QWidget):
         layout = QVBoxLayout(self)
         layout.setSpacing(10)
         
-        # Apply consistent styling to match doctor management
-        self.setStyleSheet(AppStyles.APP_STYLE)
-        
         # Header with title and main actions
         header_frame = self.create_header()
         layout.addWidget(header_frame)
