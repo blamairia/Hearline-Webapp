@@ -1,93 +1,251 @@
 {% extends "base.html" %}
 
-{% block title %}New Patient | Heartline Medical Clinic{% endblock %}
+{% block title %}{% if patient %}Edit Patient{% else %}New Patient{% endif %} | Heartline Medical Clinic{% endblock %}
+
+{% block extra_css %}
+<style>
+  .form-header {
+    background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+    color: white;
+    border-radius: 10px 10px 0 0;
+    padding: 2rem;
+    margin: 0;
+  }
+  
+  .form-card {
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0 4px 20px rgba(0, 116, 217, 0.15);
+    overflow: hidden;
+  }
+  
+  .form-section {
+    background: #f8f9fa;
+    border-left: 4px solid #0074d9;
+    padding: 1rem 1.5rem;
+    margin: 1.5rem 0;
+    border-radius: 0 10px 10px 0;
+  }
+  
+  .form-section-title {
+    color: #0074d9;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1.1rem;
+  }
+  
+  .form-section-subtitle {
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-bottom: 0;
+  }
+  
+  .form-group label {
+    font-weight: 600;
+    color: #495057;
+    margin-bottom: 0.5rem;
+  }
+  
+  .form-control {
+    border: 2px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s;
+    font-size: 0.95rem;
+  }
+  
+  .form-control:focus {
+    border-color: #0074d9;
+    box-shadow: 0 0 0 0.2rem rgba(0, 116, 217, 0.25);
+  }
+  
+  .btn-gradient-primary {
+    background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+    border: none;
+    color: white;
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s;
+  }
+  
+  .btn-gradient-primary:hover {
+    background: linear-gradient(135deg, #005bb5 0%, #0099cc 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 116, 217, 0.4);
+    color: white;
+  }
+  
+  .btn-outline-secondary {
+    border: 2px solid #6c757d;
+    color: #6c757d;
+    border-radius: 25px;
+    padding: 0.75rem 2rem;
+    font-weight: 600;
+    transition: all 0.3s;
+  }
+  
+  .btn-outline-secondary:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-2px);
+  }
+  
+  .text-danger {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+  }
+  
+  .required-field::after {
+    content: " *";
+    color: #dc3545;
+  }
+  
+  .form-actions {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    padding: 2rem;
+    margin: 0 -2rem -2rem -2rem;
+    border-radius: 0 0 10px 10px;
+  }
+</style>
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-lg-8 col-md-10 mx-auto">
-      <div class="card shadow">
-        <div class="card-header bg-primary text-white">
-          <h3 class="mb-0"><i class="fas fa-user-plus"></i> Create New Patient</h3>
+  <div class="row justify-content-center">
+    <div class="col-lg-8 col-md-10">
+      <div class="card form-card">
+        <!-- Header -->
+        <div class="form-header">
+          <div class="d-flex justify-content-between align-items-center">
+            <div>
+              <h2 class="mb-2">
+                <i class="fas {% if patient %}fa-user-edit{% else %}fa-user-plus{% endif %} mr-3"></i>
+                {% if patient %}Edit Patient Profile{% else %}Create New Patient{% endif %}
+              </h2>
+              <p class="mb-0 opacity-75">
+                {% if patient %}Update {{ patient.first_name }}'s information{% else %}Add a new patient to the system{% endif %}
+              </p>
+            </div>
+            <div>
+              <a href="{{ url_for('patients_table') }}" class="btn btn-light">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Patients
+              </a>
+            </div>
+          </div>
         </div>
-        <div class="card-body">
+        <!-- Form Body -->
+        <div class="card-body p-4">
           <form method="POST">
             {{ form.hidden_tag() }}
 
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                {{ form.first_name.label(class="form-label") }}
-                {{ form.first_name(class="form-control") }}
+            <!-- Personal Information Section -->
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="fas fa-user mr-2"></i>Personal Information
+              </div>
+              <div class="form-section-subtitle">Basic patient identification details</div>
+            </div>
+
+            <div class="row">
+              <div class="col-md-6 mb-3">
+                {{ form.first_name.label(class="form-label required-field") }}
+                {{ form.first_name(class="form-control", placeholder="Enter first name") }}
                 {% for err in form.first_name.errors %}
-                  <small class="text-danger">{{ err }}</small>
+                  <div class="text-danger">{{ err }}</div>
                 {% endfor %}
               </div>
-              <div class="form-group col-md-6">
-                {{ form.last_name.label(class="form-label") }}
-                {{ form.last_name(class="form-control") }}
+              <div class="col-md-6 mb-3">
+                {{ form.last_name.label(class="form-label required-field") }}
+                {{ form.last_name(class="form-control", placeholder="Enter last name") }}
                 {% for err in form.last_name.errors %}
-                  <small class="text-danger">{{ err }}</small>
+                  <div class="text-danger">{{ err }}</div>
                 {% endfor %}
               </div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group col-md-4">
-                {{ form.date_of_birth.label(class="form-label") }}
+            <div class="row">
+              <div class="col-md-4 mb-3">
+                {{ form.date_of_birth.label(class="form-label required-field") }}
                 {{ form.date_of_birth(class="form-control") }}
                 {% for err in form.date_of_birth.errors %}
-                  <small class="text-danger">{{ err }}</small>
+                  <div class="text-danger">{{ err }}</div>
                 {% endfor %}
               </div>
-              <div class="form-group col-md-4">
-                {{ form.gender.label(class="form-label") }}
+              <div class="col-md-4 mb-3">
+                {{ form.gender.label(class="form-label required-field") }}
                 {{ form.gender(class="form-control") }}
                 {% for err in form.gender.errors %}
-                  <small class="text-danger">{{ err }}</small>
+                  <div class="text-danger">{{ err }}</div>
                 {% endfor %}
               </div>
-              <div class="form-group col-md-4">
+              <div class="col-md-4 mb-3">
                 {{ form.phone.label(class="form-label") }}
-                {{ form.phone(class="form-control") }}
+                {{ form.phone(class="form-control", placeholder="Enter phone number") }}
                 {% for err in form.phone.errors %}
-                  <small class="text-danger">{{ err }}</small>
+                  <div class="text-danger">{{ err }}</div>
                 {% endfor %}
               </div>
             </div>
 
-            <div class="form-group">
-              {{ form.address.label(class="form-label") }}
-              {{ form.address(class="form-control", rows=2) }}
-              {% for err in form.address.errors %}
-                <small class="text-danger">{{ err }}</small>
-              {% endfor %}
+            <!-- Contact Information Section -->
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="fas fa-address-book mr-2"></i>Contact Information
+              </div>
+              <div class="form-section-subtitle">How to reach the patient</div>
             </div>
 
-            <div class="form-row">
-              <div class="form-group col-md-6">
+            <div class="row">
+              <div class="col-md-6 mb-3">
                 {{ form.email.label(class="form-label") }}
-                {{ form.email(class="form-control") }}
+                {{ form.email(class="form-control", placeholder="Enter email address") }}
                 {% for err in form.email.errors %}
-                  <small class="text-danger">{{ err }}</small>
+                  <div class="text-danger">{{ err }}</div>
+                {% endfor %}
+              </div>
+              <div class="col-md-6 mb-3">
+                {{ form.address.label(class="form-label") }}
+                {{ form.address(class="form-control", rows=3, placeholder="Enter full address") }}
+                {% for err in form.address.errors %}
+                  <div class="text-danger">{{ err }}</div>
                 {% endfor %}
               </div>
             </div>
 
-            <div class="form-group">
+            <!-- Medical Information Section -->
+            <div class="form-section">
+              <div class="form-section-title">
+                <i class="fas fa-notes-medical mr-2"></i>Medical Information
+              </div>
+              <div class="form-section-subtitle">Patient's medical background and history</div>
+            </div>
+
+            <div class="mb-3">
               {{ form.medical_history.label(class="form-label") }}
-              {{ form.medical_history(class="form-control", rows=3) }}
+              {{ form.medical_history(class="form-control", rows=4, placeholder="Enter any relevant medical history, allergies, chronic conditions, etc.") }}
               {% for err in form.medical_history.errors %}
-                <small class="text-danger">{{ err }}</small>
+                <div class="text-danger">{{ err }}</div>
               {% endfor %}
             </div>
 
-            <div class="form-group mt-4">
-              <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-save"></i> Create Patient
-              </button>
-              <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg ml-2">
-                <i class="fas fa-times"></i> Cancel
-              </a>
+            <!-- Form Actions -->
+            <div class="form-actions">
+              <div class="d-flex justify-content-between align-items-center">
+                <div class="text-muted">
+                  <small><i class="fas fa-info-circle mr-1"></i>Fields marked with * are required</small>
+                </div>
+                <div>
+                  <a href="{{ url_for('patients_table') }}" class="btn btn-outline-secondary mr-3">
+                    <i class="fas fa-times mr-2"></i>Cancel
+                  </a>
+                  <button type="submit" class="btn btn-gradient-primary">
+                    <i class="fas fa-save mr-2"></i>
+                    {% if patient %}Update Patient{% else %}Create Patient{% endif %}
+                  </button>
+                </div>
+              </div>
             </div>
           </form>
         </div>

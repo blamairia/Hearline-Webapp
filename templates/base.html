@@ -13,8 +13,8 @@
       left: 0;
       height: 100vh;
       width: 250px;
-      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-      color: white;
+background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+      color: #ffffff;
       overflow-y: auto;
       transition: all 0.3s;
       z-index: 1000;
@@ -160,7 +160,19 @@
     .sidebar::-webkit-scrollbar-thumb:hover {
       background: rgba(255,255,255,0.5);
     }
-    
+    .sidebar-header {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
+}
+.sidebar-header img {
+  max-width: 100px;
+  filter: drop-shadow(0 0 6px rgba(0, 180, 255, 0.4));
+  margin-bottom: 10px;
+}
+
+
     /* Badge styles */
     .nav-badge {
       background-color: #ff4757;
@@ -169,6 +181,7 @@
       padding: 2px 6px;
       font-size: 0.7rem;      margin-left: auto;
     }
+  
   </style>
   
   {% block extra_css %}{% endblock %}
@@ -178,8 +191,12 @@
   <!-- Sidebar -->
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
-      <h3><img src="d:\projects\ECG webapp\HeartLine.png" alt="Heartline Logo" class="img-fluid" /> <span class="nav-text">Heartline</span></h3>
-      <div class="subtitle nav-text">Medical Clinic</div>
+        <div class="logo-wrapper">
+          <img src="{{ url_for('static', filename='img/Heartline-W.png') }}" alt="Heartline Logo" class="img-fluid">
+          <h3 class="nav-text">Heartline</h3>
+          <div class="subtitle nav-text">Medical Clinic</div>
+        </div>
+
     </div>
     
     <ul class="sidebar-nav">

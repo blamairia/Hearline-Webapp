@@ -67,6 +67,11 @@ app = Flask(__name__)
 moment = Moment(app) # Add this line to initialize Flask-Moment
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "replace-this-with-a-secure-random-string")
 
+# Development configuration for real-time template updates
+app.config['TEMPLATES_AUTO_RELOAD'] = True
+app.jinja_env.auto_reload = True
+app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 0  # Disable static file caching in development
+
 # Use environment variables for database connection
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT") 
@@ -282,6 +287,20 @@ class VisitForm(FlaskForm):
 
 
 # --- Form for Patient creation & editing ---
+def validate_unique_email(form, field):
+    """Custom validator to check if email is unique."""
+    if field.data:  # Only validate if email is provided (since it's optional)
+        # Check if we're editing an existing patient
+        patient_id = getattr(form, '_patient_id', None)
+        
+        query = Patient.query.filter_by(email=field.data)
+        if patient_id:
+            # Exclude current patient when editing
+            query = query.filter(Patient.id != patient_id)
+        
+        if query.first():
+            raise validators.ValidationError('A patient with this email address already exists.')
+
 class PatientForm(FlaskForm):
     first_name      = StringField("First Name", validators=[validators.DataRequired(), validators.Length(max=50)])
     last_name       = StringField("Last Name", validators=[validators.DataRequired(), validators.Length(max=50)])
@@ -293,7 +312,7 @@ class PatientForm(FlaskForm):
     )
     address         = TextAreaField("Address", validators=[validators.Optional()])
     phone           = StringField("Phone", validators=[validators.Optional(), validators.Length(max=20)])
-    email           = StringField("Email", validators=[validators.Optional(), validators.Email()])
+    email           = StringField("Email", validators=[validators.Optional(), validators.Email(), validate_unique_email])
     medical_history = TextAreaField("Medical History", validators=[validators.Optional()])
 
 
@@ -332,21 +351,27 @@ class AppointmentForm(FlaskForm):
 def create_patient():
     form = PatientForm()
     if form.validate_on_submit():
-        # Save new Patient
-        p = Patient(
-            first_name      = form.first_name.data,
-            last_name       = form.last_name.data,
-            date_of_birth   = form.date_of_birth.data,
-            gender          = form.gender.data,
-            address         = form.address.data,
-            phone           = form.phone.data,
-            email           = form.email.data,
-            medical_history = form.medical_history.data,
-        )
-        db.session.add(p)
-        db.session.commit()
-        flash("Patient created successfully!", "success")
-        return redirect(url_for("index"))
+        try:
+            # Save new Patient
+            p = Patient(
+                first_name      = form.first_name.data,
+                last_name       = form.last_name.data,
+                date_of_birth   = form.date_of_birth.data,
+                gender          = form.gender.data,
+                address         = form.address.data,
+                phone           = form.phone.data,
+                email           = form.email.data,
+                medical_history = form.medical_history.data,
+            )
+            db.session.add(p)
+            db.session.commit()
+            flash("Patient created successfully!", "success")
+            return redirect(url_for("patients_table"))
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while creating the patient. Please try again.", "error")
+            app.logger.error(f"Error creating patient: {str(e)}")
+            return render_template("forms/patient_form.html", form=form)
 
     return render_template("forms/patient_form.html", form=form)
 
@@ -1344,18 +1369,27 @@ def patient_details(patient_id):
 
 
 @app.route("/patient/<int:patient_id>/edit", methods=["GET", "POST"])
+@login_required
+@any_role_required
 def edit_patient(patient_id):
     """
     Edit patient information.
     """
     patient = Patient.query.get_or_404(patient_id)
     form = PatientForm(obj=patient)
+    form._patient_id = patient_id  # Pass patient_id to form for validation
     
     if form.validate_on_submit():
-        form.populate_obj(patient)
-        db.session.commit()
-        flash("Patient updated successfully!", "success")
-        return redirect(url_for("patient_details", patient_id=patient.id))
+        try:
+            form.populate_obj(patient)
+            db.session.commit()
+            flash("Patient updated successfully!", "success")
+            return redirect(url_for("patient_details", patient_id=patient.id))
+        except Exception as e:
+            db.session.rollback()
+            flash("An error occurred while updating the patient. Please try again.", "error")
+            app.logger.error(f"Error updating patient: {str(e)}")
+            return render_template("forms/patient_form.html", form=form, patient=patient)
     
     return render_template("forms/patient_form.html", form=form, patient=patient)
 
@@ -2867,4 +2901,4 @@ if __name__ == "__main__":
         
         load_onnx_model()      # load ONNX model for ECG inference
     
-    app.run(host='0.0.0.0',debug=False)
+    app.run(host='0.0.0.0', debug=True)

@@ -20,7 +20,7 @@ from .styles import AppColors, AppStyles
 from .components.navigation import NavigationPanel
 from .components.dashboard import DashboardWidget
 from .patient_management import PatientManagementWidget
-from .components.appointments import AppointmentWidget
+from .appointment_management import AppointmentManagementWidget
 from .components.visits import VisitManagementWidget
 from .components.ecg_analysis import ECGAnalysisWidget
 from .components.database_tables import DatabaseTablesWidget
@@ -110,7 +110,7 @@ class MainWindow(QMainWindow):
         self.content_widget.addWidget(self.doctors_widget)
         
         # Appointments
-        self.appointment_widget = AppointmentWidget()
+        self.appointment_widget = AppointmentManagementWidget()
         self.content_widget.addWidget(self.appointment_widget)
         
         # Visits
