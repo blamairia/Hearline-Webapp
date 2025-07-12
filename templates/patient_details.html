@@ -2,287 +2,114 @@
 
 {% block title %}{{ patient.first_name }} {{ patient.last_name }} | Heartline Medical Clinic{% endblock %}
 
-{% block extra_css %}
-<style>
-  .patient-header {
-    background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-    color: white;
-    border-radius: 10px;
-    padding: 2rem;
-    margin-bottom: 2rem;
-    box-shadow: 0 4px 15px rgba(0, 116, 217, 0.3);
-  }
-  
-  .patient-card {
-    border: none;
-    border-radius: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    transition: transform 0.2s, box-shadow 0.2s;
-  }
-  
-  .patient-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0,0,0,0.15);
-  }
-  
-  .card-header-custom {
-    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-    border-bottom: 3px solid #0074d9;
-    border-radius: 10px 10px 0 0 !important;
-  }
-  
-  .info-item {
-    padding: 0.75rem 0;
-    border-bottom: 1px solid #f1f3f4;
-  }
-  
-  .info-item:last-child {
-    border-bottom: none;
-  }
-  
-  .info-label {
-    color: #6c757d;
-    font-weight: 600;
-    font-size: 0.9rem;
-  }
-  
-  .info-value {
-    color: #495057;
-    font-size: 1rem;
-  }
-  
-  .action-btn {
-    border-radius: 25px;
-    padding: 0.5rem 1.5rem;
-    font-weight: 500;
-    transition: all 0.3s;
-  }
-  
-  .btn-gradient-primary {
-    background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-    border: none;
-    color: white;
-  }
-  
-  .btn-gradient-primary:hover {
-    background: linear-gradient(135deg, #005bb5 0%, #0099cc 100%);
-    transform: translateY(-1px);
-    color: white;
-  }
-  
-  .visit-badge {
-    padding: 0.4rem 0.8rem;
-    border-radius: 20px;
-    font-size: 0.8rem;
-    font-weight: 500;
-  }
-  
-  .empty-state {
-    text-align: center;
-    padding: 3rem 2rem;
-    color: #6c757d;
-  }
-  
-  .empty-state i {
-    margin-bottom: 1rem;
-    opacity: 0.5;
-  }
-</style>
-{% endblock %}
-
 {% block content %}
 <div class="container-fluid">
   <div class="row">
-    <div class="col-12">
-      <!-- Patient Header -->
-      <div class="patient-header">
-        <div class="d-flex justify-content-between align-items-center">
-          <div>
-            <h1 class="mb-2">
-              <i class="fas fa-user-circle mr-3"></i>
-              {{ patient.first_name }} {{ patient.last_name }}
-            </h1>
-            <p class="mb-0 opacity-75">
-              <i class="fas fa-calendar-alt mr-2"></i>
-              {{ (date.today() - patient.date_of_birth).days // 365 }} years old • {{ patient.gender }}
-            </p>
-          </div>
-          <div class="text-right">
-            <a href="{{ url_for('patients_table') }}" class="btn btn-light action-btn mr-2">
-              <i class="fas fa-arrow-left mr-2"></i>Back to Patients
-            </a>
-            <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-warning action-btn mr-2">
-              <i class="fas fa-edit mr-2"></i>Edit Patient
-            </a>
-            <a href="{{ url_for('create_visit') }}?patient_id={{ patient.id }}" class="btn btn-success action-btn">
-              <i class="fas fa-file-medical-alt mr-2"></i>New Visit
-            </a>
-          </div>
+    <div class="col-lg-10 col-md-12 mx-auto">
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1><i class="fas fa-user"></i> {{ patient.first_name }} {{ patient.last_name }}</h1>
+        <div>
+          <a href="{{ url_for('patients_table') }}" class="btn btn-secondary">
+            <i class="fas fa-arrow-left"></i> Back to Patients
+          </a>
+          <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-primary">
+            <i class="fas fa-edit"></i> Edit Patient
+          </a>
+          <a href="{{ url_for('create_visit') }}?patient_id={{ patient.id }}" class="btn btn-success">
+            <i class="fas fa-file-medical-alt"></i> New Visit
+          </a>
         </div>
       </div>
 
-      <div class="row">
-        <!-- Patient Information Card -->
-        <div class="col-lg-6 mb-4">
-          <div class="card patient-card h-100">
-            <div class="card-header card-header-custom">
-              <h5 class="mb-0">
-                <i class="fas fa-info-circle text-primary mr-2"></i>
-                Patient Information
-              </h5>
-            </div>
-            <div class="card-body">
-              <div class="row">
-                <div class="col-12">
-                  <div class="info-item">
-                    <div class="info-label">Date of Birth</div>
-                    <div class="info-value">{{ patient.date_of_birth.strftime('%B %d, %Y') }}</div>
-                  </div>
-                  
-                  <div class="info-item">
-                    <div class="info-label">Age</div>
-                    <div class="info-value">{{ (date.today() - patient.date_of_birth).days // 365 }} years old</div>
-                  </div>
-                  
-                  <div class="info-item">
-                    <div class="info-label">Gender</div>
-                    <div class="info-value">
-                      <i class="fas {% if patient.gender == 'Male' %}fa-mars text-primary{% elif patient.gender == 'Female' %}fa-venus text-danger{% else %}fa-genderless text-info{% endif %} mr-2"></i>
-                      {{ patient.gender }}
-                    </div>
-                  </div>
-                  
-                  {% if patient.phone %}
-                  <div class="info-item">
-                    <div class="info-label">Phone Number</div>
-                    <div class="info-value">
-                      <i class="fas fa-phone text-success mr-2"></i>
-                      <a href="tel:{{ patient.phone }}" class="text-decoration-none">{{ patient.phone }}</a>
-                    </div>
-                  </div>
-                  {% endif %}
-                  
-                  {% if patient.email %}
-                  <div class="info-item">
-                    <div class="info-label">Email Address</div>
-                    <div class="info-value">
-                      <i class="fas fa-envelope text-info mr-2"></i>
-                      <a href="mailto:{{ patient.email }}" class="text-decoration-none">{{ patient.email }}</a>
-                    </div>
-                  </div>
-                  {% endif %}
-                  
-                  {% if patient.address %}
-                  <div class="info-item">
-                    <div class="info-label">Address</div>
-                    <div class="info-value">
-                      <i class="fas fa-map-marker-alt text-warning mr-2"></i>
-                      {{ patient.address }}
-                    </div>
-                  </div>
-                  {% endif %}
-                </div>
-              </div>
-            </div>
-          </div>
+      <!-- Patient Information Card -->
+      <div class="card mb-4">
+        <div class="card-header">
+          <h5><i class="fas fa-user-circle"></i> Patient Information</h5>
         </div>
-        
-        <!-- Medical History Card -->
-        <div class="col-lg-6 mb-4">
-          <div class="card patient-card h-100">
-            <div class="card-header card-header-custom">
-              <h5 class="mb-0">
-                <i class="fas fa-notes-medical text-primary mr-2"></i>
-                Medical History
-              </h5>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-6">
+              <p><strong>Date of Birth:</strong> {{ patient.date_of_birth.strftime('%Y-%m-%d') }}</p>
+              <p><strong>Age:</strong> {{ (date.today() - patient.date_of_birth).days // 365 }} years</p>
+              <p><strong>Gender:</strong> {{ patient.gender }}</p>
             </div>
-            <div class="card-body">
-              {% if patient.medical_history %}
-                <div class="info-value">{{ patient.medical_history }}</div>
-              {% else %}
-                <div class="empty-state">
-                  <i class="fas fa-notes-medical fa-2x"></i>
-                  <p class="mb-0">No medical history recorded</p>
-                  <small class="text-muted">Add medical history by editing this patient</small>
-                </div>
+            <div class="col-md-6">
+              {% if patient.phone %}
+                <p><strong>Phone:</strong> {{ patient.phone }}</p>
+              {% endif %}
+              {% if patient.email %}
+                <p><strong>Email:</strong> {{ patient.email }}</p>
+              {% endif %}
+              {% if patient.address %}
+                <p><strong>Address:</strong> {{ patient.address }}</p>
               {% endif %}
             </div>
           </div>
+          {% if patient.medical_history %}
+            <hr>
+            <h6>Medical History:</h6>
+            <p>{{ patient.medical_history }}</p>
+          {% endif %}
         </div>
       </div>
 
       <!-- Visits History -->
-      <div class="row">
-        <div class="col-12">
-          <div class="card patient-card">
-            <div class="card-header card-header-custom">
-              <div class="d-flex justify-content-between align-items-center">
-                <h5 class="mb-0">
-                  <i class="fas fa-history text-primary mr-2"></i>
-                  Visit History
-                </h5>
-                <span class="badge badge-primary visit-badge">{{ visits|length }} Total Visits</span>
-              </div>
+      <div class="card">
+        <div class="card-header">
+          <h5><i class="fas fa-history"></i> Visit History ({{ visits|length }})</h5>
+        </div>
+        <div class="card-body">
+          {% if visits %}
+            <div class="table-responsive">
+              <table class="table table-striped">
+                <thead>
+                  <tr>
+                    <th>Visit Date</th>
+                    <th>Diagnosis</th>
+                    <th>Payment Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {% for visit in visits %}
+                    <tr>
+                      <td>{{ visit.visit_date.strftime('%Y-%m-%d %H:%M') }}</td>
+                      <td>
+                        {% if visit.diagnosis %}
+                          {{ visit.diagnosis[:100] }}{% if visit.diagnosis|length > 100 %}...{% endif %}
+                        {% else %}
+                          <span class="text-muted">No diagnosis</span>
+                        {% endif %}
+                      </td>
+                      <td>
+                        <span class="badge {% if visit.payment_status == 'paid' %}badge-success{% elif visit.payment_status == 'partial' %}badge-warning{% else %}badge-danger{% endif %}">
+                          {{ visit.payment_status.title() }}
+                        </span>
+                      </td>
+                      <td>
+                        <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-sm btn-info">
+                          <i class="fas fa-eye"></i> View
+                        </a>
+                        <a href="{{ url_for('edit_visit', visit_id=visit.id) }}" class="btn btn-sm btn-warning">
+                          <i class="fas fa-edit"></i> Edit
+                        </a>
+                      </td>
+                    </tr>
+                  {% endfor %}
+                </tbody>
+              </table>
             </div>
-            <div class="card-body">
-              {% if visits %}
-                <div class="table-responsive">
-                  <table class="table table-hover">
-                    <thead class="thead-light">
-                      <tr>
-                        <th><i class="fas fa-calendar mr-2"></i>Visit Date</th>
-                        <th><i class="fas fa-stethoscope mr-2"></i>Diagnosis</th>
-                        <th><i class="fas fa-credit-card mr-2"></i>Payment Status</th>
-                        <th><i class="fas fa-cogs mr-2"></i>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {% for visit in visits %}
-                        <tr>
-                          <td>
-                            <strong>{{ visit.visit_date.strftime('%b %d, %Y') }}</strong><br>
-                            <small class="text-muted">{{ visit.visit_date.strftime('%I:%M %p') }}</small>
-                          </td>
-                          <td>
-                            {% if visit.diagnosis %}
-                              {{ visit.diagnosis[:80] }}{% if visit.diagnosis|length > 80 %}...{% endif %}
-                            {% else %}
-                              <span class="text-muted"><i>No diagnosis recorded</i></span>
-                            {% endif %}
-                          </td>
-                          <td>
-                            <span class="badge visit-badge {% if visit.payment_status == 'paid' %}badge-success{% elif visit.payment_status == 'partial' %}badge-warning{% else %}badge-danger{% endif %}">
-                              <i class="fas {% if visit.payment_status == 'paid' %}fa-check-circle{% elif visit.payment_status == 'partial' %}fa-exclamation-circle{% else %}fa-times-circle{% endif %} mr-1"></i>
-                              {{ visit.payment_status.title() }}
-                            </span>
-                          </td>
-                          <td>
-                            <div class="btn-group" role="group">
-                              <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-sm btn-outline-primary action-btn">
-                                <i class="fas fa-eye"></i>
-                              </a>
-                              <a href="{{ url_for('edit_visit', visit_id=visit.id) }}" class="btn btn-sm btn-outline-warning action-btn">
-                                <i class="fas fa-edit"></i>
-                              </a>
-                            </div>
-                          </td>
-                        </tr>
-                      {% endfor %}
-                    </tbody>
-                  </table>
-                </div>
-              {% else %}
-                <div class="empty-state">
-                  <i class="fas fa-file-medical fa-4x"></i>
-                  <h5>No visits recorded</h5>
-                  <p class="text-muted mb-4">This patient hasn't had any visits yet. Create the first visit to get started.</p>
-                  <a href="{{ url_for('create_visit') }}?patient_id={{ patient.id }}" class="btn btn-gradient-primary action-btn">
-                    <i class="fas fa-file-medical-alt mr-2"></i>Create First Visit
-                  </a>
-                </div>
-              {% endif %}
+          {% else %}
+            <div class="text-center py-4">
+              <i class="fas fa-file-medical fa-3x text-muted mb-3"></i>
+              <h5 class="text-muted">No visits recorded</h5>
+              <p class="text-muted">Create the first visit for this patient</p>
+              <a href="{{ url_for('create_visit') }}?patient_id={{ patient.id }}" class="btn btn-success">
+                <i class="fas fa-file-medical-alt"></i> Create First Visit
+              </a>
             </div>
-          </div>
+          {% endif %}
         </div>
       </div>
     </div>

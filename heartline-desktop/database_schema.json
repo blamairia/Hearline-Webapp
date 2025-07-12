@@ -45,76 +45,6 @@
           "primary_key": false,
           "autoincrement": false
         },
-        "appointment_type": {
-          "type": "VARCHAR(50)",
-          "nullable": true,
-          "default": "consultation",
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "duration_minutes": {
-          "type": "INTEGER",
-          "nullable": true,
-          "default": 30,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "priority": {
-          "type": "VARCHAR(20)",
-          "nullable": true,
-          "default": "normal",
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "notes": {
-          "type": "TEXT",
-          "nullable": true,
-          "default": null,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "patient_notes": {
-          "type": "TEXT",
-          "nullable": true,
-          "default": null,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "confirmed": {
-          "type": "BOOLEAN",
-          "nullable": true,
-          "default": false,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "reminder_sent": {
-          "type": "BOOLEAN",
-          "nullable": true,
-          "default": false,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "cancelled_reason": {
-          "type": "VARCHAR(200)",
-          "nullable": true,
-          "default": null,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "cancelled_by": {
-          "type": "VARCHAR(50)",
-          "nullable": true,
-          "default": null,
-          "primary_key": false,
-          "autoincrement": false
-        },
-        "rescheduled_from": {
-          "type": "INTEGER",
-          "nullable": true,
-          "default": null,
-          "primary_key": false,
-          "autoincrement": false
-        },
         "created_at": {
           "type": "TIMESTAMP",
           "nullable": true,
@@ -151,19 +81,6 @@
           ],
           "referred_schema": null,
           "referred_table": "patient",
-          "referred_columns": [
-            "id"
-          ],
-          "options": {},
-          "comment": null
-        },
-        {
-          "name": "appointment_rescheduled_from_fkey",
-          "constrained_columns": [
-            "rescheduled_from"
-          ],
-          "referred_schema": null,
-          "referred_table": "appointment",
           "referred_columns": [
             "id"
           ],
@@ -439,13 +356,6 @@
           "primary_key": false,
           "autoincrement": false
         },
-        "default_doctor_id": {
-          "type": "INTEGER",
-          "nullable": true,
-          "default": null,
-          "primary_key": false,
-          "autoincrement": false
-        },
         "created_at": {
           "type": "TIMESTAMP",
           "nullable": true,
@@ -461,21 +371,7 @@
           "autoincrement": false
         }
       },
-      "foreign_keys": [
-        {
-          "name": "general_settings_default_doctor_id_fkey",
-          "constrained_columns": [
-            "default_doctor_id"
-          ],
-          "referred_schema": null,
-          "referred_table": "doctor",
-          "referred_columns": [
-            "id"
-          ],
-          "options": {},
-          "comment": null
-        }
-      ],
+      "foreign_keys": [],
       "indexes": []
     },
     "medicament": {

@@ -116,124 +116,28 @@ class ECGFormSubmissionHandler {
     this.clearError();
     this.hideLoading();
     this.analysisResults.innerHTML = `
-      <div class="card border-warning">
-        <div class="card-header bg-warning text-dark">
-          <h6 class="mb-0"><i class="fas fa-clock"></i> Waiting for Complete ECG Upload</h6>
-        </div>
-        <div class="card-body">
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <h6 class="text-warning">Almost Ready!</h6>
-              <p class="mb-2">Please upload both ECG files (MAT and HEA) to start the heart rhythm analysis.</p>
-              <small class="text-muted">
-                <i class="fas fa-info-circle"></i> Both files work together to provide accurate ECG analysis - one contains the data, the other contains the header information.
-              </small>
-            </div>
-            <div class="col-md-4 text-center">
-              <i class="fas fa-hourglass-half fa-3x text-warning mb-2"></i>
-              <br>
-              <small class="text-muted">Upload remaining file</small>
-            </div>
-          </div>
-        </div>
+      <div class="alert alert-warning">
+        <h6><i class="fas fa-clock"></i> Waiting for Both ECG Files</h6>
+        <p>Please select both MAT and HEA files to perform ECG analysis.</p>
       </div>`;
   }
-// Map abbreviations to full names and detailed explanations
-getFullClassNameAndExplanation(abbr) {
-  const classData = {
-    'NSR': {
-      fullName: 'Normal Sinus Rhythm',
-      explanation: 'The patient\'s heart rhythm is completely normal and healthy. The electrical signals are working perfectly, creating regular heartbeats at a normal rate.',
-      severity: 'normal',
-      action: 'Patient should continue regular check-ups and maintain a healthy lifestyle.'
-    },
-    'AF': {
-      fullName: 'Atrial Fibrillation',
-      explanation: 'The patient\'s heart\'s upper chambers are beating irregularly, which can cause an uneven pulse. This is a common condition that can be managed with proper treatment.',
-      severity: 'moderate',
-      action: 'Patient should consult their doctor about treatment options to prevent complications.'
-    },
-    'STEMI': {
-      fullName: 'ST-Elevation Myocardial Infarction (Major Heart Attack)',
-      explanation: 'This indicates a serious heart attack where a major heart artery is completely blocked. The patient requires immediate emergency medical attention.',
-      severity: 'critical',
-      action: 'Patient needs emergency medical care immediately - call 911 or go to the nearest emergency room.'
-    },
-    'NSTEMI': {
-      fullName: 'Non-ST-Elevation Myocardial Infarction (Heart Attack)',
-      explanation: 'This shows signs of a heart attack where a heart artery is partially blocked. While less severe than STEMI, the patient still requires urgent medical attention.',
-      severity: 'high',
-      action: 'Patient should contact their doctor immediately or seek urgent medical care.'
-    },
-    'LBBB': {
-      fullName: 'Left Bundle Branch Block',
-      explanation: 'The electrical signals in the patient\'s heart are taking a detour, causing a slight delay in how the heart contracts. This can indicate heart muscle strain.',
-      severity: 'moderate',
-      action: 'Patient should follow up with their cardiologist for further evaluation and monitoring.'
-    },
-    'RBBB': {
-      fullName: 'Right Bundle Branch Block',
-      explanation: 'There\'s a delay in the electrical signal to the right side of the patient\'s heart. This is often harmless but may sometimes indicate underlying heart or lung conditions.',
-      severity: 'low',
-      action: 'Patient should discuss with their doctor, but this is often not a serious concern.'
-    },
-    'PVC': {
-      fullName: 'Premature Ventricular Contractions',
-      explanation: 'The patient\'s heart occasionally beats earlier than expected, creating extra heartbeats. This is very common and usually harmless, like hiccups of the heart.',
-      severity: 'low',
-      action: 'Usually no treatment needed, but patient should mention to their doctor during regular visits.'
-    },
-    'PAC': {
-      fullName: 'Premature Atrial Contractions',
-      explanation: 'The patient\'s heart\'s upper chambers occasionally beat early, causing extra heartbeats. This is very common and typically not dangerous.',
-      severity: 'low',
-      action: 'Generally harmless - patient should discuss with their doctor if they feel symptoms.'
-    },
-    'Tachycardia': {
-      fullName: 'Rapid Heart Rate (Tachycardia)',
-      explanation: 'The patient\'s heart is beating faster than normal. This can happen due to exercise, stress, fever, or underlying heart conditions.',
-      severity: 'moderate',
-      action: 'Monitor patient symptoms and consult their doctor to determine the cause.'
-    },
-    'Bradycardia': {
-      fullName: 'Slow Heart Rate (Bradycardia)',
-      explanation: 'The patient\'s heart is beating slower than normal. This can be normal for athletes or may indicate an issue with the patient\'s heart\'s electrical system.',
-      severity: 'moderate',
-      action: 'Patient should discuss with their doctor, especially if they experience dizziness or fatigue.'
-    }
-  };
+injectClassExplanation(abbr) {
+  const explanations = {'NSR': 'Normal Sinus Rhythm: Heartbeat is regular and healthy with normal intervals.', 'AF': 'Atrial Fibrillation: Irregular heartbeat without consistent P-waves; may cause palpitations or fatigue.', 'STEMI': 'ST-Elevation Myocardial Infarction: Severe heart attack with full artery blockage; immediate care needed.', 'NSTEMI': 'Non-ST-Elevation MI: Partial artery blockage; less severe than STEMI but still urgent.', 'LBBB': "Left Bundle Branch Block: A delay in the heart's electrical signal to the left side; may indicate heart strain.", 'RBBB': 'Right Bundle Branch Block: A delay to the right side of the heart; often benign, sometimes linked to lung or heart issues.', 'PVC': 'Premature Ventricular Contractions: Extra heartbeats from the ventricles; common and often harmless.', 'PAC': 'Premature Atrial Contractions: Early heartbeats starting in the atria; usually not a concern.', 'Tachycardia': 'Fast heart rate; may occur with fever, stress, or underlying heart conditions.', 'Bradycardia': 'Slow heart rate; normal in athletes, but may require attention if symptomatic.'};
 
-  return classData[abbr] || {
-    fullName: abbr,
-    explanation: 'This heart rhythm pattern requires further evaluation by a medical professional.',
-    severity: 'unknown',
-    action: 'Please consult with the patient\'s doctor for interpretation of this result.'
-  };
+  const summaryEl = document.getElementById('ecg-class-summary');
+  if (!summaryEl) return;
+
+  const text = explanations[abbr] || 'No additional explanation is available for this diagnosis class.';
+  summaryEl.innerHTML = `<h6>What this means:</h6><p class="mb-0">${text}</p>`;
 }
   showInstructionMessage() {
     this.clearError();
     this.hideLoading();
     this.analysisResults.innerHTML = `
-      <div class="card border-info">
-        <div class="card-header bg-info text-white">
-          <h6 class="mb-0"><i class="fas fa-heartbeat"></i> ECG Analysis Ready</h6>
-        </div>
-        <div class="card-body">
-          <div class="row align-items-center">
-            <div class="col-md-8">
-              <h6 class="text-info">Upload Your ECG Files</h6>
-              <p class="mb-2">Upload both ECG files (MAT and HEA) above to get instant AI-powered heart rhythm analysis.</p>
-              <small class="text-muted">
-                <i class="fas fa-shield-alt"></i> Your ECG data is processed securely and analyzed using advanced AI technology.
-              </small>
-            </div>
-            <div class="col-md-4 text-center">
-              <i class="fas fa-file-upload fa-3x text-info mb-2"></i>
-              <br>
-              <small class="text-muted">Both files required</small>
-            </div>
-          </div>
-        </div>
+      <div class="alert alert-info">
+        <h6><i class="fas fa-info-circle"></i> ECG Analysis Ready</h6>
+        <p>Upload ECG files (MAT and HEA) above to get real-time results here.</p>
+        <small class="text-muted">Both files are required for complete analysis.</small>
       </div>`;
   }
 
@@ -294,194 +198,59 @@ getFullClassNameAndExplanation(abbr) {
 
   displayAnalysisResults(data) {
     const primaryAbbr = data.primary_diagnosis.abbreviation;
+    const primaryName = data.primary_diagnosis.name;
     const primaryProb = data.primary_diagnosis.probability;
     const summary = data.summary;
     const confidencePct = (primaryProb * 100).toFixed(1) + '%';
 
-    // Get comprehensive class information
-    const classInfo = this.getFullClassNameAndExplanation(primaryAbbr);
-    const primaryName = classInfo.fullName;
-
-    // Determine confidence styling and message
     let confidenceClass = 'text-danger';
-    let confidenceMessage = 'Low confidence - requires further evaluation';
-    if (primaryProb > 0.8) {
+    if (primaryProb > 0.7) {
       confidenceClass = 'text-success';
-      confidenceMessage = 'High confidence in diagnosis';
-    } else if (primaryProb > 0.6) {
+    } else if (primaryProb > 0.5) {
       confidenceClass = 'text-warning';
-      confidenceMessage = 'Moderate confidence - consider additional testing';
-    }
-
-    // Determine severity styling
-    let severityClass = 'badge-secondary';
-    let severityIcon = 'fas fa-question-circle';
-    switch(classInfo.severity) {
-      case 'normal':
-        severityClass = 'badge-success';
-        severityIcon = 'fas fa-check-circle';
-        break;
-      case 'low':
-        severityClass = 'badge-info';
-        severityIcon = 'fas fa-info-circle';
-        break;
-      case 'moderate':
-        severityClass = 'badge-warning';
-        severityIcon = 'fas fa-exclamation-triangle';
-        break;
-      case 'high':
-        severityClass = 'badge-danger';
-        severityIcon = 'fas fa-exclamation-circle';
-        break;
-      case 'critical':
-        severityClass = 'badge-danger';
-        severityIcon = 'fas fa-times-circle';
-        break;
     }
 
     const detailedProbsHtml = this.getDetailedProbabilitiesHtml(data.probabilities);
 
     this.analysisResults.innerHTML = `
-      <div class="ecg-analysis-results">
-        <!-- Primary Diagnosis Card -->
-        <div class="card border-primary mb-3">
-          <div class="card-header bg-primary text-white">
-            <h5 class="mb-0"><i class="fas fa-heartbeat"></i> Primary Diagnosis</h5>
-          </div>
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md-8">
-                <h4 class="text-primary mb-2">${primaryName}</h4>
-                <span class="badge ${severityClass} mb-2">
-                  <i class="${severityIcon}"></i> ${classInfo.severity.charAt(0).toUpperCase() + classInfo.severity.slice(1)} Priority
-                </span>
-              </div>
-              <div class="col-md-4 text-right">
-                <div class="mb-2">
-                  <small class="text-muted">Confidence Level</small>
-                  <div class="h4 ${confidenceClass}">${confidencePct}</div>
-                  <small class="${confidenceClass}">${confidenceMessage}</small>
-                </div>
-              </div>
-            </div>
-          </div>
+      <div class="row mb-3">
+        <div class="col-md-8">
+          <h6>Primary Diagnosis:</h6>
+          <div class="font-weight-bold text-primary">${primaryName} (${primaryAbbr})</div>
         </div>
-
-        <!-- Explanation Card -->
-        <div class="card border-info mb-3">
-          <div class="card-header bg-info text-white">
-            <h6 class="mb-0"><i class="fas fa-info-circle"></i> What This Means (In Simple Terms)</h6>
-          </div>
-          <div class="card-body">
-            <p class="mb-3">${classInfo.explanation}</p>
-            <div class="alert alert-light border-left-info">
-              <strong><i class="fas fa-stethoscope"></i> Recommended Action:</strong><br>
-              ${classInfo.action}
-            </div>
-          </div>
-        </div>
-
-        <!-- AI Summary Card -->
-        <div class="card border-secondary mb-3">
-          <div class="card-header bg-secondary text-white">
-            <h6 class="mb-0"><i class="fas fa-robot"></i> AI Analysis Summary</h6>
-          </div>
-          <div class="card-body">
-            <p class="mb-0">${summary}</p>
-            <hr>
-            <small class="text-muted">
-              <i class="fas fa-info-circle"></i> This is an AI-powered analysis. Always consult with a qualified healthcare professional for medical interpretation and treatment decisions.
-            </small>
-          </div>
-        </div>
-
-        <!-- Detailed Probabilities (Collapsible) -->
-        <div class="card border-light">
-          <div class="card-header bg-light">
-            <h6 class="mb-0">
-              <button class="btn btn-link text-decoration-none p-0" type="button" data-toggle="collapse" data-target="#detailedProbs" aria-expanded="false" aria-controls="detailedProbs">
-                <i class="fas fa-chart-bar"></i> Detailed Analysis Results <i class="fas fa-chevron-down ml-2"></i>
-              </button>
-            </h6>
-          </div>
-          <div class="collapse" id="detailedProbs">
-            <div class="card-body">
-              <p class="text-muted mb-3">
-                <small>The AI system evaluates multiple possible diagnoses. Here are all the probabilities:</small>
-              </p>
-              ${detailedProbsHtml}
-            </div>
-          </div>
+        <div class="col-md-4">
+          <h6>Confidence:</h6>
+          <div class="font-weight-bold ${confidenceClass}">${confidencePct}</div>
         </div>
       </div>
-
-      <style>
-        .border-left-info {
-          border-left: 4px solid #17a2b8 !important;
-        }
-        .ecg-analysis-results .card {
-          box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-          border-radius: 8px;
-        }
-        .ecg-analysis-results .progress {
-          height: 8px;
-          border-radius: 4px;
-        }
-      </style>
+      <div class="mb-3">
+        <h6>Summary:</h6>
+        <p class="mb-0">${summary}</p>
+      </div>
+      <div class="mt-3">
+        <h6>Detailed Probabilities:</h6>
+        ${detailedProbsHtml}
+      </div>
     `;
-    
-    console.log('Enhanced ECG analysis results displayed with comprehensive explanations');
+    console.log('ECG analysis results displayed with abbreviation and summary');
   }
 
-  // Enhanced detailed probabilities with full class names
+  // Renamed from displayDetailedProbabilities to reflect it returns HTML string
   getDetailedProbabilitiesHtml(probabilities) {
     let html = '<div class="row">';
-    
-    // Sort probabilities by value (highest first)
-    const sortedProbs = Object.entries(probabilities).sort(([,a], [,b]) => b - a);
-    
-    for (const [abbr, p] of sortedProbs) {
+    for (const [abbr, p] of Object.entries(probabilities)) {
       const pct = (p * 100).toFixed(1);
-      const classInfo = this.getFullClassNameAndExplanation(abbr);
-      const displayName = classInfo.fullName;
-      
-      // Color coding based on probability
-      let progressClass = 'bg-secondary';
-      if (p > 0.7) progressClass = 'bg-success';
-      else if (p > 0.4) progressClass = 'bg-warning';
-      else if (p > 0.2) progressClass = 'bg-info';
-      
+      // You might want a mapping from abbr to full name here if available
+      const displayName = abbr; // Placeholder: use actual names if you have them
       html += `
-        <div class="col-md-6 mb-3">
-          <div class="d-flex justify-content-between align-items-center mb-1">
-            <small class="font-weight-bold">${displayName}</small>
-            <small class="text-muted">${pct}%</small>
+        <div class="col-md-6 mb-2">
+          <small><strong>${displayName}:</strong> ${pct}%</small>
+          <div class="progress" style="height:5px;">
+            <div class="progress-bar" role="progressbar" style="width:${pct}%" aria-valuenow="${pct}" aria-valuemin="0" aria-valuemax="100"></div>
           </div>
-          <div class="progress" style="height:12px; border-radius: 6px;">
-            <div class="progress-bar ${progressClass}" 
-                 role="progressbar" 
-                 style="width:${pct}%" 
-                 aria-valuenow="${pct}" 
-                 aria-valuemin="0" 
-                 aria-valuemax="100">
-            </div>
-          </div>
-          <small class="text-muted">${abbr}</small>
         </div>`;
     }
     html += '</div>';
-    
-    html += `
-      <div class="mt-3 p-3 bg-light rounded">
-        <small class="text-muted">
-          <i class="fas fa-lightbulb"></i> <strong>Understanding These Results:</strong><br>
-          • Higher percentages indicate stronger likelihood of that specific heart rhythm pattern<br>
-          • Multiple conditions can have similar ECG patterns, which is why several options are shown<br>
-          • Your doctor will consider these results along with your symptoms and medical history
-        </small>
-      </div>
-    `;
-    
     return html;
   }
 

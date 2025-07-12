@@ -22,16 +22,6 @@ from src.ui.doctor_management import DoctorManagementWidget
 from src.core.database import db_manager
 
 
-def initialize_database():
-    """Initialize the database with sample data if needed"""
-    try:
-        # Initialize database
-        db_manager.init_db()
-        print("Database initialized successfully")
-    except Exception as e:
-        print(f"Database initialization error: {e}")
-
-
 class TestWindow(QMainWindow):
     """Test window for doctor management system"""
     
@@ -69,9 +59,6 @@ def main():
     app.setApplicationName("Heartline Doctor Management Test")
     app.setApplicationVersion("1.0.0")
     app.setOrganizationName("Heartline Medical")
-    
-    # Initialize database
-    initialize_database()
     
     # Create and show main window
     window = TestWindow()

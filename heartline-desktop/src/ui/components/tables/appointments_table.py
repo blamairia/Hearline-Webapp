@@ -16,7 +16,6 @@ from typing import List, Optional
 from src.models.complete_models import Appointment
 from src.core.database import db_manager
 from src.ui.styles import AppColors, AppStyles
-from src.ui.appointment_management.dialogs.appointment_dialog import AppointmentDialog
 
 class AppointmentsTableWidget(QWidget):
     """Widget for displaying and managing appointments table"""
@@ -42,14 +41,7 @@ class AppointmentsTableWidget(QWidget):
         # Title
         title_label = QLabel("📅 Appointments Management")
         title_label.setFont(QFont("Segoe UI", 16, QFont.Weight.Bold))
-        title_label.setStyleSheet(f"""
-            QLabel {{
-                color: {AppColors.PRIMARY};
-                margin: 10px;
-                background-color: transparent;
-                border: none;
-            }}
-        """)
+        title_label.setStyleSheet(f"color: {AppColors.PRIMARY}; margin: 10px;")
         layout.addWidget(title_label)
         
         # Search and filter section
@@ -58,39 +50,26 @@ class AppointmentsTableWidget(QWidget):
         filter_layout = QHBoxLayout(filter_frame)
         
         # Search box
-        search_label = QLabel("🔍 Search:")
-        search_label.setStyleSheet(f"color: {AppColors.TEXT_PRIMARY}; font-weight: bold;")
-        filter_layout.addWidget(search_label)
+        filter_layout.addWidget(QLabel("🔍 Search:"))
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Search by reason, patient, or doctor...")
         filter_layout.addWidget(self.search_input)
         
         # State filter
-        state_label = QLabel("State:")
-        state_label.setStyleSheet(f"color: {AppColors.TEXT_PRIMARY}; font-weight: bold;")
-        filter_layout.addWidget(state_label)
+        filter_layout.addWidget(QLabel("State:"))
         self.state_filter = QComboBox()
         self.state_filter.addItems(["All", "Scheduled", "Completed", "Cancelled", "No-show"])
         filter_layout.addWidget(self.state_filter)
         
         # Refresh button
         self.refresh_btn = QPushButton("🔄 Refresh")
-        self.refresh_btn.setStyleSheet(AppStyles.SECONDARY_BUTTON_STYLE)
         self.refresh_btn.clicked.connect(self.load_appointments)
         filter_layout.addWidget(self.refresh_btn)
         
         # Add button
         self.add_btn = QPushButton("➕ Add Appointment")
-        self.add_btn.setStyleSheet(AppStyles.PRIMARY_BUTTON_STYLE)
         self.add_btn.clicked.connect(self.add_appointment)
         filter_layout.addWidget(self.add_btn)
-        
-        # Edit button
-        self.edit_btn = QPushButton("✏️ Edit Appointment")
-        self.edit_btn.setStyleSheet(AppStyles.SECONDARY_BUTTON_STYLE)
-        self.edit_btn.clicked.connect(lambda: self.edit_appointment())
-        self.edit_btn.setEnabled(False)  # Disabled until selection
-        filter_layout.addWidget(self.edit_btn)
         
         layout.addWidget(filter_frame)
         
@@ -107,9 +86,7 @@ class AppointmentsTableWidget(QWidget):
     def setup_table(self):
         """Setup the table widget"""
         headers = [
-            "ID", "Date", "Time", "Duration", "Patient", "Doctor", 
-            "Type", "Reason", "Priority", "Status", "Confirmed", 
-            "Reminder", "Notes", "Updated"
+            "ID", "Date", "Reason", "State", "Patient ID", "Doctor ID", "Created", "Updated"
         ]
         
         self.table.setColumnCount(len(headers))
@@ -119,18 +96,12 @@ class AppointmentsTableWidget(QWidget):
         header = self.table.horizontalHeader()
         header.setSectionResizeMode(0, QHeaderView.ResizeMode.ResizeToContents)  # ID
         header.setSectionResizeMode(1, QHeaderView.ResizeMode.ResizeToContents)  # Date
-        header.setSectionResizeMode(2, QHeaderView.ResizeMode.ResizeToContents)  # Time
-        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # Duration
-        header.setSectionResizeMode(4, QHeaderView.ResizeMode.Stretch)          # Patient
-        header.setSectionResizeMode(5, QHeaderView.ResizeMode.Stretch)          # Doctor
-        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)  # Type
-        header.setSectionResizeMode(7, QHeaderView.ResizeMode.Stretch)          # Reason
-        header.setSectionResizeMode(8, QHeaderView.ResizeMode.ResizeToContents)  # Priority
-        header.setSectionResizeMode(9, QHeaderView.ResizeMode.ResizeToContents)  # Status
-        header.setSectionResizeMode(10, QHeaderView.ResizeMode.ResizeToContents) # Confirmed
-        header.setSectionResizeMode(11, QHeaderView.ResizeMode.ResizeToContents) # Reminder
-        header.setSectionResizeMode(12, QHeaderView.ResizeMode.Stretch)         # Notes
-        header.setSectionResizeMode(13, QHeaderView.ResizeMode.ResizeToContents) # Updated
+        header.setSectionResizeMode(2, QHeaderView.ResizeMode.Stretch)          # Reason
+        header.setSectionResizeMode(3, QHeaderView.ResizeMode.ResizeToContents)  # State
+        header.setSectionResizeMode(4, QHeaderView.ResizeMode.ResizeToContents)  # Patient ID
+        header.setSectionResizeMode(5, QHeaderView.ResizeMode.ResizeToContents)  # Doctor ID
+        header.setSectionResizeMode(6, QHeaderView.ResizeMode.ResizeToContents)  # Created
+        header.setSectionResizeMode(7, QHeaderView.ResizeMode.ResizeToContents)  # Updated
         
         # Set row selection behavior
         self.table.setSelectionBehavior(QTableWidget.SelectionBehavior.SelectRows)
@@ -152,47 +123,25 @@ class AppointmentsTableWidget(QWidget):
         self.table.itemSelectionChanged.connect(self.on_selection_changed)
     
     def load_appointments(self):
-        """Load appointments from database with enhanced fields and related data"""
+        """Load appointments from database"""
         try:
             self.status_label.setText("Loading appointments...")
             
             # Get database session
             with db_manager.get_session() as session:
-                # Query appointments with patient and doctor relationships
+                # Query appointments using SQLAlchemy
                 appointments_query = session.query(Appointment).order_by(Appointment.date.desc()).all()
                 
                 # Extract data from SQLAlchemy objects before session closes
                 self.appointments = []
                 for appointment in appointments_query:
-                    # Get patient name
-                    patient_name = "Unknown Patient"
-                    if appointment.patient:
-                        patient_name = f"{appointment.patient.first_name} {appointment.patient.last_name}"
-                    
-                    # Get doctor name
-                    doctor_name = "No Doctor"
-                    if appointment.doctor:
-                        doctor_name = f"Dr. {appointment.doctor.first_name} {appointment.doctor.last_name}"
-                    
                     appointment_data = {
                         'id': appointment.id,
                         'patient_id': appointment.patient_id,
                         'doctor_id': appointment.doctor_id,
-                        'patient_name': patient_name,
-                        'doctor_name': doctor_name,
                         'date': appointment.date,
                         'reason': appointment.reason,
                         'state': appointment.state,
-                        'appointment_type': appointment.appointment_type,
-                        'duration_minutes': appointment.duration_minutes,
-                        'priority': appointment.priority,
-                        'notes': appointment.notes,
-                        'patient_notes': appointment.patient_notes,
-                        'confirmed': appointment.confirmed,
-                        'reminder_sent': appointment.reminder_sent,
-                        'cancelled_reason': appointment.cancelled_reason,
-                        'cancelled_by': appointment.cancelled_by,
-                        'rescheduled_from': appointment.rescheduled_from,
                         'created_at': appointment.created_at,
                         'updated_at': appointment.updated_at
                     }
@@ -206,7 +155,7 @@ class AppointmentsTableWidget(QWidget):
             QMessageBox.critical(self, "Database Error", f"Failed to load appointments:\n{str(e)}")
     
     def populate_table(self):
-        """Populate table with enhanced appointment data"""
+        """Populate table with appointment data"""
         self.table.setRowCount(len(self.appointments))
         
         for row, appointment in enumerate(self.appointments):
@@ -214,83 +163,37 @@ class AppointmentsTableWidget(QWidget):
             self.table.setItem(row, 0, QTableWidgetItem(str(appointment['id'])))
             
             # Date
-            date_str = appointment['date'].strftime("%Y-%m-%d") if appointment['date'] else ""
+            date_str = appointment['date'].strftime("%Y-%m-%d %H:%M") if appointment['date'] else ""
             self.table.setItem(row, 1, QTableWidgetItem(date_str))
             
-            # Time
-            time_str = appointment['date'].strftime("%H:%M") if appointment['date'] else ""
-            self.table.setItem(row, 2, QTableWidgetItem(time_str))
+            # Reason
+            self.table.setItem(row, 2, QTableWidgetItem(appointment['reason'] or ""))
             
-            # Duration
-            duration = f"{appointment['duration_minutes']} min" if appointment['duration_minutes'] else "30 min"
-            self.table.setItem(row, 3, QTableWidgetItem(duration))
-            
-            # Patient Name
-            self.table.setItem(row, 4, QTableWidgetItem(appointment['patient_name'] or ""))
-            
-            # Doctor Name
-            self.table.setItem(row, 5, QTableWidgetItem(appointment['doctor_name'] or ""))
-            
-            # Type
-            appointment_type = appointment['appointment_type'] or "consultation"
-            type_display = appointment_type.replace("_", " ").title()
-            self.table.setItem(row, 6, QTableWidgetItem(type_display))
-            
-            # Reason (truncated for display)
-            reason = appointment['reason'] or ""
-            if len(reason) > 50:
-                reason = reason[:50] + "..."
-            self.table.setItem(row, 7, QTableWidgetItem(reason))
-            
-            # Priority
-            priority = appointment['priority'] or "normal"
-            priority_item = QTableWidgetItem(priority.title())
-            # Color code priorities
-            if priority == "urgent":
-                priority_item.setBackground(Qt.GlobalColor.red)
-            elif priority == "high":
-                priority_item.setBackground(Qt.GlobalColor.yellow)
-            elif priority == "low":
-                priority_item.setBackground(Qt.GlobalColor.lightGray)
-            self.table.setItem(row, 8, priority_item)
-            
-            # Status
-            state = appointment['state'] or "scheduled"
-            state_item = QTableWidgetItem(state.replace("_", " ").title())
+            # State
+            state_item = QTableWidgetItem(appointment['state'] or "")
             # Color code states
-            if state == "completed":
+            if appointment['state'] == "Completed":
                 state_item.setBackground(Qt.GlobalColor.green)
-            elif state == "cancelled":
+            elif appointment['state'] == "Cancelled":
                 state_item.setBackground(Qt.GlobalColor.red)
-            elif state == "confirmed":
+            elif appointment['state'] == "Scheduled":
                 state_item.setBackground(Qt.GlobalColor.blue)
-            elif state == "no_show":
-                state_item.setBackground(Qt.GlobalColor.darkRed)
-            self.table.setItem(row, 9, state_item)
+            self.table.setItem(row, 3, state_item)
             
-            # Confirmed
-            confirmed = "Yes" if appointment['confirmed'] else "No"
-            confirmed_item = QTableWidgetItem(confirmed)
-            if appointment['confirmed']:
-                confirmed_item.setBackground(Qt.GlobalColor.lightGreen)
-            self.table.setItem(row, 10, confirmed_item)
+            # Patient ID
+            self.table.setItem(row, 4, QTableWidgetItem(str(appointment['patient_id'])))
             
-            # Reminder Sent
-            reminder = "Yes" if appointment['reminder_sent'] else "No"
-            reminder_item = QTableWidgetItem(reminder)
-            if appointment['reminder_sent']:
-                reminder_item.setBackground(Qt.GlobalColor.lightBlue)
-            self.table.setItem(row, 11, reminder_item)
+            # Doctor ID
+            doctor_id = str(appointment['doctor_id']) if appointment['doctor_id'] else ""
+            self.table.setItem(row, 5, QTableWidgetItem(doctor_id))
             
-            # Notes (truncated for display)
-            notes = appointment['notes'] or ""
-            if len(notes) > 30:
-                notes = notes[:30] + "..."
-            self.table.setItem(row, 12, QTableWidgetItem(notes))
+            # Created At
+            created_str = appointment['created_at'].strftime("%Y-%m-%d %H:%M") if appointment['created_at'] else ""
+            self.table.setItem(row, 6, QTableWidgetItem(created_str))
             
             # Updated At
             updated_str = appointment['updated_at'].strftime("%Y-%m-%d %H:%M") if appointment['updated_at'] else ""
-            self.table.setItem(row, 13, QTableWidgetItem(updated_str))
+            self.table.setItem(row, 7, QTableWidgetItem(updated_str))
     
     def filter_table(self):
         """Filter table based on search input and filters"""
@@ -328,32 +231,14 @@ class AppointmentsTableWidget(QWidget):
     def on_selection_changed(self):
         """Handle selection change"""
         current_row = self.table.currentRow()
-        has_selection = current_row >= 0
-        self.edit_btn.setEnabled(has_selection)
-        
-        if has_selection:
+        if current_row >= 0:
             appointment_id = int(self.table.item(current_row, 0).text())
             self.appointment_selected.emit(appointment_id)
     
     def add_appointment(self):
         """Add new appointment"""
-        dialog = AppointmentDialog(parent=self)
-        dialog.appointment_saved.connect(self.on_appointment_saved)
-        dialog.exec()
-    
-    def edit_appointment(self):
-        """Edit selected appointment"""
-        appointment_id = self.get_selected_appointment_id()
-        if appointment_id:
-            dialog = AppointmentDialog(appointment_id=appointment_id, parent=self)
-            dialog.appointment_saved.connect(self.on_appointment_saved)
-            dialog.exec()
-        else:
-            QMessageBox.information(self, "Edit Appointment", "Please select an appointment to edit.")
-    
-    def on_appointment_saved(self, appointment_id: int):
-        """Handle appointment saved signal"""
-        self.load_appointments()  # Refresh the table
+        # This will be implemented when we add CRUD functionality
+        QMessageBox.information(self, "Add Appointment", "Add appointment functionality will be implemented in the next phase.")
     
     def get_selected_appointment_id(self) -> Optional[int]:
         """Get the ID of currently selected appointment"""

@@ -146,35 +146,16 @@ class Doctor(Base):
 
 
 class Appointment(Base):
-    """Enhanced Appointment model with comprehensive fields for desktop application"""
+    """Appointment model matching the web app structure exactly"""
     
     __tablename__ = "appointment"
     
-    # Core fields (matching web app)
     id = Column(Integer, primary_key=True)
     date = Column(DateTime, nullable=False)  # scheduled datetime
     reason = Column(String(200), nullable=False)
-    state = Column(String(20), nullable=False, default="scheduled")  # appointment status
+    state = Column(String(20), nullable=False, default="scheduled")  # "scheduled"/"completed"/"canceled"
     patient_id = Column(Integer, ForeignKey("patient.id"), nullable=False)
     doctor_id = Column(Integer, ForeignKey("doctor.id"), nullable=True)
-
-    # Enhanced fields for desktop
-    appointment_type = Column(String(50), nullable=True, default="consultation")  # "consultation", "follow_up", "emergency", etc.
-    duration_minutes = Column(Integer, default=30)  # appointment duration in minutes
-    priority = Column(String(20), default="normal")  # "low", "normal", "high", "urgent"
-    
-    # Notes and communication
-    notes = Column(Text, nullable=True)  # internal notes for staff
-    patient_notes = Column(Text, nullable=True)  # notes from/for patient
-    
-    # Status tracking
-    confirmed = Column(Boolean, default=False)  # patient confirmation status
-    reminder_sent = Column(Boolean, default=False)  # reminder sent status
-    
-    # Cancellation and rescheduling
-    cancelled_reason = Column(String(200), nullable=True)  # reason for cancellation
-    cancelled_by = Column(String(50), nullable=True)  # who cancelled (patient/doctor/admin)
-    rescheduled_from = Column(Integer, ForeignKey("appointment.id"), nullable=True)  # original appointment if rescheduled
 
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -183,54 +164,12 @@ class Appointment(Base):
     patient = relationship("Patient", back_populates="appointments")
     doctor = relationship("Doctor", back_populates="appointments")
     visit = relationship("Visit", back_populates="appointment", uselist=False)
-    
-    # Self-referential relationship for rescheduled appointments
-    original_appointment = relationship("Appointment", remote_side=[id], backref="rescheduled_appointments")
 
-    @property
-    def full_patient_name(self) -> str:
-        """Get patient's full name"""
-        if self.patient:
-            return f"{self.patient.first_name} {self.patient.last_name}"
-        return "Unknown Patient"
-    
-    @property
-    def full_doctor_name(self) -> str:
-        """Get doctor's full name"""
-        if self.doctor:
-            return f"Dr. {self.doctor.first_name} {self.doctor.last_name}"
-        return "No Doctor Assigned"
-    
-    @property
-    def appointment_datetime_str(self) -> str:
-        """Get formatted appointment date and time"""
-        return self.date.strftime("%Y-%m-%d %H:%M") if self.date else ""
-    
-    @property
-    def duration_str(self) -> str:
-        """Get formatted duration"""
-        return f"{self.duration_minutes} min" if self.duration_minutes else "30 min"
-    
-    @property
-    def status_display(self) -> str:
-        """Get display-friendly status"""
-        status_map = {
-            "scheduled": "Scheduled",
-            "confirmed": "Confirmed", 
-            "in_progress": "In Progress",
-            "completed": "Completed",
-            "cancelled": "Cancelled",
-            "no_show": "No Show",
-            "rescheduled": "Rescheduled",
-            "pending": "Pending"
-        }
-        return status_map.get(self.state, self.state.title())
-    
     def __str__(self) -> str:
-        return f"Appointment(id={self.id}, patient={self.full_patient_name}, date={self.appointment_datetime_str})"
+        return f"Appointment(id={self.id}, patient={self.patient_id}, date={self.date})"
     
     def __repr__(self) -> str:
-        return f"<Appointment {self.id}: {self.full_patient_name} on {self.appointment_datetime_str}>"
+        return f"<Appointment {self.id}: {self.date}>"
 
 
 class WaitingListEntry(Base):
@@ -429,7 +368,6 @@ class GeneralSettings(Base):
     currency = Column(String(10), default="DZD")
     date_format = Column(String(20), default="YYYY-MM-DD")
     auto_backup = Column(Boolean, default=True)
-    default_doctor_id = Column(Integer, ForeignKey("doctor.id"), nullable=True)  # Default doctor for appointments
     
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

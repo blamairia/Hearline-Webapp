@@ -1,0 +1,24 @@
+# HeartLine Desktop App Build Requirements
+# Install these packages before building the executable
+
+pyinstaller>=5.13.0
+auto-py-to-exe>=2.40.0  # Optional GUI for PyInstaller
+
+# Core application dependencies (already in requirements.txt)
+Flask>=2.3.0
+Flask-SQLAlchemy>=3.0.0
+Flask-Login>=0.6.0
+Flask-Bcrypt>=1.0.0
+Flask-Moment>=1.0.0
+Flask-WTF>=1.1.0
+WTForms>=3.0.0
+python-dotenv>=1.0.0
+onnxruntime>=1.15.0
+numpy>=1.24.0
+wfdb>=4.1.0
+psycopg2-binary>=2.9.0
+Werkzeug>=2.3.0
+
+# Additional packages for desktop features
+psutil>=5.9.0  # For process management
+pillow>=10.0.0  # For image handling

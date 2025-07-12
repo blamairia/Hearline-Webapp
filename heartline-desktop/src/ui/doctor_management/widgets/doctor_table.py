@@ -137,9 +137,9 @@ class DoctorTableWidget(QWidget):
                         'phone': doctor.phone,
                         'email': doctor.email,
                         'license_number': doctor.license_number,
-                        'years_of_experience': doctor.years_of_experience,
+                        'years_experience': doctor.years_experience,
                         'consultation_fee': doctor.consultation_fee,
-                        'is_active': doctor.is_active,
+                        'status': doctor.status,
                         'created_at': doctor.created_at
                     }
                     self.doctors.append(doctor_data)
@@ -181,7 +181,7 @@ class DoctorTableWidget(QWidget):
             self.table.setItem(row, 6, QTableWidgetItem(doctor['license_number'] or ""))
             
             # Experience
-            exp_text = f"{doctor['years_of_experience']} years" if doctor['years_of_experience'] else ""
+            exp_text = f"{doctor['years_experience']} years" if doctor['years_experience'] else ""
             self.table.setItem(row, 7, QTableWidgetItem(exp_text))
             
             # Fee
@@ -189,12 +189,9 @@ class DoctorTableWidget(QWidget):
             self.table.setItem(row, 8, QTableWidgetItem(fee_text))
             
             # Status
-            status_text = "Active" if doctor['is_active'] else "Inactive" if doctor['is_active'] is False else "Unknown"
-            status_item = QTableWidgetItem(status_text)
-            if doctor['is_active']:
-                status_item.setBackground(Qt.GlobalColor.green)
-            elif doctor['is_active'] is False:
-                status_item.setBackground(Qt.GlobalColor.lightGray)
+            status_item = QTableWidgetItem(doctor['status'] or "Unknown")
+            status_color = AppColors.get_status_color(doctor['status'] or "unknown")
+            status_item.setForeground(AppColors.get_qcolor(status_color))
             self.table.setItem(row, 9, status_item)
             
             # Created

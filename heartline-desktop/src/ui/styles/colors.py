@@ -26,7 +26,6 @@ class AppColors:
     BACKGROUND_SECONDARY = "#F5F5F5"  # Light gray
     BACKGROUND_ACCENT = "#FAFAFA"     # Very light gray
     SURFACE = "#FFFFFF"        # Surface color (same as background)
-    CARD_BACKGROUND = "#FFFFFF"       # Card background color
     
     # Text Colors
     TEXT = "#212121"           # Primary text color (same as TEXT_PRIMARY)
@@ -69,13 +68,6 @@ class AppColors:
     NAV_BACKGROUND = "#FFFFFF"      # Navigation background
     NAV_SELECTED = "#E3F2FD"        # Selected nav item
     NAV_HOVER = "#F5F5F5"           # Nav item hover
-    
-    # Additional UI Colors
-    HOVER = "#F0F7FF"              # Light blue hover
-    SELECTED = "#E3F2FD"           # Light blue selection
-    DISABLED = "#F5F5F5"           # Disabled background
-    PRIMARY_HOVER = "#1976D2"      # Primary hover (same as PRIMARY_DARK)
-    PRIMARY_PRESSED = "#0D47A1"    # Primary pressed state
     
     # Form Colors
     INPUT_BACKGROUND = "#FFFFFF"    # Input field background
@@ -311,51 +303,38 @@ class AppStyles:
 
     @staticmethod
     def get_table_style() -> str:
-        """Get standard table widget styling with improved contrast"""
+        """Get standard table widget styling"""
         return f"""
             QTableWidget {{
                 background-color: {AppColors.BACKGROUND};
                 alternate-background-color: {AppColors.TABLE_ALTERNATE};
-                selection-background-color: {AppColors.PRIMARY_LIGHT};
+                selection-background-color: {AppColors.TABLE_SELECTION};
                 gridline-color: {AppColors.BORDER};
                 color: {AppColors.TEXT_PRIMARY};
                 border: 1px solid {AppColors.BORDER};
-                border-radius: 4px;
             }}
             QTableWidget::item {{
-                padding: 10px 8px;
+                padding: 8px;
                 border-bottom: 1px solid {AppColors.BORDER};
                 color: {AppColors.TEXT_PRIMARY};
-                background-color: transparent;
             }}
             QTableWidget::item:hover {{
-                background-color: {AppColors.HOVER};
-                color: {AppColors.TEXT_PRIMARY};
+                background-color: {AppColors.TABLE_HOVER};
             }}
             QTableWidget::item:selected {{
-                background-color: {AppColors.PRIMARY_LIGHT};
-                color: {AppColors.TEXT_PRIMARY};
-                font-weight: bold;
-            }}
-            QTableWidget::item:selected:hover {{
-                background-color: {AppColors.PRIMARY_LIGHT};
+                background-color: {AppColors.TABLE_SELECTION};
                 color: {AppColors.TEXT_PRIMARY};
             }}
             QHeaderView::section {{
                 background-color: {AppColors.TABLE_HEADER};
                 color: {AppColors.TEXT_ON_PRIMARY};
-                padding: 12px 8px;
+                padding: 10px;
                 border: none;
-                border-right: 1px solid {AppColors.PRIMARY_DARK};
                 font-weight: bold;
                 font-size: 12px;
-                text-align: center;
             }}
             QHeaderView::section:hover {{
                 background-color: {AppColors.PRIMARY_DARK};
-            }}
-            QHeaderView::section:last {{
-                border-right: none;
             }}
         """
     
