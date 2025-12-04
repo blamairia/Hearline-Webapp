@@ -2,84 +2,143 @@
 
 {% block title %}Dashboard | Heartline Medical Clinic{% endblock %}
 
+{% block extra_css %}
+<style>
+  .page-hero { background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%); color: #fff; padding: 2rem 1.25rem; margin: -1rem -1rem 0 -1rem; }
+  .page-hero .title { font-size: 2rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: .6rem; }
+  .page-hero .hero-sub { margin-top: .35rem; opacity: .95; }
+  .page-hero .hero-meta { margin-top: .2rem; opacity: .85; font-size: .9rem; }
+  .role-pill { background: rgba(255,255,255,.2); border: 1px solid rgba(255,255,255,.35); color: #fff; padding: .25rem .6rem; border-radius: 999px; margin-right: .75rem; font-size: .85rem; backdrop-filter: blur(4px); }
+  .page-content { padding: 1.5rem 1.25rem 2.5rem; background: #f5f9ff; }
+  .card { border: 1px solid #e7f1ff; box-shadow: 0 6px 18px rgba(0,116,217,.08); }
+  .card-header { background: linear-gradient(135deg, rgba(0,116,217,.08), rgba(0,180,255,.08)); border-bottom: 1px solid #e7f1ff; }
+  .btn-primary { background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%); border: 0; box-shadow: 0 8px 16px rgba(0,116,217,.24); }
+  .btn-success { background: linear-gradient(135deg, #1fa661 0%, #2ecc71 100%); border: 0; box-shadow: 0 8px 16px rgba(46,204,113,.2); }
+  .badge-info { background-color: #00b4ff; }
+  .badge-success { background-color: #2ecc71; }
+  .badge-warning { background-color: #f1c40f; }
+  .badge-danger { background-color: #e74c3c; }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-tachometer-alt"></i> Clinic Dashboard</h1>
-        <div>
-          <a href="{{ url_for('create_patient') }}" class="btn btn-primary">
-            <i class="fas fa-user-plus"></i> New Patient
-          </a>
-          <a href="{{ url_for('create_visit') }}" class="btn btn-success ml-2">
-            <i class="fas fa-file-medical-alt"></i> New Visit
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>  <div class="row">
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-users"></i> Recent Patients</h5>
-        </div>
-        <div class="card-body">
-          {% if patients %}
-            <div class="list-group list-group-flush">
-              {% for p in patients %}
-                <div class="list-group-item d-flex justify-content-between align-items-center">
-                  <div>
-                    <h6 class="mb-1">{{ p.first_name }} {{ p.last_name }}</h6>
-                    <small class="text-muted">DOB: {{ p.date_of_birth.strftime('%Y-%m-%d') }}</small>
-                  </div>
-                  <i class="fas fa-user text-muted"></i>
-                </div>
-              {% endfor %}
-            </div>
+  <!-- Hero/Header -->
+  <div class="page-hero">
+    <div class="container-fluid px-0 d-flex justify-content-between align-items-center">
+      <div>
+        <h1 class="title"><i class="fas fa-tachometer-alt"></i>
+          {% if current_user.is_authenticated and current_user.role == 'doctor' %}Doctor{% else %}Assistant{% endif %} Dashboard
+        </h1>
+        <div class="hero-sub">
+          {% if current_user.is_authenticated %}
+            {% if current_user.role == 'doctor' %}
+              {% if current_user.last_name %}
+                Welcome back, Dr. {{ current_user.last_name }}
+              {% else %}
+                Welcome back, Dr. {{ current_user.get_full_name() }}
+              {% endif %}
+              {% if current_user.doctor and current_user.doctor.specialty %}
+                <span class="ml-1">• {{ current_user.doctor.specialty }}</span>
+              {% endif %}
+            {% elif current_user.role == 'assistant' %}
+              Welcome back, {{ current_user.get_full_name() }}
+            {% else %}
+              Welcome back
+            {% endif %}
           {% else %}
-            <p class="text-muted mb-0">No patients yet.</p>
+            Welcome
           {% endif %}
         </div>
+        {% if current_user.is_authenticated and current_user.last_login %}
+          <div class="hero-meta">
+            Last login: {{ current_user.last_login.strftime('%B %d, %Y at %I:%M %p') }}
+          </div>
+        {% endif %}
+      </div>
+      <div class="d-flex align-items-center">
+        {% if current_user.is_authenticated %}
+          <span class="role-pill">
+            {% if current_user.role == 'doctor' %}Doctor{% else %}Assistant{% endif %}
+            {% if current_user.role == 'doctor' and current_user.doctor and current_user.doctor.specialty %}
+              · {{ current_user.doctor.specialty }}
+            {% endif %}
+          </span>
+        {% endif %}
+        <a href="{{ url_for('create_patient') }}" class="btn btn-primary">
+          <i class="fas fa-user-plus"></i> New Patient
+        </a>
+        <a href="{{ url_for('create_visit') }}" class="btn btn-success ml-2">
+          <i class="fas fa-file-medical-alt"></i> New Visit
+        </a>
       </div>
     </div>
-    
-    <div class="col-md-6">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-history"></i> Recent Visits</h5>
-        </div>
-        <div class="card-body">
-          {% if visits %}
-            <div class="list-group list-group-flush">
-              {% for v in visits %}
-                <a href="{{ url_for('visit_details', visit_id=v.id) }}" class="list-group-item list-group-item-action">
-                  <div class="d-flex w-100 justify-content-between">
-                    <h6 class="mb-1">Visit #{{ v.id }} - {{ v.patient.first_name }} {{ v.patient.last_name }}</h6>
-                    <small class="text-muted">{{ v.visit_date.strftime('%Y-%m-%d %H:%M') }}</small>
+  </div>
+
+  <div class="page-content">
+    <div class="row">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5><i class="fas fa-users"></i> Recent Patients</h5>
+          </div>
+          <div class="card-body">
+            {% if patients %}
+              <div class="list-group list-group-flush">
+                {% for p in patients %}
+                  <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                      <h6 class="mb-1">{{ p.first_name }} {{ p.last_name }}</h6>
+                      <small class="text-muted">DOB: {{ p.date_of_birth.strftime('%Y-%m-%d') }}</small>
+                    </div>
+                    <i class="fas fa-user text-muted"></i>
                   </div>
-                  <p class="mb-1">
-                    {% if v.diagnosis %}
-                      <strong>Diagnosis:</strong> {{ v.diagnosis[:100] }}{% if v.diagnosis|length > 100 %}...{% endif %}
-                    {% else %}
-                      <em>No diagnosis recorded</em>
-                    {% endif %}
-                  </p>
-                  <small class="text-muted">
-                    Payment: 
-                    <span class="badge {% if v.payment_status == 'paid' %}badge-success{% elif v.payment_status == 'partial' %}badge-warning{% else %}badge-danger{% endif %}">
-                      {{ v.payment_status | capitalize }}
-                    </span>
-                    {% if v.ecg_mat and v.ecg_hea %}
-                      <span class="badge badge-info ml-2"><i class="fas fa-heartbeat"></i> ECG Available</span>
-                    {% endif %}
-                  </small>
-                </a>
-              {% endfor %}
-            </div>
-          {% else %}
-            <p class="text-muted mb-0">No visits yet.</p>
-          {% endif %}
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-muted mb-0">No patients yet.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+      
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header">
+            <h5><i class="fas fa-history"></i> Recent Visits</h5>
+          </div>
+          <div class="card-body">
+            {% if visits %}
+              <div class="list-group list-group-flush">
+                {% for v in visits %}
+                  <a href="{{ url_for('visit_details', visit_id=v.id) }}" class="list-group-item list-group-item-action">
+                    <div class="d-flex w-100 justify-content-between">
+                      <h6 class="mb-1">Visit #{{ v.id }} - {{ v.patient.first_name }} {{ v.patient.last_name }}</h6>
+                      <small class="text-muted">{{ v.visit_date.strftime('%Y-%m-%d %H:%M') }}</small>
+                    </div>
+                    <p class="mb-1">
+                      {% if v.diagnosis %}
+                        <strong>Diagnosis:</strong> {{ v.diagnosis[:100] }}{% if v.diagnosis|length > 100 %}...{% endif %}
+                      {% else %}
+                        <em>No diagnosis recorded</em>
+                      {% endif %}
+                    </p>
+                    <small class="text-muted">
+                      Payment: 
+                      <span class="badge {% if v.payment_status == 'paid' %}badge-success{% elif v.payment_status == 'partial' %}badge-warning{% else %}badge-danger{% endif %}">
+                        {{ v.payment_status | capitalize }}
+                      </span>
+                      {% if v.ecg_mat and v.ecg_hea %}
+                        <span class="badge badge-info ml-2"><i class="fas fa-heartbeat"></i> ECG Available</span>
+                      {% endif %}
+                    </small>
+                  </a>
+                {% endfor %}
+              </div>
+            {% else %}
+              <p class="text-muted mb-0">No visits yet.</p>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>

@@ -560,6 +560,7 @@ function initializePatientSearch() {
     
     let currentPage = 1;
     let isLoading = false;
+    let selectedIndex = -1; // Track currently selected option with keyboard
     
     console.log('Initializing patient search');
     
@@ -567,6 +568,7 @@ function initializePatientSearch() {
     searchBox.addEventListener('focus', () => {
         console.log('Patient search box focused');
         currentPage = 1;
+        selectedIndex = -1;
         fetchPatients('');
         optionsList.style.display = 'block';
     });
@@ -575,6 +577,7 @@ function initializePatientSearch() {
     searchBox.addEventListener('blur', () => {
         setTimeout(() => {
             optionsList.style.display = 'none';
+            selectedIndex = -1;
         }, 200);
     });
     
@@ -583,8 +586,52 @@ function initializePatientSearch() {
         console.log('Patient search input changed:', searchBox.value);
         const query = searchBox.value.trim();
         currentPage = 1;
+        selectedIndex = -1;
         fetchPatients(query);
     }, 300));
+    
+    // Keyboard navigation for dropdown
+    searchBox.addEventListener('keydown', (e) => {
+        const options = optionsList.querySelectorAll('.patient-option');
+        
+        if (options.length === 0) return;
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                selectedIndex = Math.min(selectedIndex + 1, options.length - 1);
+                updateSelection(options);
+                break;
+            case 'ArrowUp':
+                e.preventDefault();
+                selectedIndex = Math.max(selectedIndex - 1, -1);
+                updateSelection(options);
+                break;
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0 && options[selectedIndex]) {
+                    options[selectedIndex].click();
+                }
+                break;
+            case 'Escape':
+                optionsList.style.display = 'none';
+                selectedIndex = -1;
+                break;
+        }
+    });
+    
+    function updateSelection(options) {
+        options.forEach((option, index) => {
+            if (index === selectedIndex) {
+                option.style.backgroundColor = '#0074d9';
+                option.style.color = '#fff';
+                option.scrollIntoView({ block: 'nearest' });
+            } else {
+                option.style.backgroundColor = '';
+                option.style.color = '';
+            }
+        });
+    }
     
     // Add scroll event for pagination
     optionsList.addEventListener('scroll', () => {

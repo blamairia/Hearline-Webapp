@@ -110,6 +110,17 @@ background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
     .main-content.expanded {
       margin-left: 60px;
     }
+    /* Login page: remove sidebar spacing and toggle */
+    body.login-page .main-content {
+      margin-left: 0 !important;
+      background: transparent;
+    }
+    body.login-page .content-wrapper {
+      padding: 0;
+    }
+    body.login-page .sidebar-toggle {
+      display: none !important;
+    }
     
     /* Toggle Button */
     .sidebar-toggle {
@@ -181,14 +192,150 @@ background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
       padding: 2px 6px;
       font-size: 0.7rem;      margin-left: auto;
     }
+
+    /* Theme Toggle Styles */
+    .theme-toggle {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      z-index: 1002;
+      background: #fff;
+      border: 2px solid #e0e0e0;
+      border-radius: 50px;
+      padding: 5px;
+      display: flex;
+      align-items: center;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+      transition: all 0.3s ease;
+    }
+
+    .theme-toggle-btn {
+      width: 50px;
+      height: 26px;
+      background: #ccc;
+      border-radius: 50px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+
+    .theme-toggle-btn::before {
+      content: '';
+      position: absolute;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: white;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s ease;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .theme-toggle-btn.active {
+      background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+    }
+
+    .theme-toggle-btn.active::before {
+      transform: translateX(24px);
+    }
+
+    .theme-icon {
+      width: 30px;
+      text-align: center;
+      font-size: 16px;
+      transition: opacity 0.3s ease;
+    }
+
+    .theme-icon.light {
+      color: #f39c12;
+      opacity: 1;
+    }
+
+    .theme-icon.dark {
+      color: #34495e;
+      opacity: 0.3;
+    }
+
+    .theme-toggle-btn.active ~ .theme-icon.light {
+      opacity: 0.3;
+    }
+
+    .theme-toggle-btn.active ~ .theme-icon.dark {
+      opacity: 1;
+      color: #2c3e50;
+    }
+
+    /* Dark Mode Styles */
+    body.dark-mode {
+      background-color: #1a1a1a;
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .main-content {
+      background-color: #2a2a2a;
+    }
+
+    body.dark-mode .sidebar {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
+
+    body.dark-mode .card,
+    body.dark-mode .section-block,
+    body.dark-mode .stat-card {
+      background-color: #333;
+      color: #e0e0e0;
+      border-color: #444;
+    }
+
+    body.dark-mode .form-control,
+    body.dark-mode .form-select,
+    body.dark-mode select.form-control {
+      background-color: #2a2a2a !important;
+      color: #e0e0e0 !important;
+      border-color: #444;
+    }
+
+    body.dark-mode .form-control:focus {
+      background-color: #333 !important;
+      border-color: #0074d9;
+    }
+
+    body.dark-mode select.form-control option {
+      background-color: #2a2a2a !important;
+      color: #e0e0e0 !important;
+    }
+
+    body.dark-mode .theme-toggle {
+      background: #333;
+      border-color: #444;
+    }
+
+    body.dark-mode .form-label {
+      color: #e0e0e0;
+    }
+
+    body.dark-mode .page-hero {
+      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    }
   
   </style>
   
   {% block extra_css %}{% endblock %}
   {{ moment.include_moment() }}
 </head>
-<body>
+<body{% if request.endpoint == 'login' %} class="login-page"{% endif %}>
+  <!-- Theme Toggle -->
+  {% if request.endpoint != 'login' %}
+  <div class="theme-toggle">
+    <i class="fas fa-sun theme-icon light"></i>
+    <div class="theme-toggle-btn" id="themeToggle"></div>
+    <i class="fas fa-moon theme-icon dark"></i>
+  </div>
+  {% endif %}
+
   <!-- Sidebar -->
+  {% if request.endpoint != 'login' %}
   <nav class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="logo-wrapper">
@@ -280,11 +427,14 @@ background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
       {% endif %}
     </ul>
   </nav>
+  {% endif %}
   
   <!-- Toggle Button -->
+  {% if request.endpoint != 'login' %}
   <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
     <i class="fas fa-bars"></i>
   </button>
+  {% endif %}
   
   <!-- Main Content -->
   <div class="main-content" id="mainContent">
@@ -327,10 +477,34 @@ background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
       alert(`${feature} feature coming soon!`);
     }
     
-    // Flash message auto-hide
-    setTimeout(function() {
-      $('.alert').fadeOut('slow');
-    }, 5000);
+    // Flash message auto-hide (disabled on login page to keep the demo hint visible)
+    if (!document.body.classList.contains('login-page')) {
+      setTimeout(function() {
+        $('.alert').fadeOut('slow');
+      }, 5000);
+    }
+
+    // Theme Toggle Functionality
+    const themeToggle = document.getElementById('themeToggle');
+    
+    if (themeToggle) {
+      // Check for saved theme preference or default to light mode
+      const currentTheme = localStorage.getItem('theme') || 'light';
+      if (currentTheme === 'dark') {
+        document.body.classList.add('dark-mode');
+        themeToggle.classList.add('active');
+      }
+
+      // Toggle theme on click
+      themeToggle.addEventListener('click', function() {
+        document.body.classList.toggle('dark-mode');
+        this.classList.toggle('active');
+        
+        // Save theme preference
+        const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+        localStorage.setItem('theme', theme);
+      });
+    }
   </script>
   
   {% block extra_js %}{% endblock %}

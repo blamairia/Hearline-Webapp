@@ -4,247 +4,366 @@
   {% if appointment %}Edit Appointment{% else %}Schedule New Appointment{% endif %} | Heartline Medical Clinic
 {% endblock %}
 
+{% block extra_css %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/flatpickr.min.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/select2.min.css') }}">
+<style>
+  /* Container adjustments for full-bleed design */
+  .container-fluid {
+    padding: 0;
+    margin: 0;
+    max-width: 100%;
+  }
+
+  /* Hero header with blue gradient and animations */
+  .page-hero {
+    background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+    color: #fff;
+    padding: 3rem 2rem;
+    margin: 0;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Animated background blobs */
+  .page-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -5%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 18s ease-in-out infinite;
+  }
+
+  .page-hero::after {
+    content: '';
+    position: absolute;
+    bottom: -40%;
+    right: -5%;
+    width: 350px;
+    height: 350px;
+    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+    border-radius: 50%;
+    animation: float 15s ease-in-out infinite reverse;
+  }
+
+  @keyframes float {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(20px, -20px) scale(1.1); }
+    66% { transform: translate(-15px, 15px) scale(0.9); }
+  }
+
+  .page-hero .title {
+    font-size: clamp(1.75rem, 4vw, 2.25rem);
+    font-weight: 700;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .page-hero .subtitle {
+    font-size: 1rem;
+    opacity: 0.95;
+    margin-top: 0.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* Content area */
+  .page-content {
+    background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%);
+    padding: 2.5rem 2rem 4rem;
+    min-height: calc(100vh - 180px);
+  }
+
+  .form-container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  /* Form card styling */
+  .form-card {
+    background: #fff;
+    border: 1px solid #e7f1ff;
+    border-radius: 1rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
+    transition: all 0.3s ease;
+  }
+
+  .form-card:hover {
+    box-shadow: 0 6px 25px rgba(0, 116, 217, 0.12);
+  }
+
+  .form-label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 0.5rem;
+    font-size: 0.95rem;
+  }
+
+  .form-control,
+  .form-select {
+    border: 2px solid #e7f1ff;
+    border-radius: 0.75rem;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+    font-size: 0.95rem;
+    min-height: 48px;
+  }
+
+  .form-control:focus,
+  .form-select:focus {
+    border-color: #0074d9;
+    box-shadow: 0 0 0 0.2rem rgba(0, 116, 217, 0.15);
+    background-color: #f8fbff;
+  }
+
+  .form-control:hover:not(:focus),
+  .form-select:hover:not(:focus) {
+    border-color: #00b4ff;
+  }
+
+  textarea.form-control {
+    resize: vertical;
+    min-height: 100px;
+  }
+
+  /* Button styling */
+  .btn-gradient-primary {
+    background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+    color: #fff;
+    border: 0;
+    box-shadow: 0 6px 20px rgba(0, 116, 217, 0.3);
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-gradient-primary:hover {
+    background: linear-gradient(135deg, #005bb5 0%, #0095d9 100%);
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 116, 217, 0.4);
+  }
+
+  .btn-secondary {
+    background: #fff;
+    color: #6c757d;
+    border: 2px solid #e7f1ff;
+    padding: 0.875rem 2rem;
+    font-weight: 600;
+    font-size: 1rem;
+    border-radius: 0.75rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-secondary:hover {
+    background: #f8f9fa;
+    color: #495057;
+    border-color: #0074d9;
+  }
+
+  /* Info card styling */
+  .info-card {
+    background: #fff;
+    border: 1px solid #e7f1ff;
+    border-radius: 1rem;
+    padding: 2rem;
+    box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
+  }
+
+  .info-card-header {
+    background: linear-gradient(135deg, rgba(0, 116, 217, 0.08) 0%, rgba(0, 180, 255, 0.08) 100%);
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+    border-left: 4px solid #0074d9;
+  }
+
+  .info-card-header h5 {
+    margin: 0;
+    color: #0074d9;
+    font-weight: 700;
+  }
+
+  .info-section h6 {
+    color: #0074d9;
+    font-weight: 600;
+    margin-bottom: 0.75rem;
+  }
+
+  .info-section ul {
+    list-style: none;
+    padding-left: 0;
+  }
+
+  .info-section ul li {
+    padding: 0.4rem 0;
+    color: #495057;
+  }
+
+  .info-section ul li::before {
+    content: "•";
+    color: #0074d9;
+    font-weight: bold;
+    margin-right: 0.5rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+  }
+
+  .text-danger {
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+    display: block;
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .page-hero {
+      padding: 2rem 1.5rem;
+    }
+
+    .page-content {
+      padding: 1.5rem 1rem 3rem;
+    }
+
+    .form-card,
+    .info-card {
+      padding: 1.5rem;
+    }
+
+    .btn-gradient-primary,
+    .btn-secondary {
+      width: 100%;
+      margin-bottom: 0.75rem;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container-fluid">
-  <div class="row">
-    <div class="col-lg-8 col-md-10 mx-auto">
-      <div class="card shadow">
-        <div class="card-header bg-success text-white">
-          <h3 class="mb-0">
-            <i class="fas fa-calendar-plus"></i> 
-            {% if appointment %}Edit Appointment{% else %}Schedule New Appointment{% endif %}
-          </h3>
-        </div>
-        <div class="card-body">
-          <form method="POST">
-            {{ form.hidden_tag() }}            <div class="form-row">
-              <div class="form-group col-md-6">
-                {{ form.patient_id.label(class="form-label") }}
-                {{ form.patient_id(class="form-control searchable-select", id="patient_id") }}
-                {% for err in form.patient_id.errors %}
-                  <small class="text-danger">{{ err }}</small>
-                {% endfor %}
-              </div>
-              <div class="form-group col-md-6">
-                {{ form.doctor_id.label(class="form-label") }}
-                {{ form.doctor_id(class="form-control searchable-select", id="doctor_id") }}
-                {% for err in form.doctor_id.errors %}
-                  <small class="text-danger">{{ err }}</small>
-                {% endfor %}
-              </div>
-            </div>
+  <!-- Hero Header -->
+  <div class="page-hero">
+    <div class="container">
+      <h1 class="title">
+        <i class="fas fa-calendar-plus"></i> 
+        {% if appointment %}Edit Appointment{% else %}Schedule New Appointment{% endif %}
+      </h1>
+      <div class="subtitle">
+        {% if appointment %}Update appointment details{% else %}Create a new appointment for a patient{% endif %}
+      </div>
+    </div>
+  </div>
 
-            <div class="form-row">
-              <div class="form-group col-md-6">
-                {{ form.date.label(class="form-label") }}
-                {{ form.date(class="form-control flatpickr-datetime") }}
-                {% for err in form.date.errors %}
-                  <small class="text-danger">{{ err }}</small>
-                {% endfor %}
-              </div>
-              <div class="form-group col-md-6">
-                {{ form.state.label(class="form-label") }}
-                {{ form.state(class="form-control") }}
-                {% for err in form.state.errors %}
-                  <small class="text-danger">{{ err }}</small>
-                {% endfor %}
-              </div>
-            </div>
-
-            <div class="form-group">
-              {{ form.reason.label(class="form-label") }}
-              {{ form.reason(class="form-control", placeholder="Describe the reason for this appointment...") }}
-              {% for err in form.reason.errors %}
+  <!-- Form Content -->
+  <div class="page-content">
+    <div class="form-container">
+      <div class="form-card">
+        <form method="POST">
+          {{ form.hidden_tag() }}
+          
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.patient_id.label(class="form-label") }}
+              {{ form.patient_id(class="form-control searchable-select", id="patient_id") }}
+              {% for err in form.patient_id.errors %}
                 <small class="text-danger">{{ err }}</small>
               {% endfor %}
             </div>
-
-            <div class="form-group mt-4">
-              <div class="row">
-                <div class="col-md-6">
-                  <button type="submit" class="btn btn-success btn-lg btn-block">
-                    <i class="fas fa-save"></i> 
-                    {% if appointment %}Update Appointment{% else %}Schedule Appointment{% endif %}
-                  </button>
-                </div>
-                <div class="col-md-6">
-                  <a href="{{ url_for('appointments_table') }}" class="btn btn-secondary btn-lg btn-block">
-                    <i class="fas fa-times"></i> Cancel
-                  </a>
-                </div>
-              </div>
+            <div class="form-group col-md-6">
+              {{ form.doctor_id.label(class="form-label") }}
+              {{ form.doctor_id(class="form-control searchable-select", id="doctor_id") }}
+              {% for err in form.doctor_id.errors %}
+                <small class="text-danger">{{ err }}</small>
+              {% endfor %}
             </div>
-          </form>
-        </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group col-md-6">
+              {{ form.date.label(class="form-label") }}
+              {{ form.date(class="form-control flatpickr-datetime") }}
+              {% for err in form.date.errors %}
+                <small class="text-danger">{{ err }}</small>
+              {% endfor %}
+            </div>
+            <div class="form-group col-md-6">
+              {{ form.state.label(class="form-label") }}
+              {{ form.state(class="form-control") }}
+              {% for err in form.state.errors %}
+                <small class="text-danger">{{ err }}</small>
+              {% endfor %}
+            </div>
+          </div>
+
+          <div class="form-group">
+            {{ form.reason.label(class="form-label") }}
+            {{ form.reason(class="form-control", placeholder="Describe the reason for this appointment...", rows="4") }}
+            {% for err in form.reason.errors %}
+              <small class="text-danger">{{ err }}</small>
+            {% endfor %}
+          </div>
+
+          <div class="d-flex flex-wrap gap-2 mt-4">
+            <button type="submit" class="btn btn-gradient-primary btn-lg">
+              <i class="fas fa-save mr-2"></i> 
+              {% if appointment %}Update Appointment{% else %}Schedule Appointment{% endif %}
+            </button>
+            <a href="{{ url_for('appointments_table') }}" class="btn btn-secondary btn-lg">
+              <i class="fas fa-times mr-2"></i> Cancel
+            </a>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 </div>
 
-<!-- Additional appointment scheduling info -->
+<!-- Appointment Guidelines -->
 {% if not appointment %}
-<div class="container-fluid mt-4">
-  <div class="row">
-    <div class="col-lg-8 col-md-10 mx-auto">
-      <div class="card border-info">
-        <div class="card-header bg-info text-white">
-          <h5 class="mb-0"><i class="fas fa-info-circle"></i> Appointment Guidelines</h5>
+<div class="page-content" style="padding-top: 0;">
+  <div class="form-container">
+    <div class="info-card">
+      <div class="info-card-header">
+        <h5><i class="fas fa-info-circle mr-2"></i> Appointment Guidelines</h5>
+      </div>
+      <div class="row">
+        <div class="col-md-6 info-section">
+          <h6><i class="fas fa-clock mr-2"></i> Scheduling Notes</h6>
+          <ul>
+            <li>Regular appointments: 30 minutes</li>
+            <li>Follow-up appointments: 15 minutes</li>
+            <li>Initial consultations: 45 minutes</li>
+            <li>Emergency appointments: Contact directly</li>
+          </ul>
         </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-6">
-              <h6><i class="fas fa-clock text-primary"></i> Scheduling Notes:</h6>
-              <ul class="small">
-                <li>Regular appointments: 30 minutes</li>
-                <li>Follow-up appointments: 15 minutes</li>
-                <li>Initial consultations: 45 minutes</li>
-                <li>Emergency appointments: Contact directly</li>
-              </ul>
-            </div>
-            <div class="col-md-6">
-              <h6><i class="fas fa-calendar-check text-success"></i> Available Times:</h6>
-              <ul class="small">
-                <li>Monday - Friday: 8:00 AM - 6:00 PM</li>
-                <li>Saturday: 9:00 AM - 2:00 PM</li>
-                <li>Sunday: Emergency only</li>
-                <li>Lunch break: 12:00 PM - 1:00 PM</li>
-              </ul>
-            </div>
-          </div>
+        <div class="col-md-6 info-section">
+          <h6><i class="fas fa-calendar-check mr-2"></i> Available Times</h6>
+          <ul>
+            <li>Monday - Friday: 8:00 AM - 6:00 PM</li>
+            <li>Saturday: 9:00 AM - 2:00 PM</li>
+            <li>Sunday: Emergency only</li>
+            <li>Lunch break: 12:00 PM - 1:00 PM</li>
+          </ul>
         </div>
       </div>
     </div>
   </div>
 </div>
 {% endif %}
-{% endblock %}
-
-{% block extra_css %}
-<link rel="stylesheet" href="{{ url_for('static', filename='css/flatpick.mi,.css') }}">
-<link rel="stylesheet" href="{{ url_for('static', filename='css/select2.min.css') }}">
-<style>
-.form-label {
-  font-weight: 600;
-  color: #495057;
-  margin-bottom: 0.5rem;
-}
-
-.card {
-  border: none;
-  border-radius: 15px;
-}
-
-.card-header {
-  border-radius: 15px 15px 0 0 !important;
-  padding: 1.5rem;
-}
-
-.form-control {
-  border-radius: 8px;
-  border: 2px solid #e9ecef;
-  padding: 0.875rem 1rem;
-  min-height: 48px;
-  transition: all 0.3s ease;
-  font-size: 0.95rem;
-}
-
-.form-control:focus {
-  border-color: #28a745;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-/* Specific styling for select and textarea elements */
-select.form-control {
-  min-height: 54px;
-  line-height: 1.5;
-  padding: 0.875rem 1rem;
-}
-
-textarea.form-control {
-  min-height: 120px;
-  resize: vertical;
-}
-
-/* Select2 styling to match the form design */
-.select2-container--default .select2-selection--single {
-  border: 2px solid #e9ecef;
-  border-radius: 8px;
-  height: 54px;
-  padding: 0.875rem 1rem;
-  font-size: 0.95rem;
-  line-height: 1.5;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__rendered {
-  color: #495057;
-  padding-left: 0;
-  padding-right: 0;
-  height: auto;
-  margin-top: 0;
-  margin-bottom: 0;
-  line-height: 1.5;
-}
-
-.select2-container--default .select2-selection--single .select2-selection__arrow {
-  height: 52px;
-  right: 10px;
-}
-
-.select2-container--default.select2-container--focus .select2-selection--single {
-  border-color: #28a745;
-  box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25);
-}
-
-.select2-container {
-  width: 100% !important;
-}
-
-.select2-dropdown {
-  border: 2px solid #28a745;
-  border-radius: 8px;
-  border-top: none;
-  border-top-left-radius: 0;
-  border-top-right-radius: 0;
-}
-
-.select2-results__option--highlighted[aria-selected] {
-  background-color: #28a745;
-}
-
-.select2-search--dropdown .select2-search__field {
-  border: 2px solid #e9ecef;
-  border-radius: 6px;
-  padding: 0.5rem;
-  font-size: 0.9rem;
-}
-
-.select2-search--dropdown .select2-search__field:focus {
-  border-color: #28a745;
-  outline: none;
-}
-
-.btn {
-  border-radius: 8px;
-  padding: 0.75rem 1.5rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  min-height: 48px;
-}
-
-.btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.text-danger {
-  font-size: 0.875rem;
-  margin-top: 0.25rem;
-}
-
-.border-info .card-header {
-  background: linear-gradient(135deg, #17a2b8, #20c997) !important;
-}
-</style>
 {% endblock %}
 
 {% block extra_js %}

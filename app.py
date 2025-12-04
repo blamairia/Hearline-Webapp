@@ -67,6 +67,10 @@ app = Flask(__name__)
 moment = Moment(app) # Add this line to initialize Flask-Moment
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "replace-this-with-a-secure-random-string")
 
+# Enable template auto-reloading for development
+app.config["TEMPLATES_AUTO_RELOAD"] = True
+app.jinja_env.auto_reload = True
+
 # Use environment variables for database connection
 DB_HOST = os.getenv("DB_HOST")
 DB_PORT = os.getenv("DB_PORT") 
@@ -2854,6 +2858,7 @@ def ecg_waveform_by_visit(visit_id):
         current_app.logger.error(f"Error in /ecg_waveform_by_visit/{visit_id}: {e}", exc_info=True)
         return jsonify({"success": False, "error": f"Failed to load ECG waveform: {str(e)}"}), 500
 
+
 # ----------------------------------------
 # 5) INITIALIZE DATABASE & RUN
 # ----------------------------------------
@@ -2864,7 +2869,23 @@ if __name__ == "__main__":
             print("Database tables created/verified successfully.")
         except Exception as e:
             print(f"Database error: {e}")
-        
         load_onnx_model()      # load ONNX model for ECG inference
-    
-    app.run(host='0.0.0.0',debug=False)
+
+        # Create a demo admin user if not exists (username: admin, password: admin)
+        admin = User.query.filter_by(username="admin").first()
+        if not admin:
+            admin = User(
+                username="admin",
+                email="admin@example.com",
+                first_name="Admin",
+                last_name="User",
+                role="doctor",
+                is_active=True
+            )
+            admin.set_password("admin")
+            db.session.add(admin)
+            db.session.commit()
+            print("Demo admin user created: admin / admin")
+        else:
+            print("Demo admin user already exists.")
+    app.run(host='0.0.0.0', debug=True)
