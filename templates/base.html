@@ -1,512 +1,273 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8">
-  <title>{% block title %}Heartline Medical Clinic{% endblock %}</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
-  <style>
-    /* Sidebar Styles */
-    .sidebar {
-      position: fixed;
-      top: 0;
-      left: 0;
-      height: 100vh;
-      width: 250px;
-background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-      color: #ffffff;
-      overflow-y: auto;
-      transition: all 0.3s;
-      z-index: 1000;
-    }
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Heartline Medical Clinic{% endblock %}</title>
     
-    .sidebar.collapsed {
-      width: 60px;
-    }
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     
-    .sidebar-header {
-      padding: 20px;
-      text-align: center;
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
+    <!-- Bootstrap & Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     
-    .sidebar-header h3 {
-      margin: 0;
-      font-size: 1.5rem;
-      font-weight: bold;
-    }
+    <!-- Heartline Design System -->
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/heartline.css') }}">
     
-    .sidebar-header .subtitle {
-      font-size: 0.8rem;
-      opacity: 0.8;
-      margin-top: 5px;
-    }
-    
-    .sidebar-nav {
-      padding: 0;
-      margin: 0;
-      list-style: none;
-    }
-    
-    .sidebar-nav .nav-item {
-      border-bottom: 1px solid rgba(255,255,255,0.1);
-    }
-    
-    .sidebar-nav .nav-link {
-      display: flex;
-      align-items: center;
-      padding: 15px 20px;
-      color: rgba(255,255,255,0.9);
-      text-decoration: none;
-      transition: all 0.3s;
-    }
-    
-    .sidebar-nav .nav-link:hover {
-      background-color: rgba(255,255,255,0.1);
-      color: white;
-      text-decoration: none;
-    }
-    
-    .sidebar-nav .nav-link.active {
-      background-color: rgba(255,255,255,0.2);
-      color: white;
-      border-right: 3px solid white;
-    }
-    
-    .sidebar-nav .nav-link i {
-      width: 20px;
-      margin-right: 10px;
-      text-align: center;
-    }
-    
-    .sidebar-nav .nav-text {
-      transition: opacity 0.3s;
-    }
-    
-    .sidebar.collapsed .nav-text,
-    .sidebar.collapsed .sidebar-header h3,
-    .sidebar.collapsed .sidebar-header .subtitle {
-      opacity: 0;
-      display: none;
-    }
-    
-    .sidebar.collapsed .nav-link {
-      justify-content: center;
-      padding: 15px;
-    }
-    
-    .sidebar.collapsed .nav-link i {
-      margin-right: 0;
-    }
-    
-    /* Main Content */
-    .main-content {
-      margin-left: 250px;
-      transition: margin-left 0.3s;
-      min-height: 100vh;
-      background-color: #f8f9fa;
-    }
-    
-    .main-content.expanded {
-      margin-left: 60px;
-    }
-    /* Login page: remove sidebar spacing and toggle */
-    body.login-page .main-content {
-      margin-left: 0 !important;
-      background: transparent;
-    }
-    body.login-page .content-wrapper {
-      padding: 0;
-    }
-    body.login-page .sidebar-toggle {
-      display: none !important;
-    }
-    
-    /* Toggle Button */
-    .sidebar-toggle {
-      position: fixed;
-      top: 20px;
-      left: 260px;
-      z-index: 1001;
-      background: #007bff;
-      color: white;
-      border: none;
-      border-radius: 50%;
-      width: 40px;
-      height: 40px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: left 0.3s;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .sidebar-toggle.collapsed {
-      left: 70px;
-    }
-    
-    .sidebar-toggle:hover {
-      background: #0056b3;
-    }
-    
-    /* Content Padding */
-    .content-wrapper {
-      padding: 20px;
-    }
-    
-    /* Custom scrollbar for sidebar */
-    .sidebar::-webkit-scrollbar {
-      width: 6px;
-    }
-    
-    .sidebar::-webkit-scrollbar-track {
-      background: rgba(255,255,255,0.1);
-    }
-    
-    .sidebar::-webkit-scrollbar-thumb {
-      background: rgba(255,255,255,0.3);
-      border-radius: 3px;
-    }
-    
-    .sidebar::-webkit-scrollbar-thumb:hover {
-      background: rgba(255,255,255,0.5);
-    }
-    .sidebar-header {
-  padding: 20px;
-  text-align: center;
-  border-bottom: 1px solid rgba(255,255,255,0.1);
-  background: linear-gradient(180deg, rgba(255,255,255,0.05) 0%, transparent 100%);
-}
-.sidebar-header img {
-  max-width: 100px;
-  filter: drop-shadow(0 0 6px rgba(0, 180, 255, 0.4));
-  margin-bottom: 10px;
-}
-
-
-    /* Badge styles */
-    .nav-badge {
-      background-color: #ff4757;
-      color: white;
-      border-radius: 10px;
-      padding: 2px 6px;
-      font-size: 0.7rem;      margin-left: auto;
-    }
-
-    /* Theme Toggle Styles */
-    .theme-toggle {
-      position: fixed;
-      top: 20px;
-      right: 20px;
-      z-index: 1002;
-      background: #fff;
-      border: 2px solid #e0e0e0;
-      border-radius: 50px;
-      padding: 5px;
-      display: flex;
-      align-items: center;
-      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-      transition: all 0.3s ease;
-    }
-
-    .theme-toggle-btn {
-      width: 50px;
-      height: 26px;
-      background: #ccc;
-      border-radius: 50px;
-      position: relative;
-      cursor: pointer;
-      transition: background 0.3s ease;
-    }
-
-    .theme-toggle-btn::before {
-      content: '';
-      position: absolute;
-      width: 22px;
-      height: 22px;
-      border-radius: 50%;
-      background: white;
-      top: 2px;
-      left: 2px;
-      transition: transform 0.3s ease;
-      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    }
-
-    .theme-toggle-btn.active {
-      background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-    }
-
-    .theme-toggle-btn.active::before {
-      transform: translateX(24px);
-    }
-
-    .theme-icon {
-      width: 30px;
-      text-align: center;
-      font-size: 16px;
-      transition: opacity 0.3s ease;
-    }
-
-    .theme-icon.light {
-      color: #f39c12;
-      opacity: 1;
-    }
-
-    .theme-icon.dark {
-      color: #34495e;
-      opacity: 0.3;
-    }
-
-    .theme-toggle-btn.active ~ .theme-icon.light {
-      opacity: 0.3;
-    }
-
-    .theme-toggle-btn.active ~ .theme-icon.dark {
-      opacity: 1;
-      color: #2c3e50;
-    }
-
-    /* Dark Mode Styles */
-    body.dark-mode {
-      background-color: #1a1a1a;
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .main-content {
-      background-color: #2a2a2a;
-    }
-
-    body.dark-mode .sidebar {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    }
-
-    body.dark-mode .card,
-    body.dark-mode .section-block,
-    body.dark-mode .stat-card {
-      background-color: #333;
-      color: #e0e0e0;
-      border-color: #444;
-    }
-
-    body.dark-mode .form-control,
-    body.dark-mode .form-select,
-    body.dark-mode select.form-control {
-      background-color: #2a2a2a !important;
-      color: #e0e0e0 !important;
-      border-color: #444;
-    }
-
-    body.dark-mode .form-control:focus {
-      background-color: #333 !important;
-      border-color: #0074d9;
-    }
-
-    body.dark-mode select.form-control option {
-      background-color: #2a2a2a !important;
-      color: #e0e0e0 !important;
-    }
-
-    body.dark-mode .theme-toggle {
-      background: #333;
-      border-color: #444;
-    }
-
-    body.dark-mode .form-label {
-      color: #e0e0e0;
-    }
-
-    body.dark-mode .page-hero {
-      background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-    }
-  
-  </style>
-  
-  {% block extra_css %}{% endblock %}
-  {{ moment.include_moment() }}
+    {% block extra_css %}{% endblock %}
+    {{ moment.include_moment() }}
 </head>
 <body{% if request.endpoint == 'login' %} class="login-page"{% endif %}>
-  <!-- Theme Toggle -->
-  {% if request.endpoint != 'login' %}
-  <div class="theme-toggle">
-    <i class="fas fa-sun theme-icon light"></i>
-    <div class="theme-toggle-btn" id="themeToggle"></div>
-    <i class="fas fa-moon theme-icon dark"></i>
-  </div>
-  {% endif %}
-
-  <!-- Sidebar -->
-  {% if request.endpoint != 'login' %}
-  <nav class="sidebar" id="sidebar">
-    <div class="sidebar-header">
-        <div class="logo-wrapper">
-          <img src="{{ url_for('static', filename='img/Heartline-W.png') }}" alt="Heartline Logo" class="img-fluid">
-          <h3 class="nav-text">Heartline</h3>
-          <div class="subtitle nav-text">Medical Clinic</div>
+    
+    {% if request.endpoint != 'login' %}
+    <!-- Theme Toggle -->
+    <div class="theme-toggle" id="themeToggleWrapper">
+        <i class="fas fa-sun theme-icon light"></i>
+        <div class="theme-toggle-btn" id="themeToggle"></div>
+        <i class="fas fa-moon theme-icon dark"></i>
+    </div>
+    
+    <!-- Sidebar -->
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <img src="{{ url_for('static', filename='img/Heartline-W.png') }}" alt="Heartline" class="img-fluid">
+            <h3 class="nav-text">Heartline</h3>
+            <div class="subtitle nav-text">Medical Clinic</div>
         </div>
-
-    </div>
-    
-    <ul class="sidebar-nav">
-      <li class="nav-item">
-        <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint == 'index' %}active{% endif %}">
-          <i class="fas fa-tachometer-alt"></i>
-          <span class="nav-text">Dashboard</span>
-        </a>
-      </li>
-      
-      <li class="nav-item">
-        <a href="{{ url_for('create_patient') }}" class="nav-link {% if request.endpoint == 'create_patient' %}active{% endif %}">
-          <i class="fas fa-user-plus"></i>
-          <span class="nav-text">New Patient</span>
-        </a>
-      </li>
-      
-      <li class="nav-item">
-        <a href="{{ url_for('create_visit') }}" class="nav-link {% if request.endpoint == 'create_visit' %}active{% endif %}">
-          <i class="fas fa-file-medical-alt"></i>
-          <span class="nav-text">New Visit</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{{ url_for('patients_table') }}" class="nav-link {% if request.endpoint == 'patients_table' %}active{% endif %}">
-          <i class="fas fa-users"></i>
-          <span class="nav-text">Patients</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{{ url_for('visits_table') }}" class="nav-link {% if request.endpoint == 'visits_table' %}active{% endif %}">
-          <i class="fas fa-notes-medical"></i>
-          <span class="nav-text">Visits</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{{ url_for('appointments_table') }}" class="nav-link {% if request.endpoint == 'appointments_table' %}active{% endif %}">
-          <i class="fas fa-calendar-check"></i>
-          <span class="nav-text">Appointments</span>
-        </a>
-      </li>
-
-      <li class="nav-item">
-        <a href="{{ url_for('ecg_history') }}" class="nav-link {% if request.endpoint == 'ecg_history' %}active{% endif %}">
-          <i class="fas fa-heart-rate"></i>
-          <span class="nav-text">ECG History</span>
-        </a>
-      </li>
-
-      {% if current_user.is_authenticated %}
-        {% if current_user.role == 'doctor' or current_user.role == 'assistant' %}
-      <li class="nav-item">
-        <a href="{{ url_for('user_management') }}" class="nav-link {% if request.endpoint == 'user_management' %}active{% endif %}">
-          <i class="fas fa-users-cog"></i>
-          <span class="nav-text">User Management</span>
-        </a>
-      </li>
-        {% endif %}
-      <li class="nav-item">
-        <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
-          <i class="fas fa-user-circle"></i>
-          <span class="nav-text">Profile</span>
-        </a>
-      </li>
-      <li class="nav-item">
-        <a href="{{ url_for('logout') }}" class="nav-link">
-          <i class="fas fa-sign-out-alt"></i>
-          <span class="nav-text">Logout</span>
-        </a>
-      </li>
-      {% else %}
-      <li class="nav-item">
-        <a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">
-          <i class="fas fa-sign-in-alt"></i>
-          <span class="nav-text">Login</span>
-        </a>
-      </li>
-      {% endif %}
-    </ul>
-  </nav>
-  {% endif %}
-  
-  <!-- Toggle Button -->
-  {% if request.endpoint != 'login' %}
-  <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()">
-    <i class="fas fa-bars"></i>
-  </button>
-  {% endif %}
-  
-  <!-- Main Content -->
-  <div class="main-content" id="mainContent">
-    <div class="content-wrapper">
-      {% block content %}{% endblock %}
-    </div>
-  </div>
-  
-  <!-- Scripts -->
-  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
-  
-  <script>
-    // Sidebar Toggle Functionality
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const mainContent = document.getElementById('mainContent');
-      const toggleBtn = document.getElementById('sidebarToggle');
-      
-      sidebar.classList.toggle('collapsed');
-      mainContent.classList.toggle('expanded');
-      toggleBtn.classList.toggle('collapsed');
-      
-      // Save state to localStorage
-      const isCollapsed = sidebar.classList.contains('collapsed');
-      localStorage.setItem('sidebarCollapsed', isCollapsed);
-    }
-    
-    // Restore sidebar state on page load
-    document.addEventListener('DOMContentLoaded', function() {
-      const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
-      if (isCollapsed) {
-        toggleSidebar();
-      }
-    });
-    
-    // Coming Soon functionality
-    function showComingSoon(feature) {
-      alert(`${feature} feature coming soon!`);
-    }
-    
-    // Flash message auto-hide (disabled on login page to keep the demo hint visible)
-    if (!document.body.classList.contains('login-page')) {
-      setTimeout(function() {
-        $('.alert').fadeOut('slow');
-      }, 5000);
-    }
-
-    // Theme Toggle Functionality
-    const themeToggle = document.getElementById('themeToggle');
-    
-    if (themeToggle) {
-      // Check for saved theme preference or default to light mode
-      const currentTheme = localStorage.getItem('theme') || 'light';
-      if (currentTheme === 'dark') {
-        document.body.classList.add('dark-mode');
-        themeToggle.classList.add('active');
-      }
-
-      // Toggle theme on click
-      themeToggle.addEventListener('click', function() {
-        document.body.classList.toggle('dark-mode');
-        this.classList.toggle('active');
         
-        // Save theme preference
-        const theme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
-        localStorage.setItem('theme', theme);
-      });
-    }
-  </script>
-  
-  {% block extra_js %}{% endblock %}
+        <ul class="sidebar-nav">
+            <li class="nav-item">
+                <a href="{{ url_for('index') }}" class="nav-link {% if request.endpoint in ['index', 'dashboard'] %}active{% endif %}">
+                    <i class="fas fa-chart-pie"></i>
+                    <span class="nav-text">Dashboard</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('patients_table') }}" class="nav-link {% if request.endpoint == 'patients_table' %}active{% endif %}">
+                    <i class="fas fa-users"></i>
+                    <span class="nav-text">Patients</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('visits_table') }}" class="nav-link {% if request.endpoint == 'visits_table' %}active{% endif %}">
+                    <i class="fas fa-clipboard-list"></i>
+                    <span class="nav-text">Visits</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('appointments_table') }}" class="nav-link {% if request.endpoint == 'appointments_table' %}active{% endif %}">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span class="nav-text">Appointments</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('ecg_history') }}" class="nav-link {% if request.endpoint == 'ecg_history' %}active{% endif %}">
+                    <i class="fas fa-heartbeat"></i>
+                    <span class="nav-text">ECG History</span>
+                </a>
+            </li>
+            
+            <li class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <a href="{{ url_for('create_patient') }}" class="nav-link {% if request.endpoint == 'create_patient' %}active{% endif %}">
+                    <i class="fas fa-user-plus"></i>
+                    <span class="nav-text">New Patient</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('create_visit') }}" class="nav-link {% if request.endpoint == 'create_visit' %}active{% endif %}">
+                    <i class="fas fa-file-medical"></i>
+                    <span class="nav-text">New Visit</span>
+                </a>
+            </li>
+            
+            {% if current_user.is_authenticated %}
+            <li class="nav-item" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+                <a href="{{ url_for('user_management') }}" class="nav-link {% if request.endpoint == 'user_management' %}active{% endif %}">
+                    <i class="fas fa-users-cog"></i>
+                    <span class="nav-text">Users</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+                    <i class="fas fa-user-circle"></i>
+                    <span class="nav-text">Profile</span>
+                </a>
+            </li>
+            
+            <li class="nav-item">
+                <a href="{{ url_for('logout') }}" class="nav-link">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="nav-text">Logout</span>
+                </a>
+            </li>
+            {% endif %}
+        </ul>
+    </nav>
+    
+    <!-- Sidebar Toggle -->
+    <button class="sidebar-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    {% endif %}
+    
+    <!-- Main Content -->
+    <main class="main-content" id="mainContent">
+        <div class="content-wrapper">
+            <!-- Flash Messages -->
+            {% with messages = get_flashed_messages(with_categories=true) %}
+                {% if messages %}
+                    {% for category, message in messages %}
+                        <div class="alert alert-{{ category if category != 'message' else 'info' }} alert-dismissible fade show" role="alert">
+                            <i class="fas fa-{% if category == 'success' %}check-circle{% elif category == 'danger' %}exclamation-circle{% elif category == 'warning' %}exclamation-triangle{% else %}info-circle{% endif %} me-2"></i>
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+            {% endwith %}
+            
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    
+    <!-- Scripts -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <script>
+        // Sidebar Toggle
+        document.getElementById('sidebarToggle')?.addEventListener('click', function() {
+            const sidebar = document.getElementById('sidebar');
+            const mainContent = document.getElementById('mainContent');
+            const toggleBtn = this;
+            
+            sidebar.classList.toggle('collapsed');
+            mainContent.classList.toggle('expanded');
+            toggleBtn.classList.toggle('collapsed');
+            
+            localStorage.setItem('sidebarCollapsed', sidebar.classList.contains('collapsed'));
+        });
+        
+        // Restore sidebar state
+        document.addEventListener('DOMContentLoaded', function() {
+            if (localStorage.getItem('sidebarCollapsed') === 'true') {
+                document.getElementById('sidebar')?.classList.add('collapsed');
+                document.getElementById('mainContent')?.classList.add('expanded');
+                document.getElementById('sidebarToggle')?.classList.add('collapsed');
+            }
+        });
+        
+        // Theme Toggle
+        const themeToggle = document.getElementById('themeToggle');
+        if (themeToggle) {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            if (currentTheme === 'dark') {
+                document.body.classList.add('dark-mode');
+                themeToggle.classList.add('active');
+            }
+            
+            themeToggle.addEventListener('click', function() {
+                document.body.classList.toggle('dark-mode');
+                this.classList.toggle('active');
+                localStorage.setItem('theme', document.body.classList.contains('dark-mode') ? 'dark' : 'light');
+            });
+        }
+        
+        // Auto-hide flash messages
+        setTimeout(function() {
+            document.querySelectorAll('.alert:not(.alert-permanent)').forEach(function(alert) {
+                $(alert).fadeOut('slow');
+            });
+        }, 5000);
+    </script>
+    
+    <style>
+        /* Theme Toggle Styles */
+        .theme-toggle {
+            position: fixed;
+            top: 1.5rem;
+            right: 1.5rem;
+            z-index: 1002;
+            background: #fff;
+            border: 2px solid #e9ecef;
+            border-radius: 50px;
+            padding: 4px;
+            display: flex;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .theme-toggle-btn {
+            width: 44px;
+            height: 24px;
+            background: #ced4da;
+            border-radius: 50px;
+            position: relative;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+        
+        .theme-toggle-btn::before {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: white;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .theme-toggle-btn.active {
+            background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+        }
+        
+        .theme-toggle-btn.active::before {
+            transform: translateX(20px);
+        }
+        
+        .theme-icon {
+            width: 28px;
+            text-align: center;
+            font-size: 14px;
+        }
+        
+        .theme-icon.light { color: #f39c12; }
+        .theme-icon.dark { color: #6c757d; opacity: 0.4; }
+        
+        .theme-toggle-btn.active ~ .theme-icon.light { opacity: 0.4; }
+        .theme-toggle-btn.active ~ .theme-icon.dark { opacity: 1; color: #495057; }
+        
+        body.dark-mode .theme-toggle {
+            background: #333;
+            border-color: #444;
+        }
+        
+        /* Login page overrides */
+        body.login-page .main-content {
+            margin-left: 0 !important;
+            background: transparent;
+        }
+        body.login-page .content-wrapper {
+            padding: 0;
+            max-width: none;
+        }
+        body.login-page .theme-toggle {
+            display: none;
+        }
+    </style>
+    
+    {% block extra_js %}{% endblock %}
 </body>
 </html>

@@ -3,148 +3,150 @@
 {% block title %}Register New User | Heartline Medical Clinic{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-lg-8 col-md-10 mx-auto">
-      <div class="card">
-        <div class="card-header bg-primary text-white">
-          <h3 class="mb-0"><i class="fas fa-user-plus"></i> Register New User</h3>
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-title-section">
+                <h1 class="page-title">
+                    <i class="fas fa-user-plus"></i>
+                    Register New User
+                </h1>
+                <p class="page-subtitle">Create a new account for a staff member</p>
+            </div>
+            <div class="page-actions">
+                <a href="{{ url_for('user_management') }}" class="btn btn-secondary">
+                    <i class="fas fa-arrow-left"></i>
+                    <span>Back to Users</span>
+                </a>
+            </div>
         </div>
-        <div class="card-body">
-          <form method="POST">
-            {{ form.hidden_tag() }}
-            
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.username.label(class="form-label") }}
-                  {{ form.username(class="form-control") }}
-                  {% for error in form.username.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.email.label(class="form-label") }}
-                  {{ form.email(class="form-control") }}
-                  {% for error in form.email.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.first_name.label(class="form-label") }}
-                  {{ form.first_name(class="form-control") }}
-                  {% for error in form.first_name.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.last_name.label(class="form-label") }}
-                  {{ form.last_name(class="form-control") }}
-                  {% for error in form.last_name.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.phone.label(class="form-label") }}
-                  {{ form.phone(class="form-control") }}
-                  {% for error in form.phone.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.role.label(class="form-label") }}
-                  {{ form.role(class="form-control", id="role-select") }}
-                  {% for error in form.role.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-
-            <div class="form-group mb-3" id="doctor-profile-section" style="display: none;">
-              {{ form.doctor_id.label(class="form-label") }}
-              {{ form.doctor_id(class="form-control") }}
-              {% for error in form.doctor_id.errors %}
-                <div class="text-danger mt-1">{{ error }}</div>
-              {% endfor %}
-              <small class="form-text text-muted">
-                Select an existing doctor profile to link to this user account, or choose "Create New Doctor Profile" to create a new one.
-              </small>
-            </div>
-
-            <div class="row">
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.password.label(class="form-label") }}
-                  {{ form.password(class="form-control") }}
-                  {% for error in form.password.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-              <div class="col-md-6">
-                <div class="form-group mb-3">
-                  {{ form.password_confirm.label(class="form-label") }}
-                  {{ form.password_confirm(class="form-control") }}
-                  {% for error in form.password_confirm.errors %}
-                    <div class="text-danger mt-1">{{ error }}</div>
-                  {% endfor %}
-                </div>
-              </div>
-            </div>
-
-            <div class="d-flex justify-content-between">
-              <a href="{{ url_for('user_management') }}" class="btn btn-secondary">
-                <i class="fas fa-arrow-left"></i> Back to User Management
-              </a>
-              <button type="submit" class="btn btn-success">
-                <i class="fas fa-user-plus"></i> Register User
-              </button>
-            </div>
-          </form>
-        </div>
-      </div>
     </div>
-  </div>
-</div>
-{% endblock %}
 
-{% block extra_js %}
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title h5 mb-0">
+                        <i class="fas fa-user-shield me-2 text-primary"></i>
+                        Account Details
+                    </h3>
+                </div>
+                <div class="card-body p-4">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.username.label.text }}</label>
+                                {{ form.username(class="form-control") }}
+                                {% for error in form.username.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.email.label.text }}</label>
+                                {{ form.email(class="form-control") }}
+                                {% for error in form.email.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.first_name.label.text }}</label>
+                                {{ form.first_name(class="form-control") }}
+                                {% for error in form.first_name.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.last_name.label.text }}</label>
+                                {{ form.last_name(class="form-control") }}
+                                {% for error in form.last_name.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.phone.label.text }}</label>
+                                {{ form.phone(class="form-control") }}
+                                {% for error in form.phone.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.role.label.text }}</label>
+                                {{ form.role(class="form-select", id="role-select") }}
+                                {% for error in form.role.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="mb-3" id="doctor-profile-section" style="display: none;">
+                            <div class="p-3 bg-light rounded border">
+                                <label class="form-label fw-bold text-primary">{{ form.doctor_id.label.text }}</label>
+                                {{ form.doctor_id(class="form-select") }}
+                                {% for error in form.doctor_id.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                                <div class="form-text text-muted mt-2">
+                                    <i class="fas fa-info-circle me-1"></i>
+                                    Select an existing doctor profile to link to this user account, or choose "Create New Doctor Profile".
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.password.label.text }}</label>
+                                {{ form.password(class="form-control") }}
+                                {% for error in form.password.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">{{ form.confirm_password.label.text }}</label>
+                                {{ form.confirm_password(class="form-control") }}
+                                {% for error in form.confirm_password.errors %}
+                                    <div class="text-danger small mt-1">{{ error }}</div>
+                                {% endfor %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 pt-3 border-top">
+                            <a href="{{ url_for('user_management') }}" class="btn btn-light">Cancel</a>
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="fas fa-save me-2"></i>
+                                Create User
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const roleSelect = document.getElementById('role-select');
-  const doctorProfileSection = document.getElementById('doctor-profile-section');
-  
-  // Show/hide doctor profile section based on role selection
-  function toggleDoctorProfileSection() {
-    if (roleSelect.value === 'doctor') {
-      doctorProfileSection.style.display = 'block';
-    } else {
-      doctorProfileSection.style.display = 'none';
+    const roleSelect = document.getElementById('role-select');
+    const doctorSection = document.getElementById('doctor-profile-section');
+    
+    function toggleDoctorSection() {
+        if (roleSelect.value === 'Doctor') {
+            doctorSection.style.display = 'block';
+        } else {
+            doctorSection.style.display = 'none';
+        }
     }
-  }
-  
-  // Initial check
-  toggleDoctorProfileSection();
-  
-  // Listen for changes
-  roleSelect.addEventListener('change', toggleDoctorProfileSection);
+    
+    roleSelect.addEventListener('change', toggleDoctorSection);
+    toggleDoctorSection(); // Run on load
 });
 </script>
 {% endblock %}

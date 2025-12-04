@@ -2,1041 +2,233 @@
 
 {% block title %}Assistant Dashboard - Heartline Medical{% endblock %}
 
-{% block extra_css %}
-<style>
-    /* Main container - full bleed like login */
-    .container-fluid {
-        padding: 0;
-        margin: 0;
-        max-width: 100%;
-    }
-
-    /* Dashboard header with blue gradient matching login */
-    .dashboard-header {
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        color: white;
-        padding: 3rem 2rem;
-        margin: 0;
-        border-radius: 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Animated background elements like login */
-    .dashboard-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -10%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        animation: float 20s ease-in-out infinite;
-    }
-
-    .dashboard-header::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        right: -5%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        border-radius: 50%;
-        animation: float 15s ease-in-out infinite reverse;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        33% { transform: translate(30px, -30px) scale(1.1); }
-        66% { transform: translate(-20px, 20px) scale(0.9); }
-    }
-    
-    .welcome-card {
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 1rem;
-        padding: 2rem;
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        position: relative;
-        z-index: 1;
-        box-shadow: 0 8px 32px rgba(0, 116, 217, 0.2);
-    }
-
-    .welcome-card h1 {
-        font-size: clamp(1.75rem, 4vw, 2.5rem);
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .welcome-card p {
-        font-size: 1rem;
-        opacity: 0.95;
-    }
-    
-    /* Content area with subtle background */
-    .dashboard-content {
-        background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%);
-        padding: 2rem;
-        min-height: calc(100vh - 200px);
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.75rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #e7f1ff;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0, 116, 217, 0.15);
-    }
-    
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-    }
-    
-    .stat-number {
-        font-size: 2.75rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-    
-    .stat-change {
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.5rem;
-        display: inline-block;
-    }
-    
-    .stat-change.positive {
-        color: #28a745;
-        background: rgba(40, 167, 69, 0.1);
-    }
-    
-    .stat-change.negative {
-        color: #dc3545;
-        background: rgba(220, 53, 69, 0.1);
-    }
-    
-    .stat-icon {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        font-size: 2.5rem;
-        opacity: 0.1;
-        color: #0074d9;
-    }
-    
-    .quick-actions {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        margin-bottom: 2rem;
-        border: 1px solid #e7f1ff;
-    }
-
-    .quick-actions h4 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .action-button {
-        display: flex;
-        align-items: center;
-        padding: 1.25rem;
-        border: 2px solid #e7f1ff;
-        border-radius: 0.75rem;
-        text-decoration: none;
-        color: #495057;
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
-        background: white;
-    }
-    
-    .action-button:hover {
-        border-color: #0074d9;
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.05) 0%, rgba(0, 180, 255, 0.05) 100%);
-        text-decoration: none;
-        transform: translateX(8px);
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.15);
-    }
-    
-    .action-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        margin-right: 1.25rem;
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .action-button:hover .action-icon {
-        transform: scale(1.1) rotate(5deg);
-    }
-    
-    .task-list {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        border: 1px solid #e7f1ff;
-    }
-
-    .task-list h4 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .task-item {
-        display: flex;
-        align-items: center;
-        padding: 1.25rem;
-        margin-bottom: 0.75rem;
-        border: 1px solid #e7f1ff;
-        border-radius: 0.75rem;
-        transition: all 0.3s ease;
-        background: white;
-    }
-    
-    .task-item:hover {
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.03) 0%, rgba(0, 180, 255, 0.03) 100%);
-        border-color: #0074d9;
-        transform: translateX(3px);
-        box-shadow: 0 2px 10px rgba(0, 116, 217, 0.1);
-    }
-    
-    .task-priority {
-        width: 5px;
-        height: 45px;
-        border-radius: 3px;
-        margin-right: 1.25rem;
-    }
-    
-    .priority-high {
-        background: linear-gradient(180deg, #dc3545 0%, #c82333 100%);
-    }
-    
-    .priority-medium {
-        background: linear-gradient(180deg, #ffc107 0%, #e0a800 100%);
-    }
-    
-    .priority-low {
-        background: linear-gradient(180deg, #28a745 0%, #218838 100%);
-    }
-    
-    .task-content {
-        flex: 1;
-    }
-    
-    .task-title {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        color: #333;
-    }
-    
-    .task-meta {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    
-    .task-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    
-    .patient-queue {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        border: 1px solid #e7f1ff;
-    }
-
-    .patient-queue h5 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .queue-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        border-left: 4px solid #0074d9;
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.05) 0%, rgba(0, 180, 255, 0.05) 100%);
-        border-radius: 0 0.5rem 0.5rem 0;
-        transition: all 0.2s ease;
-    }
-
-    .queue-item:hover {
-        transform: translateX(5px);
-        box-shadow: 0 2px 10px rgba(0, 116, 217, 0.15);
-    }
-    
-    .queue-number {
-        min-width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-weight: 700;
-        margin-right: 1rem;
-        box-shadow: 0 4px 12px rgba(0, 116, 217, 0.25);
-    }
-    
-    .queue-patient {
-        flex: 1;
-    }
-    
-    .patient-name {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        color: #333;
-    }
-    
-    .patient-info {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    
-    .queue-status {
-        padding: 0.35rem 0.75rem;
-        border-radius: 0.5rem;
-        font-size: 0.8rem;
-        font-weight: 600;
-    }
-    
-    .status-waiting {
-        background-color: #fff3cd;
-        color: #856404;
-    }
-    
-    .status-in-progress {
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.15) 0%, rgba(0, 180, 255, 0.15) 100%);
-        color: #0074d9;
-    }
-    
-    .status-ready {
-        background-color: #d4edda;
-        color: #155724;
-    }
-    
-    .productivity-chart {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        height: 320px;
-        border: 1px solid #e7f1ff;
-    }
-
-    .productivity-chart h5 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .notification-panel {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        margin-bottom: 2rem;
-        border: 1px solid #e7f1ff;
-    }
-
-    .notification-panel h5 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .notification-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        border-radius: 0.5rem;
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.03) 0%, rgba(0, 180, 255, 0.03) 100%);
-        transition: all 0.2s ease;
-        border: 1px solid #f0f7ff;
-    }
-
-    .notification-item:hover {
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.08) 0%, rgba(0, 180, 255, 0.08) 100%);
-        border-color: #0074d9;
-    }
-    
-    .notification-icon {
-        width: 40px;
-        height: 40px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        margin-right: 1rem;
-        box-shadow: 0 4px 12px rgba(0, 116, 217, 0.25);
-    }
-    
-    .notification-content {
-        flex: 1;
-    }
-    
-    .notification-title {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        color: #333;
-    }
-    
-    .notification-time {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-
-    /* Button styling */
-    .btn-primary {
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        border: 0;
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .btn-primary:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(0, 116, 217, 0.4);
-    }
-
-    .btn-success {
-        background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-        border: 0;
-        box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
-    }
-
-    .btn-outline-primary {
-        border-color: #0074d9;
-        color: #0074d9;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .btn-outline-primary:hover {
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        border-color: #0074d9;
-        color: white;
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.3);
-    }
-
-    /* Time display */
-    .time-display {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 1rem 1.5rem;
-        border-radius: 0.75rem;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .time-display .h5 {
-        font-size: 2rem;
-        font-weight: 700;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="dashboard-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="welcome-card">
-                        <h1 class="mb-2">
-                            <i class="fas fa-user-nurse mr-3"></i>Welcome back, {{ current_user.get_full_name() }}
-                        </h1>
-                        <p class="mb-1">
-                            Medical Assistant • Today is {{ moment().format('dddd, MMMM Do YYYY') }}
-                        </p>
-                        {% if current_user.last_login %}
-                        <p class="mb-0" style="font-size: 0.9rem;">Last login: {{ current_user.last_login.strftime('%B %d, %Y at %I:%M %p') }}</p>
-                        {% endif %}
-                    </div>
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-title-section">
+                <h1 class="page-title">
+                    <i class="fas fa-user-nurse"></i>
+                    Welcome back, {{ current_user.first_name }}
+                </h1>
+                <p class="page-subtitle">Here's what's happening at the clinic today.</p>
+            </div>
+            <div class="page-actions">
+                <span class="badge badge-light">
+                    <i class="far fa-clock"></i> {{ moment().format('MMMM Do YYYY, h:mm a') }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_patients }}</span>
+                <span class="stat-label">Total Patients</span>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> Active Database
                 </div>
-                <div class="col-md-4 text-right">
-                    <div class="time-display">
-                        <div class="h5 mb-1">{{ moment().format('HH:mm') }}</div>
-                        <div style="opacity: 0.9; font-size: 0.9rem;">Current Time</div>
-                    </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--success-500);">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ today_visits }}</span>
+                <span class="stat-label">Visits Today</span>
+                <div class="stat-change positive">
+                    <i class="fas fa-check"></i> Checked In
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--warning-600);">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ today_appointments }}</span>
+                <span class="stat-label">Appointments Today</span>
+                <div class="stat-change warning">
+                    <i class="fas fa-clock"></i> Scheduled
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--info-500);">
+                <i class="fas fa-file-medical-alt"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_visits }}</span>
+                <span class="stat-label">Total Visits</span>
+                <div class="stat-change info">
+                    <i class="fas fa-history"></i> All Time
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Content -->
-    <div class="dashboard-content">
-        <div class="container">
-            <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Statistics -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number" id="patientsRegistered">0</div>
-                    <div class="stat-label">Patients Registered Today</div>
-                    <div class="stat-change positive" id="registrationChange">
-                        <i class="fas fa-arrow-up"></i> +0% from yesterday
-                    </div>
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt text-warning"></i> Quick Actions</h5>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clipboard-check"></i>
-                    </div>
-                    <div class="stat-number" id="visitsProcessed">0</div>
-                    <div class="stat-label">Visits Processed</div>
-                    <div class="stat-change positive" id="visitsChange">
-                        <i class="fas fa-arrow-up"></i> +0% from yesterday
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-phone"></i>
-                    </div>
-                    <div class="stat-number" id="callsHandled">0</div>
-                    <div class="stat-label">Calls Handled</div>
-                    <div class="stat-change positive" id="callsChange">
-                        <i class="fas fa-arrow-up"></i> +0% from yesterday
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-number" id="avgProcessingTime">0</div>
-                    <div class="stat-label">Avg Processing Time (min)</div>
-                    <div class="stat-change" id="timeChange">
-                        <i class="fas fa-minus"></i> No change
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <h4 class="mb-3">
-                    <i class="fas fa-bolt mr-2"></i>Quick Actions
-                </h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <a href="/patient/new" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">Register New Patient</div>
-                                <small class="text-muted">Add a new patient to the system</small>
-                            </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('create_patient') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-user-plus fa-fw me-2"></i> Register New Patient
+                        </a>
+                        <a href="{{ url_for('create_visit') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-file-medical fa-fw me-2"></i> Start New Visit
+                        </a>
+                        <a href="{{ url_for('create_appointment') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-calendar-plus fa-fw me-2"></i> Schedule Appointment
+                        </a>
+                        <a href="{{ url_for('patients_table') }}" class="btn btn-outline-secondary btn-lg text-start">
+                            <i class="fas fa-search fa-fw me-2"></i> Search Records
                         </a>
                     </div>
-                    <div class="col-md-6">
-                        <a href="/patients" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">Search Patients</div>
-                                <small class="text-muted">Find and view patient records</small>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="/visits" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-calendar"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">Manage Appointments</div>
-                                <small class="text-muted">View and manage patient appointments</small>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="/settings" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-cog"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">Settings</div>
-                                <small class="text-muted">Configure clinic settings</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Task List -->
-            <div class="task-list">
-                <h4 class="mb-3">
-                    <i class="fas fa-tasks mr-2"></i>Today's Tasks
-                </h4>
-                <div id="tasksList">
-                    <!-- Tasks will be loaded here -->
-                </div>
-                <div class="text-center mt-3">
-                    <button class="btn btn-outline-success btn-sm" onclick="addNewTask()">
-                        <i class="fas fa-plus mr-1"></i>Add New Task
-                    </button>
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Patient Queue -->
-            <div class="patient-queue mb-4">
-                <h5 class="mb-3">
-                    <i class="fas fa-users mr-2"></i>Patient Queue
-                </h5>
-                <div id="patientQueue">
-                    <!-- Queue items will be loaded here -->
+        <!-- Recent Activity -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-history text-primary"></i> Recent Activity</h5>
+                    <a href="{{ url_for('visits_table') }}" class="btn btn-sm btn-secondary">View All</a>
                 </div>
-                <div class="text-center mt-3">
-                    <a href="/visits" class="btn btn-outline-success btn-sm">
-                        <i class="fas fa-list mr-1"></i>View All Visits
-                    </a>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for visit in recent_visits %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                {{ visit.patient.first_name[0] }}{{ visit.patient.last_name[0] }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ visit.patient.first_name }} {{ visit.patient.last_name }}</div>
+                                                <small class="text-muted">#{{ visit.patient.id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if visit.ecg_data %}
+                                            <span class="badge badge-info"><i class="fas fa-heartbeat"></i> ECG</span>
+                                        {% else %}
+                                            <span class="badge badge-light"><i class="fas fa-user-md"></i> Consult</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ moment(visit.visit_date).fromNow() }}</td>
+                                    <td>
+                                        {% if visit.payment_status == 'paid' %}
+                                            <span class="badge badge-success">Paid</span>
+                                        {% elif visit.payment_status == 'partial' %}
+                                            <span class="badge badge-warning">Partial</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                                        <p>No recent activity found.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
-
-            <!-- Notifications -->
-            <div class="notification-panel mb-4">
-                <h5 class="mb-3">
-                    <i class="fas fa-bell mr-2"></i>Notifications
-                </h5>
-                <div id="notificationsList">
-                    <!-- Notifications will be loaded here -->
-                </div>
-            </div>
-
-            <!-- Productivity Chart -->
-            <div class="productivity-chart">
-                <h5 class="mb-3">
-                    <i class="fas fa-chart-bar mr-2"></i>Daily Productivity
-                </h5>
-                <canvas id="productivityChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Upcoming Appointments -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-calendar-day text-info"></i> Upcoming Appointments</h5>
+            <a href="{{ url_for('appointments_table') }}" class="btn btn-sm btn-secondary">View Calendar</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Reason</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in upcoming_appointments %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ apt.appointment_date.strftime('%H:%M') }}</div>
+                                <small class="text-muted">{{ apt.appointment_date.strftime('%b %d') }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('patient_details', patient_id=apt.patient.id) }}" class="text-decoration-none">
+                                    {{ apt.patient.first_name }} {{ apt.patient.last_name }}
+                                </a>
+                            </td>
+                            <td>{{ apt.reason }}</td>
+                            <td>Dr. {{ apt.doctor.last_name }}</td>
+                            <td>
+                                <span class="badge badge-primary">Scheduled</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('edit_appointment', appointment_id=apt.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                                <p>No upcoming appointments.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
 </div>
-
-<!-- Add Task Modal -->
-<div class="modal fade" id="addTaskModal" tabindex="-1" role="dialog" aria-labelledby="addTaskModalLabel" aria-hidden="true">
-    <div class="modal-dialog" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="addTaskModalLabel">
-                    <i class="fas fa-plus mr-2"></i>Add New Task
-                </h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <form id="addTaskForm">
-                <div class="modal-body">
-                    <div class="form-group">
-                        <label for="taskTitle">Task Title *</label>
-                        <input type="text" class="form-control" id="taskTitle" name="title" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDescription">Description</label>
-                        <textarea class="form-control" id="taskDescription" name="description" rows="3"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskPriority">Priority</label>
-                        <select class="form-control" id="taskPriority" name="priority">
-                            <option value="low">Low</option>
-                            <option value="medium" selected>Medium</option>
-                            <option value="high">High</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="taskDueDate">Due Date</label>
-                        <input type="date" class="form-control" id="taskDueDate" name="due_date">
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save mr-2"></i>Add Task
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</div>
-</div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-<script>
-$(document).ready(function() {
-    // Load dashboard data
-    loadDashboardStats();
-    loadTasks();
-    loadPatientQueue();
-    loadNotifications();
-    loadProductivityChart();
-    
-    // Refresh data every 2 minutes
-    setInterval(function() {
-        loadDashboardStats();
-        loadTasks();
-        loadPatientQueue();
-        loadNotifications();
-    }, 120000);
-    
-    // Add task form submission
-    $('#addTaskForm').on('submit', function(e) {
-        e.preventDefault();
-        
-        const formData = new FormData(this);
-        
-        $.ajax({
-            url: '/api/tasks',
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            success: function(response) {
-                $('#addTaskModal').modal('hide');
-                $('#addTaskForm')[0].reset();
-                loadTasks();
-                showAlert('Task added successfully!', 'success');
-            },
-            error: function(xhr) {
-                const response = JSON.parse(xhr.responseText);
-                showAlert(response.error || 'Error adding task', 'error');
-            }
-        });
-    });
-    
-    function loadDashboardStats() {
-        $.ajax({
-            url: '/api/dashboard/assistant/stats',
-            method: 'GET',
-            success: function(stats) {
-                // Update main statistics
-                $('#patientsRegistered').text(stats.patients_registered || 0);
-                $('#visitsProcessed').text(stats.visits_processed || 0);
-                $('#callsHandled').text(stats.calls_handled || 0);
-                $('#avgProcessingTime').text(stats.avg_processing_time || 0);
-                
-                // Update changes
-                updateStatChange('#registrationChange', stats.registration_change);
-                updateStatChange('#visitsChange', stats.visits_change);
-                updateStatChange('#callsChange', stats.calls_change);
-                updateStatChange('#timeChange', stats.time_change);
-            },
-            error: function() {
-                console.log('Error loading dashboard statistics');
-            }
-        });
-    }
-    
-    function updateStatChange(selector, change) {
-        const element = $(selector);
-        if (change > 0) {
-            element.removeClass('negative').addClass('positive');
-            element.html(`<i class="fas fa-arrow-up"></i> +${change}%`);
-        } else if (change < 0) {
-            element.removeClass('positive').addClass('negative');
-            element.html(`<i class="fas fa-arrow-down"></i> ${change}%`);
-        } else {
-            element.removeClass('positive negative');
-            element.html(`<i class="fas fa-minus"></i> No change`);
-        }
-    }
-    
-    function loadTasks() {
-        $.ajax({
-            url: '/api/tasks/today',
-            method: 'GET',
-            success: function(tasks) {
-                const container = $('#tasksList');
-                container.empty();
-                
-                if (tasks.length === 0) {
-                    container.html('<p class="text-muted text-center">No tasks for today</p>');
-                    return;
-                }
-                
-                tasks.forEach(function(task) {
-                    const item = `
-                        <div class="task-item">
-                            <div class="task-priority priority-${task.priority}"></div>
-                            <div class="task-content">
-                                <div class="task-title">${task.title}</div>
-                                <div class="task-meta">
-                                    ${task.description ? task.description + ' • ' : ''}
-                                    ${task.due_date ? 'Due: ' + moment(task.due_date).format('MMM DD') : ''}
-                                </div>
-                            </div>
-                            <div class="task-actions">
-                                <button class="btn btn-sm btn-outline-success" onclick="completeTask(${task.id})" title="Complete">
-                                    <i class="fas fa-check"></i>
-                                </button>
-                                <button class="btn btn-sm btn-outline-danger" onclick="deleteTask(${task.id})" title="Delete">
-                                    <i class="fas fa-trash"></i>
-                                </button>
-                            </div>
-                        </div>
-                    `;
-                    container.append(item);
-                });
-            },
-            error: function() {
-                $('#tasksList').html('<p class="text-muted text-center">Error loading tasks</p>');
-            }
-        });
-    }
-    
-    function loadPatientQueue() {
-        $.ajax({
-            url: '/api/dashboard/patient-queue',
-            method: 'GET',
-            success: function(queue) {
-                const container = $('#patientQueue');
-                container.empty();
-                
-                if (queue.length === 0) {
-                    container.html('<p class="text-muted text-center">No patients in queue</p>');
-                    return;
-                }
-                
-                queue.forEach(function(patient, index) {
-                    const item = `
-                        <div class="queue-item">
-                            <div class="queue-number">${index + 1}</div>
-                            <div class="queue-patient">
-                                <div class="patient-name">${patient.name}</div>
-                                <div class="patient-info">
-                                    ${patient.visit_type || 'General Visit'} • 
-                                    ${moment(patient.scheduled_time).format('HH:mm')}
-                                </div>
-                            </div>
-                            <div class="queue-status status-${patient.status}">
-                                ${getStatusLabel(patient.status)}
-                            </div>
-                        </div>
-                    `;
-                    container.append(item);
-                });
-            },
-            error: function() {
-                $('#patientQueue').html('<p class="text-muted text-center">Error loading queue</p>');
-            }
-        });
-    }
-    
-    function loadNotifications() {
-        $.ajax({
-            url: '/api/dashboard/notifications',
-            method: 'GET',
-            success: function(notifications) {
-                const container = $('#notificationsList');
-                container.empty();
-                
-                if (notifications.length === 0) {
-                    container.html('<p class="text-muted text-center">No new notifications</p>');
-                    return;
-                }
-                
-                notifications.slice(0, 5).forEach(function(notification) {
-                    const item = `
-                        <div class="notification-item">
-                            <div class="notification-icon">
-                                <i class="${getNotificationIcon(notification.type)}"></i>
-                            </div>
-                            <div class="notification-content">
-                                <div class="notification-title">${notification.title}</div>
-                                <div class="notification-time">${moment(notification.timestamp).fromNow()}</div>
-                            </div>
-                        </div>
-                    `;
-                    container.append(item);
-                });
-            },
-            error: function() {
-                $('#notificationsList').html('<p class="text-muted text-center">Error loading notifications</p>');
-            }
-        });
-    }
-    
-    function loadProductivityChart() {
-        $.ajax({
-            url: '/api/dashboard/productivity-chart',
-            method: 'GET',
-            success: function(data) {
-                const ctx = document.getElementById('productivityChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'doughnut',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            data: data.values,
-                            backgroundColor: [
-                                '#28a745',
-                                '#20c997',
-                                '#17a2b8',
-                                '#ffc107'
-                            ],
-                            borderWidth: 0
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        plugins: {
-                            legend: {
-                                position: 'bottom',
-                                labels: {
-                                    padding: 20,
-                                    usePointStyle: true
-                                }
-                            }
-                        }
-                    }
-                });
-            },
-            error: function() {
-                $('#productivityChart').parent().html('<p class="text-muted text-center">Error loading chart</p>');
-            }
-        });
-    }
-    
-    function getStatusLabel(status) {
-        switch(status) {
-            case 'waiting': return 'Waiting';
-            case 'in-progress': return 'In Progress';
-            case 'ready': return 'Ready';
-            default: return 'Unknown';
-        }
-    }
-    
-    function getNotificationIcon(type) {
-        switch(type) {
-            case 'appointment': return 'fas fa-calendar';
-            case 'patient': return 'fas fa-user';
-            case 'system': return 'fas fa-cog';
-            case 'urgent': return 'fas fa-exclamation-triangle';
-            default: return 'fas fa-info-circle';
-        }
-    }
-    
-    window.addNewTask = function() {
-        $('#addTaskModal').modal('show');
-    };
-    
-    window.completeTask = function(taskId) {
-        $.ajax({
-            url: `/api/tasks/${taskId}/complete`,
-            method: 'PUT',
-            success: function() {
-                loadTasks();
-                showAlert('Task completed!', 'success');
-            },
-            error: function() {
-                showAlert('Error completing task', 'error');
-            }
-        });
-    };
-    
-    window.deleteTask = function(taskId) {
-        if (confirm('Are you sure you want to delete this task?')) {
-            $.ajax({
-                url: `/api/tasks/${taskId}`,
-                method: 'DELETE',
-                success: function() {
-                    loadTasks();
-                    showAlert('Task deleted!', 'success');
-                },
-                error: function() {
-                    showAlert('Error deleting task', 'error');
-                }
-            });
-        }
-    };
-    
-    function showAlert(message, type) {
-        const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
-        const alertHtml = `
-            <div class="alert ${alertClass} alert-dismissible fade show" role="alert">
-                ${message}
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-        `;
-        
-        // Remove existing alerts
-        $('.alert').remove();
-        
-        // Add new alert at the top of the page
-        $('body').prepend(alertHtml);
-        
-        // Auto-dismiss after 3 seconds
-        setTimeout(function() {
-            $('.alert').fadeOut();
-        }, 3000);
-    }
-});
-</script>
 {% endblock %}

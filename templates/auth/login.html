@@ -4,230 +4,126 @@
 
 {% block extra_css %}
 <style>
-/* Hide sidebar/nav for login page */
-#sidebar, .sidebar, nav, .navbar, .main-nav { display: none !important; }
-/* Remove reserved sidebar space and toggle on login */
-.main-content, #mainContent { margin-left: 0 !important; background: transparent !important; }
-.content-wrapper { padding: 0 !important; }
-.sidebar-toggle, #sidebarToggle { display: none !important; }
-
-/* Artistic full-screen background with animated gradient blobs */
-.login-wrap {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-  background: radial-gradient(1200px 800px at -10% -20%, rgba(0,148,255,0.25), transparent 60%),
-              radial-gradient(1000px 700px at 110% 110%, rgba(0,180,255,0.25), transparent 60%),
-              linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-}
-.bg-blob {
-  position: absolute;
-  filter: blur(40px);
-  opacity: .5;
-  border-radius: 50%;
-  animation: float 14s ease-in-out infinite;
-}
-.bg-blob.one { width: 420px; height: 420px; background: #5ea3ff; top: -120px; left: -120px; animation-delay: 0s; }
-.bg-blob.two { width: 360px; height: 360px; background: #00c2ff; bottom: -120px; right: -80px; animation-delay: 2s; }
-.bg-blob.three { width: 280px; height: 280px; background: #79ffe1; top: 20%; right: 20%; animation-delay: 4s; opacity: .35; }
-@keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } }
-
-/* Inline SVG illustration behind content */
-.bg-illustration { position: absolute; inset: 0; z-index: 0; opacity: .22; pointer-events: none; }
-
-/* Split layout: hero + form */
-.login-grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 2rem;
-  padding: 4.25rem clamp(1.5rem, 6vw, 72px);
-}
-.hero-pane {
-  color: #ffffff;
-  align-self: center;
-  padding: 1.25rem clamp(1.5rem, 6vw, 72px);
-}
-.hero-inner { display: grid; grid-template-columns: 1fr; gap: 1.25rem; align-items: center; }
-.brand-row { display: flex; align-items: center; gap: .75rem; }
-.brand-logo { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(0,0,0,.25)); }
-.app-title { font-size: clamp(2.4rem, 5.2vw, 3.8rem); font-weight: 800; letter-spacing: .5px; margin: 0 0 .5rem 0; }
-.hero-title {
-  font-weight: 800;
-  line-height: 1.1;
-  margin: 0 0 .9rem 0;
-  font-size: clamp(2rem, 4.5vw, 3.2rem);
-}
-.hero-sub {
-  opacity: .92;
-  font-size: 1.1rem;
-}
-.hero-points { margin-top: 1.5rem; display: grid; gap: .6rem; }
-.hero-points .point { display: flex; align-items: center; gap: .6rem; opacity: .95; }
-.hero-points .point i { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.15); }
-.hero-illustration { display: none; }
-
-.form-pane { display: flex; align-items: center; justify-content: center; }
-.glass-card {
-  width: 100%;
-  max-width: 440px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,.25);
-  backdrop-filter: blur(10px);
-}
-.glass-card .card-inner { background: rgba(255,255,255,0.9); border-radius: 12px; padding: 1.25rem 1.25rem 1.35rem; }
-.brand-badge { width: 64px; height: 64px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 8px 24px rgba(102,126,234,.35); }
-.login-heading { font-weight: 700; margin: .75rem 0 .25rem 0; }
-.login-note { color: #6c757d; margin-bottom: .75rem; }
-
-.form-group { margin-bottom: .9rem; }
-.form-control { border-radius: 10px; padding: .8rem .9rem; border: 1px solid #e6e8f0; }
-.form-control:focus { border-color: #667eea; box-shadow: 0 0 0 .12rem rgba(102,126,234,.18); }
-
-.btn-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: 0; border-radius: 10px; box-shadow: 0 8px 18px rgba(102,126,234,.28); }
-.btn-gradient-primary:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: #fff; transform: translateY(-1px); }
-.w-100 { width: 100%; }
-
-@media (max-width: 992px) {
-  .login-grid { grid-template-columns: 1fr; padding: 2.5rem clamp(1rem, 5vw, 32px); }
-  .hero-pane { text-align: center; padding-right: 0; }
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero-points { justify-items: center; }
-}
+    /* Page-specific overrides for Login (minimal) */
+    body {
+        background: var(--bg-page); /* Use semantic variable */
+    }
+    .login-container {
+        min-height: 100vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 2rem;
+    }
+    .login-card {
+        max-width: 900px;
+        width: 100%;
+        border: none;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+    }
+    .login-hero {
+        background: linear-gradient(135deg, var(--primary) 0%, var(--info) 100%);
+        color: white;
+        padding: 3rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+    .login-form-section {
+        padding: 3rem;
+        background: var(--bg-card);
+    }
 </style>
 {% endblock %}
 
 {% block content %}
-<div class="login-wrap">
-  <!-- Artistic background illustration (waves + heartbeat) -->
-  <svg class="bg-illustration" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
-    <defs>
-      <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
-        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05"/>
-      </linearGradient>
-      <linearGradient id="cardioGrad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#ff6b6b"/>
-        <stop offset="100%" stop-color="#ffd93d"/>
-      </linearGradient>
-      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
-        <feMerge>
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
-        </feMerge>
-      </filter>
-    </defs>
-    <!-- soft waves -->
-    <path d="M0,720 C240,680 360,760 560,740 C760,720 880,640 1100,660 C1260,674 1360,700 1440,720 L1440,900 L0,900 Z" fill="url(#waveGrad)"/>
-    <path d="M0,540 C220,580 360,520 560,540 C760,560 940,620 1140,600 C1280,586 1380,560 1440,540 L1440,900 L0,900 Z" fill="url(#waveGrad)" opacity=".6"/>
-    <!-- heartbeat line -->
-    <path d="M-40 420 L 120 420 L 180 420 L 220 360 L 260 480 L 300 420 L 380 420 L 440 420 L 480 360 L 520 480 L 560 420 L 640 420 L 700 420 L 740 370 L 780 470 L 820 420 L 900 420 L 960 420 L 1000 360 L 1040 480 L 1080 420 L 1160 420 L 1240 420 L 1300 360 L 1340 480 L 1380 420 L 1500 420" stroke="url(#cardioGrad)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" opacity=".8"/>
-    <!-- decorative dots/rings -->
-    <g opacity=".55">
-      <circle cx="120" cy="160" r="3" fill="#ffffff"/>
-      <circle cx="280" cy="200" r="2" fill="#ffffff"/>
-      <circle cx="320" cy="140" r="2" fill="#ffffff"/>
-      <circle cx="980" cy="220" r="3" fill="#ffffff"/>
-      <circle cx="1120" cy="160" r="2" fill="#ffffff"/>
-      <circle cx="1320" cy="260" r="2" fill="#ffffff"/>
-    </g>
-    <g opacity=".35" stroke="#ffffff" fill="none">
-      <circle cx="260" cy="680" r="18"/>
-      <circle cx="260" cy="680" r="8"/>
-      <circle cx="1240" cy="760" r="14"/>
-      <circle cx="1240" cy="760" r="6"/>
-    </g>
-  </svg>
+<div class="login-container">
+    <div class="card login-card">
+        <div class="row g-0">
+            <!-- Left Side: Hero -->
+            <div class="col-lg-6 d-none d-lg-flex login-hero">
+                <div class="text-center mb-4">
+                    <img src="{{ url_for('static', filename='img/Logo1-nbg.png') }}" alt="Heartline Logo" style="width: 80px; height: 80px; filter: brightness(0) invert(1);">
+                </div>
+                <h2 class="fw-bold mb-3 text-center">Heartline</h2>
+                <p class="lead text-center mb-4">Care that connects. Insights that empower.</p>
+                <ul class="list-unstyled mt-4">
+                    <li class="mb-3"><i class="fas fa-check-circle me-2"></i> Secure Access</li>
+                    <li class="mb-3"><i class="fas fa-check-circle me-2"></i> Real-time ECG Analysis</li>
+                    <li class="mb-3"><i class="fas fa-check-circle me-2"></i> Streamlined Patient Care</li>
+                </ul>
+            </div>
 
-  <!-- Animated background decorations -->
-  <span class="bg-blob one"></span>
-  <span class="bg-blob two"></span>
-  <span class="bg-blob three"></span>
+            <!-- Right Side: Form -->
+            <div class="col-lg-6 login-form-section">
+                <div class="text-center mb-4 d-lg-none">
+                    <img src="{{ url_for('static', filename='img/Logo1-nbg.png') }}" alt="Heartline Logo" style="width: 60px;">
+                </div>
+                <h3 class="fw-bold mb-2">Welcome Back</h3>
+                <p class="text-muted mb-4">Sign in to your account</p>
 
-  <div class="container-fluid login-grid">
-    <!-- Left: Hero messaging -->
-    <div class="hero-pane">
-      <div class="hero-inner">
-        <div class="hero-copy">
-          <div class="brand-row">
-            <img class="brand-logo" src="{{ url_for('static', filename='img/Logo1-nbg.png') }}" alt="Heartline logo" />
-            <h1 class="app-title mb-0">Heartline</h1>
-          </div>
-          <h2 class="hero-title">Care that connects. Insights that empower.</h2>
-          <div class="hero-sub">Secure access to real‑time ECG insights, streamlined visits, and a modern patient experience—all in one place.</div>
-          <div class="hero-points">
-            <div class="point"><i class="fas fa-bolt"></i> Fast, secure sign‑in</div>
-            <div class="point"><i class="fas fa-wave-square"></i> Integrated ECG analysis</div>
-            <div class="point"><i class="fas fa-user-shield"></i> Role‑based access control</div>
-          </div>
+                <div class="alert alert-info small mb-4">
+                    <i class="fas fa-info-circle me-1"></i> <b>Demo:</b> User: <code>admin</code> / Pass: <code>admin</code>
+                </div>
+
+                <form method="POST">
+                    {{ form.hidden_tag() }}
+                    
+                    <div class="mb-3">
+                        {{ form.username.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-user"></i></span>
+                            {{ form.username(class="form-control", placeholder="Username") }}
+                        </div>
+                        {% for error in form.username.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        {{ form.password.label(class="form-label") }}
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
+                            {{ form.password(class="form-control", placeholder="Password") }}
+                        </div>
+                        {% for error in form.password.errors %}
+                            <div class="text-danger small mt-1">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-4 form-check">
+                        {{ form.remember_me(class="form-check-input") }}
+                        {{ form.remember_me.label(class="form-check-label") }}
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-primary btn-lg">
+                            Sign In
+                        </button>
+                    </div>
+                </form>
+
+                <div class="text-center mt-4">
+                    <small class="text-muted">Need help? Contact IT Support.</small>
+                </div>
+            </div>
         </div>
-        <div class="hero-illustration"></div>
-      </div>
     </div>
-
-    <!-- Right: Login form -->
-    <div class="form-pane">
-      <div class="glass-card">
-        <div class="card-inner">
-          <h3 class="login-heading">Welcome back</h3>
-          <div class="login-note">Sign in to continue</div>
-
-          <div class="alert alert-info mb-3">
-            <b>Demo credentials:</b> Username: <code>admin</code> &nbsp; Password: <code>admin</code>
-          </div>
-
-          <form method="POST">
-            {{ form.hidden_tag() }}
-
-            <div class="form-group">
-              {{ form.username.label(class="form-label") }}
-              {{ form.username(class="form-control", placeholder="Enter your username") }}
-              {% for error in form.username.errors %}
-                <div class="text-danger mt-1">{{ error }}</div>
-              {% endfor %}
-            </div>
-
-            <div class="form-group">
-              {{ form.password.label(class="form-label") }}
-              {{ form.password(class="form-control", placeholder="Enter your password") }}
-              {% for error in form.password.errors %}
-                <div class="text-danger mt-1">{{ error }}</div>
-              {% endfor %}
-            </div>
-
-            <div class="form-check mb-3">
-              {{ form.remember_me(class="form-check-input") }}
-              {{ form.remember_me.label(class="form-check-label") }}
-            </div>
-
-            <button type="submit" class="btn btn-gradient-primary btn-lg w-100">
-              <i class="fas fa-sign-in-alt mr-1"></i> Sign In
-            </button>
-          </form>
-
-          <div class="text-center mt-3">
-            <small class="text-muted">Need help accessing your account? Contact your administrator.</small>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 </div>
 {% endblock %}
 
 {% block extra_js %}
 <script>
-// Auto-focus on the username field
-document.addEventListener('DOMContentLoaded', function() {
-  const usernameField = document.getElementById('username');
-  if (usernameField) {
-    usernameField.focus();
-  }
-});
+    // Hide sidebar on login page
+    document.addEventListener('DOMContentLoaded', function() {
+        const sidebar = document.getElementById('sidebar');
+        if (sidebar) sidebar.style.display = 'none';
+        const mainContent = document.querySelector('.main-content');
+        if (mainContent) {
+            mainContent.style.marginLeft = '0';
+            mainContent.style.width = '100%';
+        }
+    });
 </script>
 {% endblock %}

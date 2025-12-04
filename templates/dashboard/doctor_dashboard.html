@@ -2,764 +2,233 @@
 
 {% block title %}Doctor Dashboard - Heartline Medical{% endblock %}
 
-{% block extra_css %}
-<style>
-    /* Main container - full bleed like login */
-    .container-fluid {
-        padding: 0;
-        margin: 0;
-        max-width: 100%;
-    }
-
-    /* Dashboard header with blue gradient matching login */
-    .dashboard-header {
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        color: white;
-        padding: 3rem 2rem;
-        margin: 0;
-        border-radius: 0;
-        position: relative;
-        overflow: hidden;
-    }
-
-    /* Animated background elements like login */
-    .dashboard-header::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -10%;
-        width: 500px;
-        height: 500px;
-        background: radial-gradient(circle, rgba(255,255,255,0.15) 0%, transparent 70%);
-        border-radius: 50%;
-        animation: float 20s ease-in-out infinite;
-    }
-
-    .dashboard-header::after {
-        content: '';
-        position: absolute;
-        bottom: -30%;
-        right: -5%;
-        width: 400px;
-        height: 400px;
-        background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
-        border-radius: 50%;
-        animation: float 15s ease-in-out infinite reverse;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translate(0, 0) scale(1); }
-        33% { transform: translate(30px, -30px) scale(1.1); }
-        66% { transform: translate(-20px, 20px) scale(0.9); }
-    }
-    
-    .welcome-card {
-        background: rgba(255, 255, 255, 0.15);
-        border-radius: 1rem;
-        padding: 2rem;
-        backdrop-filter: blur(20px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        position: relative;
-        z-index: 1;
-        box-shadow: 0 8px 32px rgba(0, 116, 217, 0.2);
-    }
-
-    .welcome-card h1 {
-        font-size: clamp(1.75rem, 4vw, 2.5rem);
-        font-weight: 700;
-        margin-bottom: 0.5rem;
-    }
-
-    .welcome-card p {
-        font-size: 1rem;
-        opacity: 0.95;
-    }
-    
-    /* Content area with subtle background */
-    .dashboard-content {
-        background: linear-gradient(180deg, #f5f9ff 0%, #ffffff 100%);
-        padding: 2rem;
-        min-height: calc(100vh - 200px);
-    }
-
-    .stats-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 1.5rem;
-        margin-bottom: 2rem;
-    }
-    
-    .stat-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 1.75rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        transition: all 0.3s ease;
-        position: relative;
-        overflow: hidden;
-        border: 1px solid #e7f1ff;
-    }
-    
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 8px 30px rgba(0, 116, 217, 0.15);
-    }
-    
-    .stat-card::before {
-        content: '';
-        position: absolute;
-        top: 0;
-        left: 0;
-        right: 0;
-        height: 4px;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-    }
-    
-    .stat-number {
-        font-size: 2.75rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        background-clip: text;
-        margin-bottom: 0.5rem;
-    }
-    
-    .stat-label {
-        color: #6c757d;
-        font-size: 0.9rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        margin-bottom: 0.5rem;
-        font-weight: 600;
-    }
-    
-    .stat-change {
-        font-size: 0.85rem;
-        font-weight: 600;
-        padding: 0.25rem 0.5rem;
-        border-radius: 0.5rem;
-        display: inline-block;
-    }
-    
-    .stat-change.positive {
-        color: #28a745;
-        background: rgba(40, 167, 69, 0.1);
-    }
-    
-    .stat-change.negative {
-        color: #dc3545;
-        background: rgba(220, 53, 69, 0.1);
-    }
-    
-    .stat-icon {
-        position: absolute;
-        top: 1.5rem;
-        right: 1.5rem;
-        font-size: 2.5rem;
-        opacity: 0.1;
-        color: #0074d9;
-    }
-    
-    .quick-actions {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        margin-bottom: 2rem;
-        border: 1px solid #e7f1ff;
-    }
-
-    .quick-actions h4 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .action-button {
-        display: flex;
-        align-items: center;
-        padding: 1.25rem;
-        border: 2px solid #e7f1ff;
-        border-radius: 0.75rem;
-        text-decoration: none;
-        color: #495057;
-        transition: all 0.3s ease;
-        margin-bottom: 1rem;
-        background: white;
-    }
-    
-    .action-button:hover {
-        border-color: #0074d9;
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.05) 0%, rgba(0, 180, 255, 0.05) 100%);
-        text-decoration: none;
-        transform: translateX(8px);
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.15);
-    }
-    
-    .action-icon {
-        width: 48px;
-        height: 48px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        margin-right: 1.25rem;
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.3);
-        transition: all 0.3s ease;
-    }
-
-    .action-button:hover .action-icon {
-        transform: scale(1.1) rotate(5deg);
-    }
-    
-    .recent-activity {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        border: 1px solid #e7f1ff;
-    }
-
-    .recent-activity h4 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .activity-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem 0;
-        border-bottom: 1px solid #f0f7ff;
-        transition: all 0.2s ease;
-    }
-
-    .activity-item:hover {
-        background: #f8fbff;
-        margin: 0 -1rem;
-        padding: 1rem 1rem;
-        border-radius: 0.5rem;
-    }
-    
-    .activity-item:last-child {
-        border-bottom: none;
-    }
-    
-    .activity-avatar {
-        width: 45px;
-        height: 45px;
-        border-radius: 50%;
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        margin-right: 1rem;
-        font-weight: bold;
-        box-shadow: 0 4px 12px rgba(0, 116, 217, 0.25);
-    }
-    
-    .activity-content {
-        flex: 1;
-    }
-    
-    .activity-title {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        color: #333;
-    }
-    
-    .activity-time {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    
-    .schedule-card {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        border: 1px solid #e7f1ff;
-    }
-
-    .schedule-card h5 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-    
-    .appointment-item {
-        display: flex;
-        align-items: center;
-        padding: 1rem;
-        margin-bottom: 0.75rem;
-        border-left: 4px solid #0074d9;
-        background: linear-gradient(135deg, rgba(0, 116, 217, 0.05) 0%, rgba(0, 180, 255, 0.05) 100%);
-        border-radius: 0 0.5rem 0.5rem 0;
-        transition: all 0.2s ease;
-    }
-
-    .appointment-item:hover {
-        transform: translateX(5px);
-        box-shadow: 0 2px 10px rgba(0, 116, 217, 0.15);
-    }
-    
-    .appointment-time {
-        min-width: 90px;
-        font-weight: 700;
-        color: #0074d9;
-        font-size: 1.1rem;
-    }
-    
-    .appointment-patient {
-        flex: 1;
-        margin-left: 1rem;
-    }
-    
-    .patient-name {
-        font-weight: 600;
-        margin-bottom: 0.25rem;
-        color: #333;
-    }
-    
-    .patient-type {
-        font-size: 0.85rem;
-        color: #6c757d;
-    }
-    
-    .chart-container {
-        background: white;
-        border-radius: 1rem;
-        padding: 2rem;
-        box-shadow: 0 4px 20px rgba(0, 116, 217, 0.08);
-        height: 320px;
-        border: 1px solid #e7f1ff;
-    }
-
-    .chart-container h5 {
-        color: #0074d9;
-        font-weight: 700;
-    }
-
-    /* Button styling */
-    .btn-outline-primary {
-        border-color: #0074d9;
-        color: #0074d9;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-
-    .btn-outline-primary:hover {
-        background: linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-        border-color: #0074d9;
-        color: white;
-        box-shadow: 0 4px 15px rgba(0, 116, 217, 0.3);
-    }
-
-    /* Time display */
-    .time-display {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 1rem 1.5rem;
-        border-radius: 0.75rem;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-    }
-
-    .time-display .h5 {
-        font-size: 2rem;
-        font-weight: 700;
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="container-fluid">
-    <!-- Header -->
-    <div class="dashboard-header">
-        <div class="container">
-            <div class="row align-items-center">
-                <div class="col-md-8">
-                    <div class="welcome-card">
-                        <h1 class="mb-2">
-                            <i class="fas fa-stethoscope mr-3"></i>Welcome back, Dr. {% if current_user.last_name %}{{ current_user.last_name }}{% else %}{{ current_user.get_full_name() }}{% endif %}
-                        </h1>
-                        <p class="mb-1">
-                            {% if current_user.doctor and current_user.doctor.specialty %}
-                                {{ current_user.doctor.specialty }} • Today is {{ moment().format('dddd, MMMM Do YYYY') }}
-                            {% else %}
-                                Today is {{ moment().format('dddd, MMMM Do YYYY') }}
-                            {% endif %}
-                        </p>
-                        {% if current_user.last_login %}
-                        <p class="mb-0" style="font-size: 0.9rem;">Last login: {{ current_user.last_login.strftime('%B %d, %Y at %I:%M %p') }}</p>
-                        {% endif %}
-                    </div>
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-title-section">
+                <h1 class="page-title">
+                    <i class="fas fa-user-md"></i>
+                    Welcome back, Dr. {{ current_user.last_name }}
+                </h1>
+                <p class="page-subtitle">Here's your practice overview for today.</p>
+            </div>
+            <div class="page-actions">
+                <span class="badge badge-light">
+                    <i class="far fa-clock"></i> {{ moment().format('MMMM Do YYYY, h:mm a') }}
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_patients }}</span>
+                <span class="stat-label">My Patients</span>
+                <div class="stat-change positive">
+                    <i class="fas fa-arrow-up"></i> Active Database
                 </div>
-                <div class="col-md-4 text-right">
-                    <div class="time-display">
-                        <div class="h5 mb-1">{{ moment().format('HH:mm') }}</div>
-                        <div style="opacity: 0.9; font-size: 0.9rem;">Current Time</div>
-                    </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--success-500);">
+                <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ today_visits }}</span>
+                <span class="stat-label">Visits Today</span>
+                <div class="stat-change positive">
+                    <i class="fas fa-check"></i> Checked In
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--warning-600);">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ today_appointments }}</span>
+                <span class="stat-label">Appointments Today</span>
+                <div class="stat-change warning">
+                    <i class="fas fa-clock"></i> Scheduled
+                </div>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--info-500);">
+                <i class="fas fa-file-medical-alt"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_visits }}</span>
+                <span class="stat-label">Total Consultations</span>
+                <div class="stat-change info">
+                    <i class="fas fa-history"></i> All Time
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Dashboard Content -->
-    <div class="dashboard-content">
-        <div class="container">
-            <div class="row">
-        <!-- Main Content -->
-        <div class="col-lg-8">
-            <!-- Statistics -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-number" id="totalPatients">0</div>
-                    <div class="stat-label">Total Patients</div>
-                    <div class="stat-change positive" id="patientsChange">
-                        <i class="fas fa-arrow-up"></i> +0% from last month
-                    </div>
+    <div class="row">
+        <!-- Quick Actions -->
+        <div class="col-lg-4 mb-4">
+            <div class="card h-100">
+                <div class="card-header">
+                    <h5><i class="fas fa-bolt text-warning"></i> Quick Actions</h5>
                 </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-calendar-check"></i>
-                    </div>
-                    <div class="stat-number" id="todayVisits">0</div>
-                    <div class="stat-label">Today's Visits</div>
-                    <div class="stat-change positive" id="visitsChange">
-                        <i class="fas fa-arrow-up"></i> +0% from yesterday
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-heartbeat"></i>
-                    </div>
-                    <div class="stat-number" id="ecgTests">0</div>
-                    <div class="stat-label">ECG Tests This Week</div>
-                    <div class="stat-change positive" id="ecgChange">
-                        <i class="fas fa-arrow-up"></i> +0% from last week
-                    </div>
-                </div>
-                
-                <div class="stat-card">
-                    <div class="stat-icon">
-                        <i class="fas fa-clock"></i>
-                    </div>
-                    <div class="stat-number" id="avgVisitTime">0</div>
-                    <div class="stat-label">Avg Visit Time (min)</div>
-                    <div class="stat-change" id="timeChange">
-                        <i class="fas fa-minus"></i> No change
-                    </div>
-                </div>
-            </div>
-
-            <!-- Quick Actions -->
-            <div class="quick-actions">
-                <h4 class="mb-3">
-                    <i class="fas fa-bolt mr-2"></i>Quick Actions
-                </h4>
-                <div class="row">
-                    <div class="col-md-6">
-                        <a href="/patient/new" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-user-plus"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">Add New Patient</div>
-                                <small class="text-muted">Register a new patient in the system</small>
-                            </div>
+                <div class="card-body">
+                    <div class="d-grid gap-3">
+                        <a href="{{ url_for('create_patient') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-user-plus fa-fw me-2"></i> Register New Patient
+                        </a>
+                        <a href="{{ url_for('create_visit') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-file-medical fa-fw me-2"></i> Start New Visit
+                        </a>
+                        <a href="{{ url_for('create_appointment') }}" class="btn btn-outline-primary btn-lg text-start">
+                            <i class="fas fa-calendar-plus fa-fw me-2"></i> Schedule Appointment
+                        </a>
+                        <a href="{{ url_for('patients_table') }}" class="btn btn-outline-secondary btn-lg text-start">
+                            <i class="fas fa-search fa-fw me-2"></i> Search Records
                         </a>
                     </div>
-                    <div class="col-md-6">
-                        <a href="/visit/new" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-plus-square"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">New Visit</div>
-                                <small class="text-muted">Start a new patient visit</small>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="/analyze_ecg" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-heartbeat"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">ECG Analysis</div>
-                                <small class="text-muted">Analyze ECG patterns and results</small>
-                            </div>
-                        </a>
-                    </div>
-                    <div class="col-md-6">
-                        <a href="/patients" class="action-button">
-                            <div class="action-icon">
-                                <i class="fas fa-search"></i>
-                            </div>
-                            <div>
-                                <div class="font-weight-bold">Search Patients</div>
-                                <small class="text-muted">Find and view patient records</small>
-                            </div>
-                        </a>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="recent-activity">
-                <h4 class="mb-3">
-                    <i class="fas fa-clock mr-2"></i>Recent Activity
-                </h4>
-                <div id="recentActivityList">
-                    <!-- Activity items will be loaded here -->
                 </div>
             </div>
         </div>
 
-        <!-- Sidebar -->
-        <div class="col-lg-4">
-            <!-- Today's Schedule -->
-            <div class="schedule-card mb-4">
-                <h5 class="mb-3">
-                    <i class="fas fa-calendar-day mr-2"></i>Today's Schedule
-                </h5>
-                <div id="todaySchedule">
-                    <!-- Schedule items will be loaded here -->
+        <!-- Recent Activity -->
+        <div class="col-lg-8 mb-4">
+            <div class="card h-100">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5><i class="fas fa-history text-primary"></i> Recent Activity</h5>
+                    <a href="{{ url_for('visits_table') }}" class="btn btn-sm btn-secondary">View All</a>
                 </div>
-                <div class="text-center mt-3">
-                    <a href="/visits" class="btn btn-outline-primary btn-sm">
-                        <i class="fas fa-calendar mr-1"></i>View All Appointments
-                    </a>
-                </div>
-            </div>
-
-            <!-- Patient Statistics Chart -->
-            <div class="chart-container mb-4">
-                <h5 class="mb-3">
-                    <i class="fas fa-chart-line mr-2"></i>Patient Visits (Last 7 Days)
-                </h5>
-                <canvas id="visitsChart"></canvas>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="schedule-card">
-                <h5 class="mb-3">
-                    <i class="fas fa-info-circle mr-2"></i>Quick Stats
-                </h5>
-                <div class="row text-center">
-                    <div class="col-6 mb-3">
-                        <div class="h3 text-primary" id="pendingReports">0</div>
-                        <small class="text-muted">Pending Reports</small>
-                    </div>
-                    <div class="col-6 mb-3">
-                        <div class="h3 text-success" id="completedToday">0</div>
-                        <small class="text-muted">Completed Today</small>
-                    </div>
-                    <div class="col-6">
-                        <div class="h3 text-warning" id="followUps">0</div>
-                        <small class="text-muted">Follow-ups Due</small>
-                    </div>
-                    <div class="col-6">
-                        <div class="h3 text-info" id="newPatients">0</div>
-                        <small class="text-muted">New This Week</small>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Patient</th>
+                                    <th>Type</th>
+                                    <th>Time</th>
+                                    <th>Status</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for visit in recent_visits %}
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar avatar-sm me-2">
+                                                {{ visit.patient.first_name[0] }}{{ visit.patient.last_name[0] }}
+                                            </div>
+                                            <div>
+                                                <div class="fw-bold">{{ visit.patient.first_name }} {{ visit.patient.last_name }}</div>
+                                                <small class="text-muted">#{{ visit.patient.id }}</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        {% if visit.ecg_data %}
+                                            <span class="badge badge-info"><i class="fas fa-heartbeat"></i> ECG</span>
+                                        {% else %}
+                                            <span class="badge badge-light"><i class="fas fa-user-md"></i> Consult</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ moment(visit.visit_date).fromNow() }}</td>
+                                    <td>
+                                        {% if visit.payment_status == 'paid' %}
+                                            <span class="badge badge-success">Paid</span>
+                                        {% elif visit.payment_status == 'partial' %}
+                                            <span class="badge badge-warning">Partial</span>
+                                        {% else %}
+                                            <span class="badge badge-danger">Unpaid</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                                {% else %}
+                                <tr>
+                                    <td colspan="5" class="text-center py-4 text-muted">
+                                        <i class="fas fa-inbox fa-2x mb-2"></i>
+                                        <p>No recent activity found.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
+    
+    <!-- Upcoming Appointments -->
+    <div class="card">
+        <div class="card-header d-flex justify-content-between align-items-center">
+            <h5><i class="fas fa-calendar-day text-info"></i> Upcoming Appointments</h5>
+            <a href="{{ url_for('appointments_table') }}" class="btn btn-sm btn-secondary">View Calendar</a>
+        </div>
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Time</th>
+                            <th>Patient</th>
+                            <th>Reason</th>
+                            <th>Doctor</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for apt in upcoming_appointments %}
+                        <tr>
+                            <td>
+                                <div class="fw-bold">{{ apt.appointment_date.strftime('%H:%M') }}</div>
+                                <small class="text-muted">{{ apt.appointment_date.strftime('%b %d') }}</small>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('patient_details', patient_id=apt.patient.id) }}" class="text-decoration-none">
+                                    {{ apt.patient.first_name }} {{ apt.patient.last_name }}
+                                </a>
+                            </td>
+                            <td>{{ apt.reason }}</td>
+                            <td>Dr. {{ apt.doctor.last_name }}</td>
+                            <td>
+                                <span class="badge badge-primary">Scheduled</span>
+                            </td>
+                            <td>
+                                <a href="{{ url_for('edit_appointment', appointment_id=apt.id) }}" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-edit"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="6" class="text-center py-4 text-muted">
+                                <i class="fas fa-calendar-check fa-2x mb-2"></i>
+                                <p>No upcoming appointments.</p>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
 </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-<script>
-$(document).ready(function() {
-    // Load dashboard data
-    loadDashboardStats();
-    loadRecentActivity();
-    loadTodaySchedule();
-    loadVisitsChart();
-    
-    // Refresh data every 5 minutes
-    setInterval(function() {
-        loadDashboardStats();
-        loadRecentActivity();
-        loadTodaySchedule();
-    }, 300000);
-    
-    function loadDashboardStats() {
-        $.ajax({
-            url: '/api/dashboard/doctor/stats',
-            method: 'GET',
-            success: function(stats) {
-                // Update main statistics
-                $('#totalPatients').text(stats.total_patients || 0);
-                $('#todayVisits').text(stats.today_visits || 0);
-                $('#ecgTests').text(stats.ecg_tests_week || 0);
-                $('#avgVisitTime').text(stats.avg_visit_time || 0);
-                
-                // Update changes
-                updateStatChange('#patientsChange', stats.patients_change);
-                updateStatChange('#visitsChange', stats.visits_change);
-                updateStatChange('#ecgChange', stats.ecg_change);
-                updateStatChange('#timeChange', stats.time_change);
-                
-                // Update quick stats
-                $('#pendingReports').text(stats.pending_reports || 0);
-                $('#completedToday').text(stats.completed_today || 0);
-                $('#followUps').text(stats.follow_ups || 0);
-                $('#newPatients').text(stats.new_patients_week || 0);
-            },
-            error: function() {
-                console.log('Error loading dashboard statistics');
-            }
-        });
-    }
-    
-    function updateStatChange(selector, change) {
-        const element = $(selector);
-        if (change > 0) {
-            element.removeClass('negative').addClass('positive');
-            element.html(`<i class="fas fa-arrow-up"></i> +${change}%`);
-        } else if (change < 0) {
-            element.removeClass('positive').addClass('negative');
-            element.html(`<i class="fas fa-arrow-down"></i> ${change}%`);
-        } else {
-            element.removeClass('positive negative');
-            element.html(`<i class="fas fa-minus"></i> No change`);
-        }
-    }
-    
-    function loadRecentActivity() {
-        $.ajax({
-            url: '/api/dashboard/recent-activity',
-            method: 'GET',
-            success: function(activities) {
-                const container = $('#recentActivityList');
-                container.empty();
-                
-                if (activities.length === 0) {
-                    container.html('<p class="text-muted text-center">No recent activity</p>');
-                    return;
-                }
-                
-                activities.forEach(function(activity) {
-                    const item = `
-                        <div class="activity-item">
-                            <div class="activity-avatar">
-                                <i class="${getActivityIcon(activity.type)}"></i>
-                            </div>
-                            <div class="activity-content">
-                                <div class="activity-title">${activity.title}</div>
-                                <div class="activity-time">${moment(activity.timestamp).fromNow()}</div>
-                            </div>
-                        </div>
-                    `;
-                    container.append(item);
-                });
-            },
-            error: function() {
-                $('#recentActivityList').html('<p class="text-muted text-center">Error loading activity</p>');
-            }
-        });
-    }
-    
-    function loadTodaySchedule() {
-        $.ajax({
-            url: '/api/dashboard/today-schedule',
-            method: 'GET',
-            success: function(appointments) {
-                const container = $('#todaySchedule');
-                container.empty();
-                
-                if (appointments.length === 0) {
-                    container.html('<p class="text-muted text-center">No appointments scheduled for today</p>');
-                    return;
-                }
-                
-                appointments.forEach(function(appointment) {
-                    const item = `
-                        <div class="appointment-item">
-                            <div class="appointment-time">
-                                ${moment(appointment.time).format('HH:mm')}
-                            </div>
-                            <div class="appointment-patient">
-                                <div class="patient-name">${appointment.patient_name}</div>
-                                <div class="patient-type">${appointment.visit_type || 'General Visit'}</div>
-                            </div>
-                        </div>
-                    `;
-                    container.append(item);
-                });
-            },
-            error: function() {
-                $('#todaySchedule').html('<p class="text-muted text-center">Error loading schedule</p>');
-            }
-        });
-    }
-    
-    function loadVisitsChart() {
-        $.ajax({
-            url: '/api/dashboard/visits-chart',
-            method: 'GET',
-            success: function(data) {
-                const ctx = document.getElementById('visitsChart').getContext('2d');
-                new Chart(ctx, {
-                    type: 'line',
-                    data: {
-                        labels: data.labels,
-                        datasets: [{
-                            label: 'Patient Visits',
-                            data: data.visits,
-                            borderColor: '#667eea',
-                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                            borderWidth: 2,
-                            fill: true,
-                            tension: 0.4
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: false
-                            }
-                        }
-                    }
-                });
-            },
-            error: function() {
-                $('#visitsChart').parent().html('<p class="text-muted text-center">Error loading chart</p>');
-            }
-        });
-    }
-    
-    function getActivityIcon(type) {
-        switch(type) {
-            case 'patient_added': return 'fas fa-user-plus';
-            case 'visit_completed': return 'fas fa-check-circle';
-            case 'ecg_analyzed': return 'fas fa-heartbeat';
-            case 'report_generated': return 'fas fa-file-medical';
-            default: return 'fas fa-info-circle';
-        }
-    }
-});
-</script>
 {% endblock %}

@@ -3,702 +3,293 @@
 {% block title %}ECG History | Heartline Medical Clinic{% endblock %}
 
 {% block content %}
-<div class="container-fluid">
-  <div class="row">
-    <div class="col-12">
-      <div class="d-flex justify-content-between align-items-center mb-4">
-        <h1><i class="fas fa-heartbeat"></i> ECG History</h1>
-        <div>
-          <a href="{{ url_for('create_visit') }}" class="btn btn-success">
-            <i class="fas fa-file-medical-alt"></i> New Visit with ECG
-          </a>
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-title-section">
+                <h1 class="page-title">
+                    <i class="fas fa-heartbeat text-danger"></i>
+                    ECG Analysis History
+                </h1>
+                <p class="page-subtitle">AI-powered electrocardiogram analysis results</p>
+            </div>
+            <div class="page-actions">
+                <a href="{{ url_for('ecg_history') }}?export=csv" class="btn btn-secondary">
+                    <i class="fas fa-download"></i>
+                    <span>Export CSV</span>
+                </a>
+                <a href="{{ url_for('create_visit') }}" class="btn btn-primary">
+                    <i class="fas fa-plus"></i>
+                    <span>New ECG Analysis</span>
+                </a>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 
-  <!-- Filters Section -->
-  <div class="row mb-4">
-    <div class="col-12">
-      <div class="card">
-        <div class="card-header">
-          <h5><i class="fas fa-filter"></i> Filters</h5>
-          <button class="btn btn-sm btn-outline-secondary float-right" type="button" data-toggle="collapse" data-target="#filtersCollapse" aria-expanded="false" aria-controls="filtersCollapse">
-            <i class="fas fa-chevron-down"></i> Toggle Filters
-          </button>
-        </div>
-        <div class="collapse" id="filtersCollapse">
-          <div class="card-body">
-            <form id="ecgFilters" class="row">
-              <div class="col-md-3 mb-3">
-                <label for="patientNameFilter" class="form-label">Patient Name</label>
-                <input type="text" class="form-control" id="patientNameFilter" placeholder="Patient name">
-              </div>
-              <div class="col-md-2 mb-3">
-                <label for="diagnosisFilter" class="form-label">ECG Diagnosis</label>
-                <select class="form-control" id="diagnosisFilter">
-                  <option value="">All Diagnoses</option>
-                  <option value="SNR">Sinus Rhythm</option>
-                  <option value="AF">Atrial Fibrillation</option>
-                  <option value="IAVB">AV Block</option>
-                  <option value="LBBB">Left Bundle Branch Block</option>
-                  <option value="RBBB">Right Bundle Branch Block</option>
-                  <option value="PAC">Premature Atrial Contraction</option>
-                  <option value="PVC">Premature Ventricular Contraction</option>
-                  <option value="STD">ST Depression</option>
-                  <option value="STE">ST Elevation</option>
-                </select>
-              </div>
-              <div class="col-md-2 mb-3">
-                <label for="confidenceFilter" class="form-label">Min Confidence</label>
-                <select class="form-control" id="confidenceFilter">
-                  <option value="">All Confidence</option>
-                  <option value="0.9">≥ 90%</option>
-                  <option value="0.8">≥ 80%</option>
-                  <option value="0.7">≥ 70%</option>
-                  <option value="0.6">≥ 60%</option>
-                  <option value="0.5">≥ 50%</option>
-                </select>
-              </div>
-              <div class="col-md-2 mb-3">
-                <label for="dateFromFilter" class="form-label">From Date</label>
-                <input type="date" class="form-control" id="dateFromFilter">
-              </div>
-              <div class="col-md-3 mb-3">
-                <label for="sortByECG" class="form-label">Sort By</label>
-                <select class="form-control" id="sortByECG">
-                  <option value="date_desc">Recent First</option>
-                  <option value="date_asc">Oldest First</option>
-                  <option value="patient_asc">Patient Name (A-Z)</option>
-                  <option value="patient_desc">Patient Name (Z-A)</option>
-                  <option value="confidence_desc">High Confidence First</option>
-                  <option value="confidence_asc">Low Confidence First</option>
-                </select>
-              </div>
-            </form>
-            <div class="row">
-              <div class="col-12">
-                <button type="button" class="btn btn-secondary clear-filters-btn">
-                  <i class="fas fa-times"></i> Clear Filters
-                </button>
-                <button type="button" class="btn btn-info ml-2 export-ecg-btn">
-                  <i class="fas fa-download"></i> Export
-                </button>
-              </div>
+    <!-- Stats Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon danger">
+                <i class="fas fa-heartbeat"></i>
             </div>
-          </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ total_ecgs }}</span>
+                <span class="stat-label">Total ECG Records</span>
+            </div>
         </div>
-      </div>
+        <div class="stat-card">
+            <div class="stat-icon success">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ normal_rhythm_count }}</span>
+                <span class="stat-label">Normal Sinus Rhythm</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon warning">
+                <i class="fas fa-exclamation-triangle"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ abnormal_count }}</span>
+                <span class="stat-label">Abnormal Findings</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon info">
+                <i class="fas fa-brain"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">{{ high_confidence_count }}</span>
+                <span class="stat-label">High Confidence (≥80%)</span>
+            </div>
+        </div>
     </div>
-  </div>
 
-  <!-- ECG Summary Cards -->
-  <div class="row mb-4">
-    <div class="col-md-3">
-      <div class="card bg-primary text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title mb-0">{{ total_ecgs }}</h5>
-              <small>Total ECGs</small>
+    <!-- Search & Filter Bar -->
+    <div class="card mb-4">
+        <div class="card-body p-3">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-3">
+                <form method="GET" action="{{ url_for('ecg_history') }}" class="d-flex flex-grow-1 gap-2" style="max-width: 600px;">
+                    <div class="input-group">
+                        <span class="input-group-text bg-light border-end-0">
+                            <i class="fas fa-search text-muted"></i>
+                        </span>
+                        <input type="text" 
+                               name="search" 
+                               class="form-control border-start-0 ps-0" 
+                               placeholder="Search by patient name..." 
+                               value="{{ search }}">
+                        {% if search %}
+                        <a href="{{ url_for('ecg_history') }}" class="btn btn-outline-secondary border-start-0">
+                            <i class="fas fa-times"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                    <select name="diagnosis" class="form-select" style="max-width: 200px;" onchange="this.form.submit()">
+                        <option value="">All Diagnoses</option>
+                        {% for abbr, name in class_names.items() %}
+                        <option value="{{ abbr }}" {{ 'selected' if diagnosis_filter == abbr }}>{{ name }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="btn btn-primary">
+                        Search
+                    </button>
+                </form>
+                
+                <div class="d-flex align-items-center gap-2">
+                    <label class="text-muted small">Show</label>
+                    <select class="form-select form-select-sm" style="width: 70px;" onchange="changePerPage(this.value)">
+                        <option value="10" {{ 'selected' if pagination.per_page == 10 }}>10</option>
+                        <option value="15" {{ 'selected' if pagination.per_page == 15 }}>15</option>
+                        <option value="25" {{ 'selected' if pagination.per_page == 25 }}>25</option>
+                        <option value="50" {{ 'selected' if pagination.per_page == 50 }}>50</option>
+                    </select>
+                    <label class="text-muted small">entries</label>
+                </div>
             </div>
-            <div>
-              <i class="fas fa-heartbeat fa-2x"></i>
-            </div>
-          </div>
         </div>
-      </div>
     </div>
-    <div class="col-md-3">
-      <div class="card bg-success text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title mb-0">{{ normal_rhythm_count }}</h5>
-              <small>Normal Rhythm</small>
-            </div>
-            <div>
-              <i class="fas fa-check-circle fa-2x"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-warning text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title mb-0">{{ abnormal_count }}</h5>
-              <small>Abnormal Findings</small>
-            </div>
-            <div>
-              <i class="fas fa-exclamation-triangle fa-2x"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-3">
-      <div class="card bg-info text-white">
-        <div class="card-body">
-          <div class="d-flex justify-content-between">
-            <div>
-              <h5 class="card-title mb-0">{{ high_confidence_count }}</h5>
-              <small>High Confidence (≥80%)</small>
-            </div>
-            <div>
-              <i class="fas fa-brain fa-2x"></i>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- ECG History Table -->
-  <div class="row">
-    <div class="col-12">
-      <div class="card">
+    <!-- Main Content Card -->
+    <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <h5><i class="fas fa-table"></i> ECG Records</h5>
-          <small class="text-muted">
-            Total: <span id="ecgCount">{{ ecg_records|length }}</span> ECG records
-          </small>
+            <h3 class="card-title h5 mb-0">
+                <i class="fas fa-table me-2 text-primary"></i>
+                ECG Analysis Records
+            </h3>
+            <span class="text-muted small">
+                Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} - {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }}
+            </span>
         </div>
-        <div class="card-body">
-          {% if ecg_records %}
+
+        <div class="card-body p-0">
+            {% if ecg_records %}
             <div class="table-responsive">
-              <table class="table table-striped table-hover" id="ecgTable">
-                <thead class="thead-dark">
-                  <tr>
-                    <th scope="col"><i class="fas fa-hashtag"></i> Visit ID</th>
-                    <th scope="col"><i class="fas fa-user"></i> Patient</th>
-                    <th scope="col"><i class="fas fa-calendar"></i> Date</th>
-                    <th scope="col"><i class="fas fa-heartbeat"></i> Primary Diagnosis</th>
-                    <th scope="col"><i class="fas fa-brain"></i> Confidence</th>
-                    <th scope="col"><i class="fas fa-chart-line"></i> Analysis Details</th>
-                    <th scope="col"><i class="fas fa-file"></i> Files</th>
-                    <th scope="col"><i class="fas fa-stethoscope"></i> Clinical Diagnosis</th>
-                    <th scope="col"><i class="fas fa-cogs"></i> Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {% for record in ecg_records %}
-                    {% set primary_diagnosis = record.ecg_primary_diagnosis %}
-                    {% set confidence = record.ecg_confidence %}
-                    {% set confidence_class = 'success' if confidence >= 0.8 else ('warning' if confidence >= 0.6 else 'danger') %}
-                    
-                    <tr data-visit-id="{{ record.id }}" data-patient-id="{{ record.patient_id }}">
-                      <td>
-                        <div class="d-flex align-items-center">
-                          <div class="ecg-id-circle mr-2">
-                            <i class="fas fa-heartbeat"></i>
-                          </div>
-                          <div>
-                            <strong>#{{ record.id }}</strong>
-                            <br>
-                            <small class="text-muted">{{ record.visit_date.strftime('%H:%M') }}</small>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <div>
-                          <strong>{{ record.patient.first_name }} {{ record.patient.last_name }}</strong>
-                          <br>
-                          <small class="text-muted">
-                            {% set today = date.today() %}
-                            {% set birth_date = record.patient.date_of_birth %}
-                            {% set age = today.year - birth_date.year %}
-                            {% if today.month < birth_date.month or (today.month == birth_date.month and today.day < birth_date.day) %}
-                              {% set age = age - 1 %}
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="bg-light">
+                        <tr>
+                            <th class="ps-4">Patient</th>
+                            <th>Date</th>
+                            <th>Diagnosis</th>
+                            <th>Confidence</th>
+                            <th>All Predictions</th>
+                            <th class="text-end pe-4">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for record in ecg_records %}
+                        <tr>
+                            <td class="ps-4">
+                                <div class="d-flex align-items-center gap-3">
+                                    <div class="avatar avatar-sm bg-danger-subtle text-danger rounded-circle d-flex align-items-center justify-content-center" style="width: 40px; height: 40px;">
+                                        {% if record.patient.gender == 'Male' %}
+                                        <i class="fas fa-male"></i>
+                                        {% elif record.patient.gender == 'Female' %}
+                                        <i class="fas fa-female"></i>
+                                        {% else %}
+                                        <i class="fas fa-user"></i>
+                                        {% endif %}
+                                    </div>
+                                    <div>
+                                        <div class="fw-semibold text-dark">{{ record.patient.first_name }} {{ record.patient.last_name }}</div>
+                                        <div class="small text-muted">Visit #{{ record.id }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-column">
+                                    <span class="fw-medium text-dark">{{ record.visit_date.strftime('%b %d, %Y') }}</span>
+                                    <span class="small text-muted">{{ record.visit_date.strftime('%H:%M') }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                {% set is_normal = record.ecg_primary_diagnosis.abbreviation == 'SNR' %}
+                                <div class="d-flex flex-column gap-1">
+                                    <span class="badge rounded-pill {{ 'bg-success-subtle text-success' if is_normal else 'bg-warning-subtle text-warning' }} border {{ 'border-success-subtle' if is_normal else 'border-warning-subtle' }}">
+                                        <i class="fas fa-{{ 'check-circle' if is_normal else 'exclamation-triangle' }} me-1"></i>
+                                        {{ record.ecg_primary_diagnosis.name }}
+                                    </span>
+                                    <span class="small text-muted fw-bold ms-1">{{ record.ecg_primary_diagnosis.abbreviation }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center gap-2">
+                                    <div class="progress flex-grow-1" style="height: 6px; width: 80px;">
+                                        <div class="progress-bar {{ 'bg-success' if record.ecg_confidence >= 0.8 else 'bg-warning' if record.ecg_confidence >= 0.6 else 'bg-danger' }}" 
+                                             role="progressbar" 
+                                             style="width: {{ (record.ecg_confidence * 100)|round }}%"></div>
+                                    </div>
+                                    <span class="small fw-bold {{ 'text-success' if record.ecg_confidence >= 0.8 else 'text-warning' if record.ecg_confidence >= 0.6 else 'text-danger' }}">
+                                        {{ (record.ecg_confidence * 100)|round(1) }}%
+                                    </span>
+                                </div>
+                            </td>
+                            <td>
+                                <div class="d-flex flex-wrap gap-1" style="max-width: 250px;">
+                                    {% for abbr, prob in record.ecg_prediction.items() %}
+                                    {% if prob >= 0.1 %}
+                                    <span class="badge bg-light text-dark border {{ 'border-danger text-danger' if abbr == record.ecg_primary_diagnosis.abbreviation }}" 
+                                          title="{{ class_names.get(abbr, abbr) }}: {{ (prob * 100)|round(1) }}%">
+                                        {{ abbr }}: {{ (prob * 100)|round }}%
+                                    </span>
+                                    {% endif %}
+                                    {% endfor %}
+                                </div>
+                            </td>
+                            <td class="text-end pe-4">
+                                <div class="btn-group">
+                                    <a href="{{ url_for('visit_details', visit_id=record.id) }}" 
+                                       class="btn btn-sm btn-light text-primary" 
+                                       title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <a href="{{ url_for('patient_details', patient_id=record.patient.id) }}" 
+                                       class="btn btn-sm btn-light text-info" 
+                                       title="View Patient">
+                                        <i class="fas fa-user"></i>
+                                    </a>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Pagination -->
+            {% if pagination.pages > 1 %}
+            <div class="d-flex justify-content-between align-items-center p-3 border-top bg-light">
+                <div class="small text-muted">
+                    Showing {{ ((pagination.page - 1) * pagination.per_page) + 1 }} to {{ [pagination.page * pagination.per_page, pagination.total]|min }} of {{ pagination.total }} entries
+                </div>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item {{ 'disabled' if not pagination.has_prev }}">
+                            <a class="page-link" href="{{ url_for('ecg_history', page=pagination.prev_num, search=search, diagnosis=diagnosis_filter, per_page=pagination.per_page) if pagination.has_prev else '#' }}">
+                                <i class="fas fa-chevron-left"></i>
+                            </a>
+                        </li>
+                        
+                        {% for page_num in pagination.iter_pages(left_edge=1, left_current=2, right_current=2, right_edge=1) %}
+                            {% if page_num %}
+                                <li class="page-item {{ 'active' if page_num == pagination.page }}">
+                                    <a class="page-link" href="{{ url_for('ecg_history', page=page_num, search=search, diagnosis=diagnosis_filter, per_page=pagination.per_page) }}">{{ page_num }}</a>
+                                </li>
+                            {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link">...</span>
+                                </li>
                             {% endif %}
-                            {{ age }}y, {{ record.patient.gender }}
-                          </small>
-                        </div>
-                      </td>
-                      <td>
-                        <span class="badge badge-light">{{ record.visit_date.strftime('%Y-%m-%d') }}</span>
-                        <br>
-                        <small class="text-muted">{{ record.visit_date.strftime('%A') }}</small>
-                      </td>
-                      <td>
-                        <div class="ecg-diagnosis">
-                          <span class="badge badge-{{ confidence_class }}">
-                            <i class="fas fa-heartbeat"></i> {{ primary_diagnosis.name }}
-                          </span>
-                          <br>
-                          <small class="text-muted">{{ primary_diagnosis.abbreviation }}</small>
-                        </div>
-                      </td>
-                      <td class="text-center">
-                        <div class="confidence-display">
-                          <span class="badge badge-{{ confidence_class }}">{{ "%.1f"|format(confidence * 100) }}%</span>
-                          <div class="progress mt-1" style="height: 4px;">
-                            <div class="progress-bar bg-{{ confidence_class }}" 
-                                 role="progressbar" 
-                                 style="width: {{ confidence * 100 }}%">
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td>
-                        <button class="btn btn-sm btn-outline-info" 
-                                data-toggle="modal" 
-                                data-target="#ecgDetailsModal"
-                                data-visit-id="{{ record.id }}"
-                                title="View Analysis Details">
-                          <i class="fas fa-chart-bar"></i> Details
-                        </button>
-                        {% if record.ecg_prediction|length > 1 %}
-                          <br>
-                          <small class="text-muted">{{ record.ecg_prediction|length - 1 }} other findings</small>
-                        {% endif %}
-                      </td>
-                      <td>
-                        <div class="file-status">
-                          {% if record.ecg_mat %}
-                            <div><i class="fas fa-file text-success"></i> <small>MAT</small></div>
-                          {% endif %}
-                          {% if record.ecg_hea %}
-                            <div><i class="fas fa-file text-success"></i> <small>HEA</small></div>
-                          {% endif %}
-                          {% if not record.ecg_mat and not record.ecg_hea %}
-                            <span class="text-muted"><i class="fas fa-minus"></i> No files</span>
-                          {% endif %}
-                        </div>
-                      </td>
-                      <td>
-                        {% if record.diagnosis %}
-                          <div class="clinical-diagnosis" title="{{ record.diagnosis }}">
-                            {{ record.diagnosis[:30] }}{% if record.diagnosis|length > 30 %}...{% endif %}
-                          </div>
-                        {% else %}
-                          <span class="text-muted"><i class="fas fa-minus"></i> No diagnosis</span>
-                        {% endif %}
-                      </td>
-                      <td>
-                        <div class="btn-group-vertical" role="group">
-                          <button class="btn btn-info btn-sm mb-1" 
-                                  data-visit-id="{{ record.id }}" 
-                                  data-action="view"
-                                  title="View Visit Details">
-                            <i class="fas fa-eye"></i>
-                          </button>
-                          <button class="btn btn-success btn-sm mb-1" 
-                                  data-toggle="modal" 
-                                  data-target="#ecgViewerModal"
-                                  data-visit-id="{{ record.id }}"
-                                  title="View ECG Chart">
-                            <i class="fas fa-chart-line"></i>
-                          </button>
-                          <button class="btn btn-secondary btn-sm" 
-                                  data-visit-id="{{ record.id }}" 
-                                  data-action="print"
-                                  title="Print Report">
-                            <i class="fas fa-print"></i>
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                  {% endfor %}
-                </tbody>
-              </table>
+                        {% endfor %}
+                        
+                        <li class="page-item {{ 'disabled' if not pagination.has_next }}">
+                            <a class="page-link" href="{{ url_for('ecg_history', page=pagination.next_num, search=search, diagnosis=diagnosis_filter, per_page=pagination.per_page) if pagination.has_next else '#' }}">
+                                <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
             </div>
-          {% else %}
+            {% endif %}
+
+            {% else %}
+            <!-- Empty State -->
             <div class="text-center py-5">
-              <i class="fas fa-heartbeat fa-3x text-muted mb-3"></i>
-              <h5 class="text-muted">No ECG records found</h5>
-              <p class="text-muted">ECG records will appear here when visits include ECG analysis.</p>
-              <a href="{{ url_for('create_visit') }}" class="btn btn-primary">
-                <i class="fas fa-file-medical-alt"></i> Create Visit with ECG
-              </a>
+                <div class="mb-3">
+                    <div class="avatar avatar-xl bg-light text-muted rounded-circle d-flex align-items-center justify-content-center mx-auto" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <i class="fas fa-heartbeat"></i>
+                    </div>
+                </div>
+                <h3 class="h5 text-dark">No ECG records found</h3>
+                {% if search or diagnosis_filter %}
+                <p class="text-muted mb-3">No ECG analyses match your search criteria</p>
+                <a href="{{ url_for('ecg_history') }}" class="btn btn-outline-secondary">
+                    <i class="fas fa-times me-2"></i>
+                    Clear Filters
+                </a>
+                {% else %}
+                <p class="text-muted mb-3">No ECG analyses have been performed yet</p>
+                {% endif %}
+                <div class="mt-3">
+                    <a href="{{ url_for('create_visit') }}" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>
+                        Record New Visit with ECG
+                    </a>
+                </div>
             </div>
-          {% endif %}
+            {% endif %}
         </div>
-      </div>
     </div>
-  </div>
 </div>
 
-<!-- ECG Details Modal -->
-<div class="modal fade" id="ecgDetailsModal" tabindex="-1" role="dialog" aria-labelledby="ecgDetailsModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-lg" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="ecgDetailsModalLabel">
-          <i class="fas fa-chart-bar"></i> ECG Analysis Details
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="ecgDetailsContent">
-        <div class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p class="mt-2">Loading ECG analysis details...</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ECG Viewer Modal -->
-<div class="modal fade" id="ecgViewerModal" tabindex="-1" role="dialog" aria-labelledby="ecgViewerModalLabel" aria-hidden="true">
-  <div class="modal-dialog modal-xl" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="ecgViewerModalLabel">
-          <i class="fas fa-chart-line"></i> ECG Waveform Viewer
-        </h5>
-        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body" id="ecgViewerContent">
-        <div class="text-center">
-          <div class="spinner-border" role="status">
-            <span class="sr-only">Loading...</span>
-          </div>
-          <p class="mt-2">Loading ECG waveform...</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-{% endblock %}
-
-{% block extra_js %}
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Initialize filters
-    initializeECGFilters();
-    
-    // Initialize event handlers
-    initializeEventHandlers();
-});
-
-function initializeECGFilters() {
-    const filters = ['patientNameFilter', 'diagnosisFilter', 'confidenceFilter', 'dateFromFilter'];
-    const sortBy = document.getElementById('sortByECG');
-    
-    filters.forEach(filterId => {
-        const element = document.getElementById(filterId);
-        if (element) {
-            element.addEventListener('input', filterECGTable);
-            element.addEventListener('change', filterECGTable);
-        }
-    });
-    
-    if (sortBy) {
-        sortBy.addEventListener('change', sortECGTable);
-    }
-    
-    // Clear filters button
-    const clearBtn = document.querySelector('.clear-filters-btn');
-    if (clearBtn) {
-        clearBtn.addEventListener('click', clearECGFilters);
-    }
-    
-    // Export button
-    const exportBtn = document.querySelector('.export-ecg-btn');
-    if (exportBtn) {
-        exportBtn.addEventListener('click', exportECGData);
-    }
-}
-
-function initializeEventHandlers() {
-    // View visit details
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('[data-action="view"]')) {
-            const visitId = e.target.closest('[data-visit-id]').dataset.visitId;
-            window.location.href = `/visit/${visitId}`;
-        }
-        
-        if (e.target.closest('[data-action="print"]')) {
-            const visitId = e.target.closest('[data-visit-id]').dataset.visitId;
-            window.open(`/visit/${visitId}/print`, '_blank');
-        }
-    });
-    
-    // ECG Details Modal
-    $('#ecgDetailsModal').on('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const visitId = button.getAttribute('data-visit-id');
-        loadECGDetails(visitId);
-    });
-    
-    // ECG Viewer Modal
-    $('#ecgViewerModal').on('show.bs.modal', function(event) {
-        const button = event.relatedTarget;
-        const visitId = button.getAttribute('data-visit-id');
-        loadECGViewer(visitId);
-    });
-}
-
-function filterECGTable() {
-    const nameFilter = document.getElementById('patientNameFilter').value.toLowerCase();
-    const diagnosisFilter = document.getElementById('diagnosisFilter').value;
-    const confidenceFilter = parseFloat(document.getElementById('confidenceFilter').value) || 0;
-    const dateFilter = document.getElementById('dateFromFilter').value;
-    
-    const rows = document.querySelectorAll('#ecgTable tbody tr');
-    let visibleCount = 0;
-    
-    rows.forEach(row => {
-        let show = true;
-        
-        // Patient name filter
-        if (nameFilter) {
-            const patientCell = row.cells[1];
-            const patientName = patientCell.textContent.toLowerCase();
-            if (!patientName.includes(nameFilter)) {
-                show = false;
-            }
-        }
-        
-        // Diagnosis filter
-        if (diagnosisFilter) {
-            const diagnosisCell = row.cells[3];
-            const diagnosisText = diagnosisCell.textContent;
-            if (!diagnosisText.includes(diagnosisFilter)) {
-                show = false;
-            }
-        }
-        
-        // Confidence filter
-        if (confidenceFilter > 0) {
-            const confidenceCell = row.cells[4];
-            const confidenceText = confidenceCell.querySelector('.badge').textContent;
-            const confidence = parseFloat(confidenceText.replace('%', '')) / 100;
-            if (confidence < confidenceFilter) {
-                show = false;
-            }
-        }
-        
-        // Date filter
-        if (dateFilter) {
-            const dateCell = row.cells[2];
-            const rowDate = dateCell.querySelector('.badge').textContent;
-            if (rowDate < dateFilter) {
-                show = false;
-            }
-        }
-        
-        row.style.display = show ? '' : 'none';
-        if (show) visibleCount++;
-    });
-    
-    document.getElementById('ecgCount').textContent = visibleCount;
-}
-
-function sortECGTable() {
-    const sortBy = document.getElementById('sortByECG').value;
-    const tbody = document.querySelector('#ecgTable tbody');
-    const rows = Array.from(tbody.querySelectorAll('tr'));
-    
-    rows.sort((a, b) => {
-        switch (sortBy) {
-            case 'date_desc':
-                return new Date(b.cells[2].querySelector('.badge').textContent) - 
-                       new Date(a.cells[2].querySelector('.badge').textContent);
-            case 'date_asc':
-                return new Date(a.cells[2].querySelector('.badge').textContent) - 
-                       new Date(b.cells[2].querySelector('.badge').textContent);
-            case 'patient_asc':
-                return a.cells[1].textContent.trim().localeCompare(b.cells[1].textContent.trim());
-            case 'patient_desc':
-                return b.cells[1].textContent.trim().localeCompare(a.cells[1].textContent.trim());
-            case 'confidence_desc':
-                const confA = parseFloat(a.cells[4].querySelector('.badge').textContent.replace('%', ''));
-                const confB = parseFloat(b.cells[4].querySelector('.badge').textContent.replace('%', ''));
-                return confB - confA;
-            case 'confidence_asc':
-                const confA2 = parseFloat(a.cells[4].querySelector('.badge').textContent.replace('%', ''));
-                const confB2 = parseFloat(b.cells[4].querySelector('.badge').textContent.replace('%', ''));
-                return confA2 - confB2;
-            default:
-                return 0;
-        }
-    });
-    
-    rows.forEach(row => tbody.appendChild(row));
-}
-
-function clearECGFilters() {
-    document.getElementById('patientNameFilter').value = '';
-    document.getElementById('diagnosisFilter').value = '';
-    document.getElementById('confidenceFilter').value = '';
-    document.getElementById('dateFromFilter').value = '';
-    document.getElementById('sortByECG').value = 'date_desc';
-    
-    filterECGTable();
-    sortECGTable();
-}
-
-function exportECGData() {
-    window.location.href = '/ecg_history/export';
-}
-
-function loadECGDetails(visitId) {
-    const content = document.getElementById('ecgDetailsContent');
-    
-    fetch(`/api/ecg_details/${visitId}`)
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                content.innerHTML = renderECGDetails(data.analysis);
-            } else {
-                content.innerHTML = `<div class="alert alert-danger">Error loading ECG details: ${data.error}</div>`;
-            }
-        })
-        .catch(error => {
-            content.innerHTML = `<div class="alert alert-danger">Network error: ${error.message}</div>`;
-        });
-}
-
-function renderECGDetails(analysis) {
-    let html = `
-        <div class="row">
-            <div class="col-md-6">
-                <h6>Primary Diagnosis:</h6>
-                <div class="alert alert-info">
-                    <strong>${analysis.primary_diagnosis.name}</strong>
-                    <br>
-                    <small>Confidence: ${(analysis.primary_diagnosis.probability * 100).toFixed(1)}%</small>
-                </div>
-            </div>
-            <div class="col-md-6">
-                <h6>Analysis Summary:</h6>
-                <p>${analysis.summary}</p>
-            </div>
-        </div>
-        <h6>All Findings:</h6>
-        <div class="row">
-    `;
-    
-    const classNames = {
-        'SNR': 'Sinus Rhythm',
-        'AF': 'Atrial Fibrillation',
-        'IAVB': 'AV Block',
-        'LBBB': 'Left Bundle Branch Block',
-        'RBBB': 'Right Bundle Branch Block',
-        'PAC': 'Premature Atrial Contraction',
-        'PVC': 'Premature Ventricular Contraction',
-        'STD': 'ST Depression',
-        'STE': 'ST Elevation'
-    };
-    
-    Object.entries(analysis.probabilities).forEach(([abbr, prob]) => {
-        const percentage = (prob * 100).toFixed(1);
-        const className = classNames[abbr] || abbr;
-        
-        html += `
-            <div class="col-md-6 mb-2">
-                <small><strong>${className} (${abbr}):</strong> ${percentage}%</small>
-                <div class="progress" style="height:8px;">
-                    <div class="progress-bar" role="progressbar" style="width:${percentage}%"></div>
-                </div>
-            </div>
-        `;
-    });
-    
-    html += '</div>';
-    return html;
-}
-
-function loadECGViewer(visitId) {
-    const content = document.getElementById('ecgViewerContent');
-    
-    content.innerHTML = `
-        <div class="text-center">
-            <div class="alert alert-info">
-                <i class="fas fa-info-circle"></i> ECG Waveform Viewer
-            </div>
-            <p>ECG waveform visualization will be implemented here.</p>
-            <p class="text-muted">Visit ID: ${visitId}</p>
-            <button class="btn btn-primary" onclick="window.open('/visit/${visitId}', '_blank')">
-                <i class="fas fa-external-link-alt"></i> View Full Visit Details
-            </button>
-        </div>
-    `;
+function changePerPage(value) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('per_page', value);
+    url.searchParams.set('page', '1');
+    window.location.href = url.toString();
 }
 </script>
-{% endblock %}
-
-{% block extra_css %}
-<style>
-.ecg-id-circle {
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
-    background-color: #e74c3c;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: white;
-    font-size: 14px;
-}
-
-.confidence-display .progress {
-    height: 4px;
-}
-
-.ecg-diagnosis .badge {
-    font-size: 0.75em;
-}
-
-.file-status {
-    font-size: 0.8em;
-}
-
-.clinical-diagnosis {
-    font-size: 0.85em;
-    line-height: 1.2;
-}
-
-.btn-group-vertical .btn {
-    font-size: 0.75em;
-    padding: 0.25rem 0.5rem;
-}
-
-.card.bg-primary, .card.bg-success, .card.bg-warning, .card.bg-info {
-    border: none;
-}
-
-.card.bg-primary .card-body, 
-.card.bg-success .card-body, 
-.card.bg-warning .card-body, 
-.card.bg-info .card-body {
-    padding: 1rem;
-}
-
-.progress-bar.bg-success {
-    background-color: #28a745 !important;
-}
-
-.progress-bar.bg-warning {
-    background-color: #ffc107 !important;
-}
-
-.progress-bar.bg-danger {
-    background-color: #dc3545 !important;
-}
-
-#ecgTable th {
-    font-size: 0.85em;
-    padding: 0.75rem 0.5rem;
-}
-
-#ecgTable td {
-    padding: 0.75rem 0.5rem;
-    vertical-align: middle;
-}
-
-.modal-xl {
-    max-width: 1200px;
-}
-</style>
 {% endblock %}

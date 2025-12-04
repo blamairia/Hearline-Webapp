@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Style Guide | Heartline Medical Clinic{% endblock %}
+
+{% block content %}
+<div class="page-container">
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="page-header-content">
+            <div class="page-title-section">
+                <h1 class="page-title">
+                    <i class="fas fa-swatchbook"></i>
+                    Style Guide
+                </h1>
+                <p class="page-subtitle">Design System Verification & Component Library</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Colors -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Semantic Colors (Theme Aware)</h5>
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3 mb-3">
+                    <div class="p-4 rounded text-center border" style="background-color: var(--bg-page); color: var(--text-primary);">
+                        --bg-page
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="p-4 rounded text-center border" style="background-color: var(--bg-card); color: var(--text-primary);">
+                        --bg-card
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="p-4 rounded text-center border" style="background-color: var(--bg-input); color: var(--text-primary);">
+                        --bg-input
+                    </div>
+                </div>
+                <div class="col-md-3 mb-3">
+                    <div class="p-4 rounded text-center border" style="background-color: var(--bg-hover); color: var(--text-primary);">
+                        --bg-hover
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Typography -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Typography</h5>
+        </div>
+        <div class="card-body">
+            <h1>Heading 1</h1>
+            <h2>Heading 2</h2>
+            <h3>Heading 3</h3>
+            <h4>Heading 4</h4>
+            <h5>Heading 5</h5>
+            <h6>Heading 6</h6>
+            <p>This is a standard paragraph. It uses <code>--text-primary</code> color. <span class="text-muted">This is muted text using <code>--text-secondary</code>.</span></p>
+        </div>
+    </div>
+
+    <!-- Buttons -->
+    <div class="card mb-4">
+        <div class="card-header">
+            <h5>Buttons</h5>
+        </div>
+        <div class="card-body">
+            <button class="btn btn-primary">Primary</button>
+            <button class="btn btn-secondary">Secondary</button>
+            <button class="btn btn-success">Success</button>
+            <button class="btn btn-danger">Danger</button>
+            <button class="btn btn-warning">Warning</button>
+            <button class="btn btn-outline-primary">Outline</button>
+        </div>
+    </div>
+
+    <!-- Forms -->
+    <div class="form-card mb-4">
+        <div class="form-title">Form Elements</div>
+        <div class="row">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Text Input</label>
+                    <input type="text" class="form-control" placeholder="Enter text...">
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label class="form-label">Select Input</label>
+                    <select class="form-control">
+                        <option>Option 1</option>
+                        <option>Option 2</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Grid -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-heartbeat"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">120</span>
+                <span class="stat-label">Heart Rate</span>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon" style="color: var(--success-500);">
+                <i class="fas fa-check"></i>
+            </div>
+            <div class="stat-content">
+                <span class="stat-value">Normal</span>
+                <span class="stat-label">Status</span>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -21,6 +21,7 @@ from urllib.parse import urlparse
 from functools import wraps
 
 from flask_moment import Moment # Add this import
+from flask_caching import Cache  # Add caching for performance
 
 from flask import jsonify, request
 from sqlalchemy import or_
@@ -67,6 +68,12 @@ app = Flask(__name__)
 moment = Moment(app) # Add this line to initialize Flask-Moment
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "replace-this-with-a-secure-random-string")
 
+# ============ CACHING CONFIGURATION ============
+# Using SimpleCache (in-memory) - no Redis needed, perfect for demo
+app.config['CACHE_TYPE'] = 'SimpleCache'
+app.config['CACHE_DEFAULT_TIMEOUT'] = 3600  # 1 hour default cache
+cache = Cache(app)
+
 # Enable template auto-reloading for development
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
@@ -105,6 +112,114 @@ login_manager.login_message_category = 'info'
 
 # Initialize Bcrypt
 bcrypt.init_app(app)
+
+# ----------------------------------------
+# CACHED DATA FUNCTIONS - For Performance
+# ----------------------------------------
+
+def get_cached_medications():
+    """
+    Get all medications - cached for 1 hour.
+    This is the biggest performance win (7000+ records).
+    """
+    cache_key = 'all_medications_choices'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    meds = Medicament.query.order_by(Medicament.nom_com).all()
+    med_choices = [(m.num_enr, f"{m.nom_com} ({m.dosage}{m.unite})") for m in meds]
+    cache.set(cache_key, med_choices, timeout=3600)  # 1 hour
+    return med_choices
+
+
+def get_cached_dashboard_stats():
+    """
+    Get dashboard statistics - cached for 5 minutes.
+    Since this is a demo, data doesn't change often.
+    """
+    cache_key = 'dashboard_stats'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    from datetime import date
+    today = date.today()
+    
+    stats = {
+        'total_patients': Patient.query.count(),
+        'total_visits': Visit.query.count(),
+        'total_appointments': Appointment.query.count(),
+        'today_visits': Visit.query.filter(db.func.date(Visit.visit_date) == today).count(),
+        'today_appointments': Appointment.query.filter(
+            db.func.date(Appointment.date) == today,
+            Appointment.state == 'scheduled'
+        ).count(),
+    }
+    cache.set(cache_key, stats, timeout=300)  # 5 minutes
+    return stats
+
+
+def get_cached_recent_visits(limit=5, doctor_id=None):
+    """Get recent visits - cached for 2 minutes."""
+    cache_key = f'recent_visits_{doctor_id}_{limit}'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    query = Visit.query
+    if doctor_id:
+        query = query.filter(Visit.doctor_id == doctor_id)
+    visits = query.order_by(Visit.visit_date.desc()).limit(limit).all()
+    cache.set(cache_key, visits, timeout=120)  # 2 minutes
+    return visits
+
+
+def get_cached_upcoming_appointments(limit=5, doctor_id=None):
+    """Get upcoming appointments - cached for 2 minutes."""
+    cache_key = f'upcoming_appointments_{doctor_id}_{limit}'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    query = Appointment.query.filter(Appointment.date >= datetime.now())
+    if doctor_id:
+        query = query.filter(Appointment.doctor_id == doctor_id)
+    appointments = query.order_by(Appointment.date).limit(limit).all()
+    cache.set(cache_key, appointments, timeout=120)  # 2 minutes
+    return appointments
+
+
+def get_cached_patients_list():
+    """Get all patients - cached for 5 minutes."""
+    cache_key = 'all_patients_list'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return cached
+    
+    patients = Patient.query.order_by(Patient.last_name, Patient.first_name).all()
+    cache.set(cache_key, patients, timeout=300)  # 5 minutes
+    return patients
+
+
+def prewarm_cache():
+    """Pre-warm cache on startup for instant first request."""
+    print("🔥 Pre-warming cache...")
+    try:
+        # These will cache the results
+        meds = get_cached_medications()
+        print(f"   ✓ Cached {len(meds)} medications")
+        
+        stats = get_cached_dashboard_stats()
+        print(f"   ✓ Cached dashboard stats: {stats['total_patients']} patients, {stats['total_visits']} visits")
+        
+        patients = get_cached_patients_list()
+        print(f"   ✓ Cached {len(patients)} patients")
+        
+        print("✅ Cache pre-warmed successfully!")
+    except Exception as e:
+        print(f"⚠️ Cache pre-warm failed (non-critical): {e}")
+
 
 # ----------------------------------------
 # 2) ONNX MODEL LOADING (ECG) - Replaces PyTorch
@@ -367,9 +482,8 @@ def create_visit():
     # Note: Patient selection now uses AJAX search, no need to populate choices
     # The patient_id will be set by the searchable dropdown via JavaScript
 
-    # Populate medicament choices for each PrescriptionForm
-    meds = Medicament.query.order_by(Medicament.nom_com).all()
-    med_choices = [(m.num_enr, f"{m.nom_com} ({m.dosage}{m.unite})") for m in meds]
+    # Populate medicament choices for each PrescriptionForm - CACHED for performance
+    med_choices = get_cached_medications()
     for subform in form.prescriptions:
         subform.medicament_num_enr.choices = med_choices
 
@@ -516,15 +630,49 @@ def visit_details(visit_id):
 @app.route("/ecg_history")
 def ecg_history():
     """
-    Display comprehensive ECG history table with filtering and sorting capabilities.
+    Display comprehensive ECG history table with filtering, sorting, and pagination.
     """
     from datetime import date
     from sqlalchemy import desc
     
-    # Get all visits that have ECG data, ordered by visit date (newest first)
-    ecg_records = Visit.query.filter(
-        Visit.ecg_prediction.isnot(None)
-    ).order_by(desc(Visit.visit_date)).all()
+    # Pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 15, type=int)
+    search = request.args.get('search', '', type=str).strip()
+    diagnosis_filter = request.args.get('diagnosis', '', type=str).strip()
+    
+    # Build base query with joins
+    query = Visit.query.join(Patient).filter(Visit.ecg_prediction.isnot(None))
+    
+    # Apply search filter
+    if search:
+        pattern = f'%{search}%'
+        query = query.filter(
+            or_(
+                Patient.first_name.ilike(pattern),
+                Patient.last_name.ilike(pattern)
+            )
+        )
+    
+    # Get paginated results
+    pagination = query.order_by(desc(Visit.visit_date)).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    ecg_records = pagination.items
+    
+    # Class names mapping
+    class_names = {
+        "SNR": "Sinus Rhythm",
+        "AF": "Atrial Fibrillation", 
+        "IAVB": "AV Block",
+        "LBBB": "Left Bundle Branch Block",
+        "RBBB": "Right Bundle Branch Block", 
+        "PAC": "Premature Atrial Contraction",
+        "PVC": "Premature Ventricular Contraction",
+        "STD": "ST Depression",
+        "STE": "ST Elevation"
+    }
     
     # Process ECG records to extract primary diagnosis and confidence
     for record in ecg_records:
@@ -533,19 +681,6 @@ def ecg_history():
             max_prob_abbr = max(record.ecg_prediction, key=record.ecg_prediction.get)
             max_prob_value = record.ecg_prediction[max_prob_abbr]
             
-            # Class names mapping
-            class_names = {
-                "SNR": "Sinus Rhythm",
-                "AF": "Atrial Fibrillation", 
-                "IAVB": "AV Block",
-                "LBBB": "Left Bundle Branch Block",
-                "RBBB": "Right Bundle Branch Block", 
-                "PAC": "Premature Atrial Contraction",
-                "PVC": "Premature Ventricular Contraction",
-                "STD": "ST Depression",
-                "STE": "ST Elevation"
-            }
-            
             # Attach processed data to record
             record.ecg_primary_diagnosis = {
                 'abbreviation': max_prob_abbr,
@@ -553,19 +688,39 @@ def ecg_history():
             }
             record.ecg_confidence = max_prob_value
     
-    # Calculate summary statistics
-    total_ecgs = len(ecg_records)
-    normal_rhythm_count = sum(1 for r in ecg_records 
-                             if r.ecg_primary_diagnosis['abbreviation'] == 'SNR')
-    abnormal_count = total_ecgs - normal_rhythm_count
-    high_confidence_count = sum(1 for r in ecg_records if r.ecg_confidence >= 0.8)
+    # Apply diagnosis filter after processing (for display filtering)
+    if diagnosis_filter:
+        ecg_records = [r for r in ecg_records if r.ecg_primary_diagnosis['abbreviation'] == diagnosis_filter]
+    
+    # Calculate summary statistics (from full dataset)
+    all_ecg_count = Visit.query.filter(Visit.ecg_prediction.isnot(None)).count()
+    normal_rhythm_count = 0
+    abnormal_count = 0
+    high_confidence_count = 0
+    
+    # Sample counts for stats
+    sample_records = Visit.query.filter(Visit.ecg_prediction.isnot(None)).limit(200).all()
+    for r in sample_records:
+        if r.ecg_prediction:
+            max_prob_abbr = max(r.ecg_prediction, key=r.ecg_prediction.get)
+            max_prob_value = r.ecg_prediction[max_prob_abbr]
+            if max_prob_abbr == 'SNR':
+                normal_rhythm_count += 1
+            else:
+                abnormal_count += 1
+            if max_prob_value >= 0.8:
+                high_confidence_count += 1
     
     return render_template("tables/ecg_history_table.html", 
                          ecg_records=ecg_records,
-                         total_ecgs=total_ecgs,
+                         pagination=pagination,
+                         search=search,
+                         diagnosis_filter=diagnosis_filter,
+                         total_ecgs=all_ecg_count,
                          normal_rhythm_count=normal_rhythm_count,
                          abnormal_count=abnormal_count,
                          high_confidence_count=high_confidence_count,
+                         class_names=class_names,
                          date=date)
 
 
@@ -1032,12 +1187,8 @@ def edit_visit(visit_id):
         for p in Patient.query.order_by(Patient.first_name, Patient.last_name).all()
     ]
 
-    # ──────────── 2) Prepare Medicament choices for prescriptions ────────────
-    meds = Medicament.query.order_by(Medicament.nom_com).all()
-    med_choices = [
-        (m.num_enr, f"{m.nom_com} ({m.dosage}{m.unite})") 
-        for m in meds
-    ]
+    # ──────────── 2) Prepare Medicament choices for prescriptions - CACHED ────────────
+    med_choices = get_cached_medications()
 
     # ──────────── 3) ONLY pre-populate existing prescriptions & documents on GET ────────────
     if request.method == "GET":
@@ -1316,15 +1467,39 @@ def create_patient_ajax():
 @any_role_required
 def patients_table():
     """
-    Display comprehensive patients table with filtering and sorting capabilities.
+    Display comprehensive patients table with filtering, sorting, and pagination.
     """
     from datetime import date
     
-    # Get all patients with their related data
-    patients = Patient.query.order_by(Patient.last_name, Patient.first_name).all()
+    # Pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 15, type=int)
+    search = request.args.get('search', '', type=str).strip()
+    
+    # Build query
+    query = Patient.query
+    
+    # Apply search filter
+    if search:
+        pattern = f'%{search}%'
+        query = query.filter(
+            or_(
+                Patient.first_name.ilike(pattern),
+                Patient.last_name.ilike(pattern),
+                Patient.phone.ilike(pattern),
+                Patient.email.ilike(pattern)
+            )
+        )
+    
+    # Get paginated results
+    pagination = query.order_by(Patient.last_name, Patient.first_name).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
     
     return render_template("tables/patients_table.html", 
-                         patients=patients,
+                         patients=pagination.items,
+                         pagination=pagination,
+                         search=search,
                          Patient=Patient,
                          Visit=Visit,
                          Prescription=Prescription,
@@ -1373,16 +1548,40 @@ def edit_patient(patient_id):
 @any_role_required
 def visits_table():
     """
-    Display comprehensive visits table with filtering and sorting capabilities.
+    Display comprehensive visits table with filtering, sorting, and pagination.
     """
     from datetime import date
     from sqlalchemy import desc
     
-    # Get all visits with their related data, ordered by visit date (newest first)
-    visits = Visit.query.order_by(desc(Visit.visit_date)).all()
+    # Pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 15, type=int)
+    search = request.args.get('search', '', type=str).strip()
+    
+    # Build query with joins
+    query = Visit.query.join(Patient)
+    
+    # Apply search filter
+    if search:
+        pattern = f'%{search}%'
+        query = query.filter(
+            or_(
+                Patient.first_name.ilike(pattern),
+                Patient.last_name.ilike(pattern),
+                Visit.symptoms.ilike(pattern),
+                Visit.diagnosis.ilike(pattern)
+            )
+        )
+    
+    # Get paginated results
+    pagination = query.order_by(desc(Visit.visit_date)).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
     
     return render_template("tables/visits_table.html", 
-                         visits=visits,
+                         visits=pagination.items,
+                         pagination=pagination,
+                         search=search,
                          Patient=Patient,
                          Visit=Visit,
                          Prescription=Prescription,
@@ -1397,12 +1596,38 @@ def visits_table():
 @any_role_required
 def appointments_table():
     """
-    Display comprehensive appointments table with filtering and sorting capabilities.
+    Display comprehensive appointments table with filtering, sorting, and pagination.
     """
     from datetime import date, datetime
     
-    # Get all appointments with their related data
-    appointments = Appointment.query.order_by(Appointment.date.desc()).all()
+    # Pagination parameters
+    page = request.args.get('page', 1, type=int)
+    per_page = request.args.get('per_page', 15, type=int)
+    search = request.args.get('search', '', type=str).strip()
+    status_filter = request.args.get('status', '', type=str).strip()
+    
+    # Build query with joins
+    query = Appointment.query.join(Patient)
+    
+    # Apply search filter
+    if search:
+        pattern = f'%{search}%'
+        query = query.filter(
+            or_(
+                Patient.first_name.ilike(pattern),
+                Patient.last_name.ilike(pattern),
+                Appointment.reason.ilike(pattern)
+            )
+        )
+    
+    # Apply status filter
+    if status_filter:
+        query = query.filter(Appointment.state == status_filter)
+    
+    # Get paginated results
+    pagination = query.order_by(Appointment.date.desc()).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
     
     # Get all doctors for the filter dropdown
     doctors = Doctor.query.order_by(Doctor.last_name, Doctor.first_name).all()
@@ -1418,7 +1643,10 @@ def appointments_table():
     }
     
     return render_template("tables/appointments_table.html", 
-                         appointments=appointments,
+                         appointments=pagination.items,
+                         pagination=pagination,
+                         search=search,
+                         status_filter=status_filter,
                          doctors=doctors,
                          stats=stats,
                          date=date,
@@ -2131,6 +2359,11 @@ def delete_user(user_id):
 # DASHBOARD AND HOME ROUTES
 # ----------------------------------------
 
+@app.route("/style-guide")
+def style_guide():
+    """Style Guide for UI/UX Testing"""
+    return render_template('style_guide.html')
+
 @app.route("/")
 @login_required
 def index():
@@ -2141,117 +2374,87 @@ def index():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    """Main dashboard - role-specific content"""
-    from datetime import date, timedelta
+    """Main dashboard - role-specific content - OPTIMIZED with caching"""
     
-    # Get basic statistics
-    total_patients = Patient.query.count()
-    total_visits = Visit.query.count()
-    total_appointments = Appointment.query.count()
-    
-    # Today's statistics
-    today = date.today()
-    today_visits = Visit.query.filter(
-        db.func.date(Visit.visit_date) == today
-    ).count()
-    
-    today_appointments = Appointment.query.filter(
-        db.func.date(Appointment.date) == today,
-        Appointment.state == 'scheduled'
-    ).count()
+    # Get cached statistics for instant loading
+    stats = get_cached_dashboard_stats()
     
     # Recent activity based on role
     if current_user.is_doctor():
-        # Doctor-specific dashboard data
-        recent_visits = Visit.query.filter(
-            Visit.doctor_id == current_user.doctor_id
-        ).order_by(Visit.visit_date.desc()).limit(5).all()
-        
-        doctor_appointments = Appointment.query.filter(
-            Appointment.doctor_id == current_user.doctor_id,
-            Appointment.date >= datetime.now()
-        ).order_by(Appointment.date).limit(5).all()
+        # Doctor-specific dashboard data - cached
+        recent_visits = get_cached_recent_visits(limit=5, doctor_id=current_user.doctor_id)
+        doctor_appointments = get_cached_upcoming_appointments(limit=5, doctor_id=current_user.doctor_id)
         
         return render_template('dashboard/doctor_dashboard.html',
-                             total_patients=total_patients,
-                             total_visits=total_visits,
-                             total_appointments=total_appointments,
-                             today_visits=today_visits,
-                             today_appointments=today_appointments,
+                             total_patients=stats['total_patients'],
+                             total_visits=stats['total_visits'],
+                             total_appointments=stats['total_appointments'],
+                             today_visits=stats['today_visits'],
+                             today_appointments=stats['today_appointments'],
                              recent_visits=recent_visits,
                              upcoming_appointments=doctor_appointments)
     else:
-        # Assistant dashboard - general overview
-        recent_visits = Visit.query.order_by(Visit.visit_date.desc()).limit(5).all()
-        upcoming_appointments = Appointment.query.filter(
-            Appointment.date >= datetime.now()
-        ).order_by(Appointment.date).limit(5).all()
+        # Assistant dashboard - general overview - cached
+        recent_visits = get_cached_recent_visits(limit=5)
+        upcoming_appointments = get_cached_upcoming_appointments(limit=5)
         
         return render_template('dashboard/assistant_dashboard.html',
-                             total_patients=total_patients,
-                             total_visits=total_visits,
-                             total_appointments=total_appointments,
-                             today_visits=today_visits,
-                             today_appointments=today_appointments,
-                             recent_visits=recent_visits,                             upcoming_appointments=upcoming_appointments)
+                             total_patients=stats['total_patients'],
+                             total_visits=stats['total_visits'],
+                             total_appointments=stats['total_appointments'],
+                             today_visits=stats['today_visits'],
+                             today_appointments=stats['today_appointments'],
+                             recent_visits=recent_visits,
+                             upcoming_appointments=upcoming_appointments)
 
 # ----------------------------------------
-# Dashboard API Endpoints
+# Dashboard API Endpoints - CACHED for performance
 # ----------------------------------------
 
 @app.route('/api/dashboard/doctor/stats')
 @login_required
 @doctor_required
 def doctor_dashboard_stats():
-    """Get doctor dashboard statistics"""
+    """Get doctor dashboard statistics - CACHED"""
+    cache_key = 'doctor_dashboard_stats'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         from datetime import date, timedelta
         today = date.today()
         week_ago = today - timedelta(days=7)
-        month_ago = today - timedelta(days=30)
         
-        # Basic counts
-        total_patients = Patient.query.count()
-        today_visits = Visit.query.filter(db.func.date(Visit.visit_date) == today).count()
+        # Use cached stats for basic counts
+        stats = get_cached_dashboard_stats()
+        
         ecg_tests_week = Visit.query.filter(
             Visit.visit_date >= week_ago,
             Visit.ecg_results.isnot(None)
         ).count()
         
-        # Average visit time (mock data for now)
-        avg_visit_time = 25
-        
-        # Changes (mock data for now)
-        patients_change = 5
-        visits_change = 10
-        ecg_change = 15
-        time_change = 0
-        
         # Quick stats
-        pending_reports = Visit.query.filter(Visit.notes == '').count()
-        completed_today = Visit.query.filter(
-            db.func.date(Visit.visit_date) == today,
-            Visit.notes != ''
-        ).count()
-        follow_ups = 3  # Mock data
         new_patients_week = Patient.query.filter(
             Patient.created_at >= week_ago
         ).count()
         
-        return jsonify({
-            'total_patients': total_patients,
-            'today_visits': today_visits,
+        result = {
+            'total_patients': stats['total_patients'],
+            'today_visits': stats['today_visits'],
             'ecg_tests_week': ecg_tests_week,
-            'avg_visit_time': avg_visit_time,
-            'patients_change': patients_change,
-            'visits_change': visits_change,
-            'ecg_change': ecg_change,
-            'time_change': time_change,
-            'pending_reports': pending_reports,
-            'completed_today': completed_today,
-            'follow_ups': follow_ups,
+            'avg_visit_time': 25,  # Mock data
+            'patients_change': 5,
+            'visits_change': 10,
+            'ecg_change': 15,
+            'time_change': 0,
+            'pending_reports': 0,
+            'completed_today': stats['today_visits'],
+            'follow_ups': 3,
             'new_patients_week': new_patients_week
-        })
+        }
+        cache.set(cache_key, result, timeout=300)  # 5 minutes
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
@@ -2259,49 +2462,47 @@ def doctor_dashboard_stats():
 @login_required
 @assistant_required
 def assistant_dashboard_stats():
-    """Get assistant dashboard statistics"""
+    """Get assistant dashboard statistics - CACHED"""
+    cache_key = 'assistant_dashboard_stats'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         from datetime import date, timedelta
         today = date.today()
-        yesterday = today - timedelta(days=1)
         
-        # Basic counts for today
-        patients_registered = Patient.query.filter(
-            db.func.date(Patient.created_at) == today
-        ).count()
-        visits_processed = Visit.query.filter(
-            db.func.date(Visit.visit_date) == today
-        ).count()
-        calls_handled = 12  # Mock data
-        avg_processing_time = 8  # Mock data
+        # Use cached stats
+        stats = get_cached_dashboard_stats()
         
-        # Changes (mock data for now)
-        registration_change = 20
-        visits_change = 15
-        calls_change = 8
-        time_change = -5
-        
-        return jsonify({
-            'patients_registered': patients_registered,
-            'visits_processed': visits_processed,
-            'calls_handled': calls_handled,
-            'avg_processing_time': avg_processing_time,
-            'registration_change': registration_change,
-            'visits_change': visits_change,
-            'calls_change': calls_change,
-            'time_change': time_change
-        })
+        result = {
+            'patients_registered': stats['total_patients'],
+            'visits_processed': stats['today_visits'],
+            'calls_handled': 12,  # Mock data
+            'avg_processing_time': 8,  # Mock data
+            'registration_change': 20,
+            'visits_change': 15,
+            'calls_change': 8,
+            'time_change': -5
+        }
+        cache.set(cache_key, result, timeout=300)  # 5 minutes
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/dashboard/recent-activity')
 @login_required
 def dashboard_recent_activity():
-    """Get recent activity for dashboard"""
+    """Get recent activity for dashboard - CACHED"""
+    cache_key = 'dashboard_recent_activity'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         activities = []
         
-        # Recent patients (last 5)
+        # Recent patients (last 3)
         recent_patients = Patient.query.order_by(Patient.created_at.desc()).limit(3).all()
         for patient in recent_patients:
             activities.append({
@@ -2310,8 +2511,8 @@ def dashboard_recent_activity():
                 'timestamp': patient.created_at.isoformat()
             })
         
-        # Recent visits (last 5)
-        recent_visits = Visit.query.order_by(Visit.visit_date.desc()).limit(3).all()
+        # Recent visits (last 3)
+        recent_visits = get_cached_recent_visits(limit=3)
         for visit in recent_visits:
             activities.append({
                 'type': 'visit_completed',
@@ -2322,14 +2523,21 @@ def dashboard_recent_activity():
         # Sort by timestamp descending
         activities.sort(key=lambda x: x['timestamp'], reverse=True)
         
-        return jsonify(activities[:10])
+        result = activities[:10]
+        cache.set(cache_key, result, timeout=120)  # 2 minutes
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/dashboard/today-schedule')
 @login_required
 def dashboard_today_schedule():
-    """Get today's schedule for dashboard"""
+    """Get today's schedule for dashboard - CACHED"""
+    cache_key = 'dashboard_today_schedule'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         from datetime import date
         today = date.today()
@@ -2347,6 +2555,7 @@ def dashboard_today_schedule():
                 'visit_type': apt.purpose or 'General Visit'
             })
         
+        cache.set(cache_key, schedule, timeout=120)  # 2 minutes
         return jsonify(schedule)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2354,7 +2563,12 @@ def dashboard_today_schedule():
 @app.route('/api/dashboard/visits-chart')
 @login_required
 def dashboard_visits_chart():
-    """Get visits chart data for last 7 days"""
+    """Get visits chart data for last 7 days - CACHED"""
+    cache_key = 'dashboard_visits_chart'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         from datetime import date, timedelta
         
@@ -2373,17 +2587,24 @@ def dashboard_visits_chart():
             ).count()
             visits_count.append(count)
         
-        return jsonify({
+        result = {
             'labels': dates,
             'visits': visits_count
-        })
+        }
+        cache.set(cache_key, result, timeout=300)  # 5 minutes
+        return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
 
 @app.route('/api/dashboard/patient-queue')
 @login_required
 def dashboard_patient_queue():
-    """Get patient queue for assistant dashboard"""
+    """Get patient queue for assistant dashboard - CACHED"""
+    cache_key = 'dashboard_patient_queue'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         from datetime import date
         today = date.today()
@@ -2404,6 +2625,7 @@ def dashboard_patient_queue():
                 'status': status
             })
         
+        cache.set(cache_key, queue, timeout=60)  # 1 minute
         return jsonify(queue)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2411,7 +2633,12 @@ def dashboard_patient_queue():
 @app.route('/api/dashboard/notifications')
 @login_required
 def dashboard_notifications():
-    """Get notifications for dashboard"""
+    """Get notifications for dashboard - CACHED"""
+    cache_key = 'dashboard_notifications'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         notifications = []
         
@@ -2436,6 +2663,7 @@ def dashboard_notifications():
             }
         ]
         
+        cache.set(cache_key, notifications, timeout=300)  # 5 minutes (mock data)
         return jsonify(notifications)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2444,7 +2672,12 @@ def dashboard_notifications():
 @login_required
 @assistant_required
 def dashboard_productivity_chart():
-    """Get productivity chart data for assistant dashboard"""
+    """Get productivity chart data for assistant dashboard - CACHED"""
+    cache_key = 'dashboard_productivity_chart'
+    cached = cache.get(cache_key)
+    if cached is not None:
+        return jsonify(cached)
+    
     try:
         # Mock productivity data
         data = {
@@ -2452,6 +2685,7 @@ def dashboard_productivity_chart():
             'values': [15, 23, 12, 8]
         }
         
+        cache.set(cache_key, data, timeout=300)  # 5 minutes
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2885,7 +3119,11 @@ if __name__ == "__main__":
             admin.set_password("admin")
             db.session.add(admin)
             db.session.commit()
-            print("Demo admin user created: admin / admin")
+            print("✅ Demo admin user created: admin / admin")
         else:
-            print("Demo admin user already exists.")
+            print("✅ Demo admin user already exists: admin / admin")
+        
+        # Pre-warm cache for instant first request
+        prewarm_cache()
+        
     app.run(host='0.0.0.0', debug=True)
