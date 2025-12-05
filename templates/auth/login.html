@@ -98,6 +98,15 @@
   .hero-inner { grid-template-columns: 1fr; }
   .hero-points { justify-items: center; }
 }
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
+}
 </style>
 {% endblock %}
 
@@ -177,8 +186,14 @@
           <h3 class="login-heading">Welcome back</h3>
           <div class="login-note">Sign in to continue</div>
 
-          <div class="alert alert-info mb-3">
-            <b>Demo credentials:</b> Username: <code>admin</code> &nbsp; Password: <code>admin</code>
+          <div class="alert alert-primary bg-primary-subtle border-0 mb-4 d-flex align-items-center" role="alert">
+            <i class="fas fa-info-circle text-primary me-3 fs-4"></i>
+            <div>
+                <div class="fw-bold text-primary mb-1">Portfolio Demo Access</div>
+                <div class="small text-primary-emphasis">
+                    Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>admin</strong>
+                </div>
+            </div>
           </div>
 
           <form method="POST">
@@ -214,6 +229,12 @@
             <small class="text-muted">Need help accessing your account? Contact your administrator.</small>
           </div>
         </div>
+      </div>
+
+      <!-- Portfolio Footer -->
+      <div class="text-center mt-4 text-white-50 fade-in-up" style="animation-delay: 0.5s;">
+        <small class="d-block mb-1">Designed & Developed by Billell</small>
+        <small class="opacity-75">Part of Portfolio Showcase</small>
       </div>
     </div>
   </div>
