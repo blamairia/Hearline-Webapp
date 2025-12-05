@@ -586,6 +586,8 @@ def visit_details(visit_id):
     """
     Display comprehensive visit details including ECG analysis, prescriptions, and documents.
     """
+    from datetime import date
+    
     visit = Visit.query.get_or_404(visit_id)
     
     # Get related data
@@ -625,7 +627,8 @@ def visit_details(visit_id):
                          visit=visit, 
                          prescriptions=prescriptions, 
                          documents=documents,
-                         ecg_analysis=ecg_analysis)
+                         ecg_analysis=ecg_analysis,
+                         date=date)
 
 @app.route("/ecg_history")
 def ecg_history():
