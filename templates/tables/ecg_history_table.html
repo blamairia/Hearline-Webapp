@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "includes/macros.html" import stat_card %}
 
 {% block title %}ECG History | Heartline Medical Clinic{% endblock %}
 
@@ -9,17 +10,17 @@
         <div class="page-header-content">
             <div class="page-title-section">
                 <h1 class="page-title">
-                    <i class="fas fa-heartbeat text-danger"></i>
+                    <i class="fas fa-heartbeat text-light"></i>
                     ECG Analysis History
                 </h1>
                 <p class="page-subtitle">AI-powered electrocardiogram analysis results</p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('ecg_history') }}?export=csv" class="btn btn-secondary">
+                <a href="{{ url_for('ecg_history') }}?export=csv" class="btn btn-outline-light">
                     <i class="fas fa-download"></i>
                     <span>Export CSV</span>
                 </a>
-                <a href="{{ url_for('create_visit') }}" class="btn btn-primary">
+                <a href="{{ url_for('create_visit') }}" class="btn btn-primary shadow-sm">
                     <i class="fas fa-plus"></i>
                     <span>New ECG Analysis</span>
                 </a>
@@ -29,42 +30,10 @@
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon danger">
-                <i class="fas fa-heartbeat"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ total_ecgs }}</span>
-                <span class="stat-label">Total ECG Records</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon success">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ normal_rhythm_count }}</span>
-                <span class="stat-label">Normal Sinus Rhythm</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon warning">
-                <i class="fas fa-exclamation-triangle"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ abnormal_count }}</span>
-                <span class="stat-label">Abnormal Findings</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon info">
-                <i class="fas fa-brain"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ high_confidence_count }}</span>
-                <span class="stat-label">High Confidence (≥80%)</span>
-            </div>
-        </div>
+        {{ stat_card('fas fa-heartbeat', total_ecgs, 'Total ECG Records', 'danger') }}
+        {{ stat_card('fas fa-check-circle', normal_rhythm_count, 'Normal Sinus Rhythm', 'success') }}
+        {{ stat_card('fas fa-exclamation-triangle', abnormal_count, 'Abnormal Findings', 'warning') }}
+        {{ stat_card('fas fa-brain', high_confidence_count, 'High Confidence (≥80%)', 'info') }}
     </div>
 
     <!-- Search & Filter Bar -->

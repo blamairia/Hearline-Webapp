@@ -15,13 +15,13 @@
                 <p class="page-subtitle">Patient ID: #{{ patient.id }}</p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('patients_table') }}" class="btn btn-secondary">
-                    <i class="fas fa-arrow-left"></i> Back to List
+                <a href="{{ url_for('patients_table') }}" class="btn btn-outline-light">
+                    <i class="fas fa-arrow-left"></i> Back
                 </a>
-                <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-primary">
-                    <i class="fas fa-edit"></i> Edit Profile
+                <a href="{{ url_for('edit_patient', patient_id=patient.id) }}" class="btn btn-outline-light">
+                    <i class="fas fa-edit"></i> Edit
                 </a>
-                <a href="{{ url_for('create_visit') }}?patient_id={{ patient.id }}" class="btn btn-success">
+                <a href="{{ url_for('create_visit') }}?patient_id={{ patient.id }}" class="btn btn-light text-primary fw-bold shadow-sm">
                     <i class="fas fa-file-medical-alt"></i> New Visit
                 </a>
             </div>
@@ -37,7 +37,7 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-4 text-center">
-                        <div class="avatar avatar-lg mb-3 mx-auto bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" style="width: 80px; height: 80px; font-size: 2rem;">
+                        <div class="avatar avatar-xl mb-3 mx-auto bg-primary text-white rounded-circle d-flex align-items-center justify-content-center">
                             {{ patient.first_name[0] }}{{ patient.last_name[0] }}
                         </div>
                         <h4 class="mb-1">{{ patient.first_name }} {{ patient.last_name }}</h4>
@@ -66,7 +66,7 @@
                     {% if patient.medical_history %}
                     <div class="mt-4">
                         <h6 class="text-muted mb-2"><i class="fas fa-notes-medical me-2"></i> Medical History</h6>
-                        <div class="p-3 bg-light rounded border">
+                        <div class="clinical-note">
                             {{ patient.medical_history }}
                         </div>
                     </div>

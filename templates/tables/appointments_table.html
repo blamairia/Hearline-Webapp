@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "includes/macros.html" import stat_card %}
 
 {% block title %}Appointments | Heartline Medical Clinic{% endblock %}
 
@@ -9,13 +10,13 @@
         <div class="page-header-content">
             <div class="page-title-section">
                 <h1 class="page-title">
-                    <i class="fas fa-calendar-alt text-warning"></i>
+                    <i class="fas fa-calendar-alt text-light"></i>
                     Appointments
                 </h1>
                 <p class="page-subtitle">Schedule and manage patient appointments</p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('create_appointment') }}" class="btn btn-primary">
+                <a href="{{ url_for('create_appointment') }}" class="btn btn-primary shadow-sm">
                     <i class="fas fa-calendar-plus"></i>
                     <span>Schedule Appointment</span>
                 </a>
@@ -25,42 +26,10 @@
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--primary-50); color: var(--primary-500);">
-                <i class="fas fa-calendar-check"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ stats.total }}</span>
-                <span class="stat-label">Total Appointments</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--warning-50); color: var(--warning-600);">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ stats.scheduled }}</span>
-                <span class="stat-label">Scheduled</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--success-50); color: var(--success-500);">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ stats.completed }}</span>
-                <span class="stat-label">Completed</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--info-50); color: var(--info-500);">
-                <i class="fas fa-calendar-day"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ stats.today }}</span>
-                <span class="stat-label">Today</span>
-            </div>
-        </div>
+        {{ stat_card('fas fa-calendar-check', stats.total, 'Total Appointments', 'primary') }}
+        {{ stat_card('fas fa-clock', stats.scheduled, 'Scheduled', 'warning') }}
+        {{ stat_card('fas fa-check-circle', stats.completed, 'Completed', 'success') }}
+        {{ stat_card('fas fa-calendar-day', stats.today, 'Today', 'info') }}
     </div>
 
     <!-- Main Content Card -->

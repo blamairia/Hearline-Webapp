@@ -6,325 +6,235 @@
 <style>
 /* Hide sidebar/nav for login page */
 #sidebar, .sidebar, nav, .navbar, .main-nav { display: none !important; }
+/* Remove reserved sidebar space and toggle on login */
 .main-content, #mainContent { margin-left: 0 !important; background: transparent !important; }
 .content-wrapper { padding: 0 !important; }
 .sidebar-toggle, #sidebarToggle { display: none !important; }
 
-/* Modern Professional Background */
+/* Artistic full-screen background with animated gradient blobs */
 .login-wrap {
   position: relative;
   min-height: 100vh;
   overflow: hidden;
-  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
-  color: #fff;
-  font-family: 'Inter', sans-serif;
+  background: radial-gradient(1200px 800px at -10% -20%, rgba(0,148,255,0.25), transparent 60%),
+              radial-gradient(1000px 700px at 110% 110%, rgba(0,180,255,0.25), transparent 60%),
+              linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
 }
-
-/* Abstract Medical/Tech Background Pattern */
-.bg-pattern {
+.bg-blob {
   position: absolute;
-  top: 0; left: 0; right: 0; bottom: 0;
-  background-image: 
-    radial-gradient(circle at 15% 50%, rgba(56, 189, 248, 0.08) 0%, transparent 25%),
-    radial-gradient(circle at 85% 30%, rgba(99, 102, 241, 0.08) 0%, transparent 25%);
-  z-index: 0;
+  filter: blur(40px);
+  opacity: .5;
+  border-radius: 50%;
+  animation: float 14s ease-in-out infinite;
 }
+.bg-blob.one { width: 420px; height: 420px; background: #5ea3ff; top: -120px; left: -120px; animation-delay: 0s; }
+.bg-blob.two { width: 360px; height: 360px; background: #00c2ff; bottom: -120px; right: -80px; animation-delay: 2s; }
+.bg-blob.three { width: 280px; height: 280px; background: #79ffe1; top: 20%; right: 20%; animation-delay: 4s; opacity: .35; }
+@keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } }
 
-/* Layout */
+/* Inline SVG illustration behind content */
+.bg-illustration { position: absolute; inset: 0; z-index: 0; opacity: .22; pointer-events: none; }
+
+/* Split layout: hero + form */
 .login-grid {
   position: relative;
   z-index: 1;
   display: grid;
   grid-template-columns: 1.2fr 1fr;
-  min-height: 100vh;
+  gap: 2rem;
+  padding: 4.25rem clamp(1.5rem, 6vw, 72px);
 }
-
-/* Left Side: Branding & Illustration */
 .hero-pane {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  padding: 4rem 6rem;
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border-right: 1px solid rgba(255, 255, 255, 0.05);
+  color: #ffffff;
+  align-self: center;
+  padding: 1.25rem clamp(1.5rem, 6vw, 72px);
 }
-
-.brand-header {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  margin-bottom: 2rem;
-}
-
-.brand-logo {
-  width: 48px;
-  height: 48px;
-  object-fit: contain;
-}
-
-.brand-text {
-  font-size: 1.75rem;
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: #fff;
-}
-
+.hero-inner { display: grid; grid-template-columns: 1fr; gap: 1.25rem; align-items: center; }
+.brand-row { display: flex; align-items: center; gap: .75rem; }
+.brand-logo { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(0,0,0,.25)); }
+.app-title { font-size: clamp(2.4rem, 5.2vw, 3.8rem); font-weight: 800; letter-spacing: .5px; margin: 0 0 .5rem 0; }
 .hero-title {
-  font-size: 3.5rem;
   font-weight: 800;
   line-height: 1.1;
-  margin-bottom: 1.5rem;
-  background: linear-gradient(to right, #fff, #94a3b8);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+  margin: 0 0 .9rem 0;
+  font-size: clamp(2rem, 4.5vw, 3.2rem);
 }
-
-.hero-subtitle {
-  font-size: 1.25rem;
-  color: #94a3b8;
-  margin-bottom: 3rem;
-  max-width: 500px;
-  line-height: 1.6;
+.hero-sub {
+  opacity: .92;
+  font-size: 1.1rem;
 }
+.hero-points { margin-top: 1.5rem; display: grid; gap: .6rem; }
+.hero-points .point { display: flex; align-items: center; gap: .6rem; opacity: .95; }
+.hero-points .point i { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.15); }
+.hero-illustration { display: none; }
 
-/* Illustration Placeholder - "People Illustration" */
-.illustration-container {
-  position: relative;
+.form-pane { display: flex; align-items: center; justify-content: center; }
+.glass-card {
   width: 100%;
-  height: 300px;
-  background: rgba(255, 255, 255, 0.05);
-  border-radius: 24px;
-  border: 1px dashed rgba(255, 255, 255, 0.2);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
+  max-width: 440px;
+  background: rgba(255,255,255,0.12);
+  border: 1px solid rgba(255,255,255,0.35);
+  border-radius: 16px;
+  padding: 1.5rem;
+  box-shadow: 0 20px 40px rgba(0,0,0,.25);
+  backdrop-filter: blur(10px);
 }
+.glass-card .card-inner { background: rgba(255,255,255,0.9); border-radius: 12px; padding: 1.25rem 1.25rem 1.35rem; }
+.brand-badge { width: 64px; height: 64px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 8px 24px rgba(102,126,234,.35); }
+.login-heading { font-weight: 700; margin: .75rem 0 .25rem 0; }
+.login-note { color: #6c757d; margin-bottom: .75rem; }
 
-.illustration-content {
-  text-align: center;
-  color: rgba(255, 255, 255, 0.4);
-}
+.form-group { margin-bottom: .9rem; }
+.form-control { border-radius: 10px; padding: .8rem .9rem; border: 1px solid #e6e8f0; }
+.form-control:focus { border-color: #667eea; box-shadow: 0 0 0 .12rem rgba(102,126,234,.18); }
 
-.illustration-icon-group {
-  font-size: 4rem;
-  margin-bottom: 1rem;
-  display: flex;
-  gap: 1rem;
-  justify-content: center;
-  opacity: 0.8;
-}
-
-/* Right Side: Login Form */
-.form-pane {
-  background: transparent;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 2rem;
-}
-
-.login-card {
-  width: 100%;
-  max-width: 420px;
-  background: #ffffff;
-  border-radius: 24px;
-  padding: 3rem;
-  box-shadow: 
-    0 20px 25px -5px rgba(0, 0, 0, 0.1), 
-    0 10px 10px -5px rgba(0, 0, 0, 0.04),
-    0 0 0 1px rgba(0,0,0,0.05); /* Subtle border */
-  color: #1e293b;
-  transform: perspective(1000px) rotateY(-1deg); /* Subtle perspective */
-  transition: transform 0.3s ease;
-}
-
-.login-card:hover {
-  transform: perspective(1000px) rotateY(0deg) translateY(-5px);
-  box-shadow: 
-    0 25px 50px -12px rgba(0, 0, 0, 0.25);
-}
-
-.login-header {
-  margin-bottom: 2rem;
-  text-align: center;
-}
-
-.login-title {
-  font-size: 1.75rem;
-  font-weight: 700;
-  color: #0f172a;
-  margin-bottom: 0.5rem;
-}
-
-.login-subtitle {
-  color: #64748b;
-  font-size: 0.95rem;
-}
-
-.form-label {
-  font-weight: 600;
-  color: #334155;
-  font-size: 0.9rem;
-  margin-bottom: 0.5rem;
-}
-
-.form-control {
-  padding: 0.75rem 1rem;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  background: #f8fafc;
-  transition: all 0.2s;
-}
-
-.form-control:focus {
-  background: #fff;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.btn-primary-custom {
-  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
-  color: #fff;
-  border: none;
-  padding: 0.875rem;
-  border-radius: 12px;
-  font-weight: 600;
-  width: 100%;
-  margin-top: 1rem;
-  transition: all 0.2s;
-}
-
-.btn-primary-custom:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
-}
-
-.demo-alert {
-  background: #eff6ff;
-  border: 1px solid #dbeafe;
-  border-radius: 12px;
-  padding: 1rem;
-  margin-bottom: 2rem;
-  display: flex;
-  gap: 1rem;
-  align-items: flex-start;
-}
-
-.demo-icon {
-  color: #2563eb;
-  font-size: 1.25rem;
-  margin-top: 2px;
-}
+.btn-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: 0; border-radius: 10px; box-shadow: 0 8px 18px rgba(102,126,234,.28); }
+.btn-gradient-primary:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: #fff; transform: translateY(-1px); }
+.w-100 { width: 100%; }
 
 @media (max-width: 992px) {
-  .login-grid { grid-template-columns: 1fr; }
-  .hero-pane { display: none; } /* Hide hero on mobile for cleaner look */
-  .form-pane { padding: 1rem; }
+  .login-grid { grid-template-columns: 1fr; padding: 2.5rem clamp(1rem, 5vw, 32px); }
+  .hero-pane { text-align: center; padding-right: 0; }
+  .hero-inner { grid-template-columns: 1fr; }
+  .hero-points { justify-items: center; }
+}
+
+@keyframes fadeInUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+.fade-in-up {
+    animation: fadeInUp 0.8s ease-out forwards;
+    opacity: 0;
 }
 </style>
 {% endblock %}
 
 {% block content %}
 <div class="login-wrap">
-  <div class="bg-pattern"></div>
-  
-  <div class="container-fluid p-0">
-    <div class="login-grid">
-      <!-- Left Side: Hero -->
-      <div class="hero-pane">
-        <div class="brand-header">
-          <img src="{{ url_for('static', filename='img/Heartline-W.png') }}" alt="Heartline" class="brand-logo">
-          <span class="brand-text">Heartline</span>
+  <!-- Artistic background illustration (waves + heartbeat) -->
+  <svg class="bg-illustration" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
+    <defs>
+      <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05"/>
+      </linearGradient>
+      <linearGradient id="cardioGrad" x1="0" y1="0" x2="1" y2="0">
+        <stop offset="0%" stop-color="#ff6b6b"/>
+        <stop offset="100%" stop-color="#ffd93d"/>
+      </linearGradient>
+      <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+        <feMerge>
+          <feMergeNode in="coloredBlur"/>
+          <feMergeNode in="SourceGraphic"/>
+        </feMerge>
+      </filter>
+    </defs>
+    <!-- soft waves -->
+    <path d="M0,720 C240,680 360,760 560,740 C760,720 880,640 1100,660 C1260,674 1360,700 1440,720 L1440,900 L0,900 Z" fill="url(#waveGrad)"/>
+    <path d="M0,540 C220,580 360,520 560,540 C760,560 940,620 1140,600 C1280,586 1380,560 1440,540 L1440,900 L0,900 Z" fill="url(#waveGrad)" opacity=".6"/>
+    <!-- heartbeat line -->
+    <path d="M-40 420 L 120 420 L 180 420 L 220 360 L 260 480 L 300 420 L 380 420 L 440 420 L 480 360 L 520 480 L 560 420 L 640 420 L 700 420 L 740 370 L 780 470 L 820 420 L 900 420 L 960 420 L 1000 360 L 1040 480 L 1080 420 L 1160 420 L 1240 420 L 1300 360 L 1340 480 L 1380 420 L 1500 420" stroke="url(#cardioGrad)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" opacity=".8"/>
+    <!-- decorative dots/rings -->
+    <g opacity=".55">
+      <circle cx="120" cy="160" r="3" fill="#ffffff"/>
+      <circle cx="280" cy="200" r="2" fill="#ffffff"/>
+      <circle cx="320" cy="140" r="2" fill="#ffffff"/>
+      <circle cx="980" cy="220" r="3" fill="#ffffff"/>
+      <circle cx="1120" cy="160" r="2" fill="#ffffff"/>
+      <circle cx="1320" cy="260" r="2" fill="#ffffff"/>
+    </g>
+    <g opacity=".35" stroke="#ffffff" fill="none">
+      <circle cx="260" cy="680" r="18"/>
+      <circle cx="260" cy="680" r="8"/>
+      <circle cx="1240" cy="760" r="14"/>
+      <circle cx="1240" cy="760" r="6"/>
+    </g>
+  </svg>
+
+  <!-- Animated background decorations -->
+  <span class="bg-blob one"></span>
+  <span class="bg-blob two"></span>
+  <span class="bg-blob three"></span>
+
+  <div class="container-fluid login-grid">
+    <!-- Left: Hero messaging -->
+    <div class="hero-pane">
+      <div class="hero-inner">
+        <div class="hero-copy">
+          <div class="brand-row">
+            <img class="brand-logo" src="{{ url_for('static', filename='img/Logo1-nbg.png') }}" alt="Heartline logo" />
+            <h1 class="app-title mb-0">Heartline</h1>
+          </div>
+          <h2 class="hero-title">Care that connects. Insights that empower.</h2>
+          <div class="hero-sub">Secure access to real‑time ECG insights, streamlined visits, and a modern patient experience—all in one place.</div>
+          <div class="hero-points">
+            <div class="point"><i class="fas fa-bolt"></i> Fast, secure sign‑in</div>
+            <div class="point"><i class="fas fa-wave-square"></i> Integrated ECG analysis</div>
+            <div class="point"><i class="fas fa-user-shield"></i> Role‑based access control</div>
+          </div>
         </div>
-        
-        <h1 class="hero-title">Care that connects.<br>Insights that empower.</h1>
-        <p class="hero-subtitle">
-          Experience the future of cardiac care management. Secure, real-time ECG analysis and patient monitoring in one elegant platform.
-        </p>
-        
-        <!-- Illustration Placeholder -->
-        <div class="illustration-container">
-            <div class="illustration-content">
-                <div class="illustration-icon-group">
-                    <i class="fas fa-user-md"></i>
-                    <i class="fas fa-heartbeat text-danger"></i>
-                    <i class="fas fa-user-injured"></i>
-                </div>
-                <p class="mb-0 fw-medium">Connecting Patients & Specialists</p>
-                <small class="text-white-50">Professional Healthcare Platform</small>
-            </div>
-        </div>
-        
-        <div class="mt-5 d-flex gap-4 text-white-50">
-            <div class="d-flex align-items-center gap-2">
-                <i class="fas fa-check-circle text-success"></i> HIPAA Compliant
-            </div>
-            <div class="d-flex align-items-center gap-2">
-                <i class="fas fa-check-circle text-success"></i> AI-Powered
-            </div>
-        </div>
+        <div class="hero-illustration"></div>
       </div>
-      
-      <!-- Right Side: Form -->
-      <div class="form-pane">
-        <div class="login-card">
-          <div class="login-header">
-            <h2 class="login-title">Welcome Back</h2>
-            <p class="login-subtitle">Please sign in to your account</p>
-          </div>
-          
-          <div class="demo-alert">
-            <i class="fas fa-info-circle demo-icon"></i>
+    </div>
+
+    <!-- Right: Login form -->
+    <div class="form-pane">
+      <div class="glass-card">
+        <div class="card-inner">
+          <h3 class="login-heading">Welcome back</h3>
+          <div class="login-note">Sign in to continue</div>
+
+          <div class="alert alert-primary bg-primary-subtle border-0 mb-4 d-flex align-items-center" role="alert">
+            <i class="fas fa-info-circle text-primary me-3 fs-4"></i>
             <div>
-                <div class="fw-bold text-primary mb-1" style="font-size: 0.9rem;">Portfolio Demo Access</div>
-                <div class="small text-slate-600">
-                    Username: <strong>admin</strong><br>
-                    Password: <strong>admin</strong>
+                <div class="fw-bold text-primary mb-1">Portfolio Demo Access</div>
+                <div class="small text-primary-emphasis">
+                    Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>admin</strong>
                 </div>
             </div>
           </div>
-          
+
           <form method="POST">
             {{ form.hidden_tag() }}
-            
-            <div class="mb-4">
+
+            <div class="form-group">
               {{ form.username.label(class="form-label") }}
               {{ form.username(class="form-control", placeholder="Enter your username") }}
               {% for error in form.username.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
+                <div class="text-danger mt-1">{{ error }}</div>
               {% endfor %}
             </div>
-            
-            <div class="mb-4">
+
+            <div class="form-group">
               {{ form.password.label(class="form-label") }}
               {{ form.password(class="form-control", placeholder="Enter your password") }}
               {% for error in form.password.errors %}
-                <div class="text-danger small mt-1">{{ error }}</div>
+                <div class="text-danger mt-1">{{ error }}</div>
               {% endfor %}
             </div>
-            
-            <div class="d-flex justify-content-between align-items-center mb-4">
-              <div class="form-check">
-                {{ form.remember_me(class="form-check-input") }}
-                {{ form.remember_me.label(class="form-check-label small text-muted") }}
-              </div>
-              <a href="#" class="small text-primary text-decoration-none">Forgot password?</a>
+
+            <div class="form-check mb-3">
+              {{ form.remember_me(class="form-check-input") }}
+              {{ form.remember_me.label(class="form-check-label") }}
             </div>
-            
-            <button type="submit" class="btn btn-primary-custom">
-              Sign In
+
+            <button type="submit" class="btn btn-gradient-primary btn-lg w-100">
+              <i class="fas fa-sign-in-alt mr-1"></i> Sign In
             </button>
           </form>
-          
-          <div class="text-center mt-4">
-            <p class="small text-muted mb-0">
-              Designed & Developed by Billell<br>
-              <span class="opacity-75">Part of Portfolio Showcase</span>
-            </p>
+
+          <div class="text-center mt-3">
+            <small class="text-muted">Need help accessing your account? Contact your administrator.</small>
           </div>
         </div>
+      </div>
+
+      <!-- Portfolio Footer -->
+      <div class="text-center mt-4 text-white-50 fade-in-up" style="animation-delay: 0.5s;">
+        <small class="d-block mb-1">Designed & Developed by Billell</small>
+        <small class="opacity-75">Part of Portfolio Showcase</small>
       </div>
     </div>
   </div>

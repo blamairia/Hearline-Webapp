@@ -1,0 +1,25 @@
+{% macro stat_card(icon, value, label, color='primary', change_text=None, change_type='neutral') %}
+<div class="stat-card">
+    <div class="stat-icon text-{{ color }} bg-{{ color }}-subtle">
+        <i class="{{ icon }}"></i>
+    </div>
+    <div class="stat-content">
+        <span class="stat-value">{{ value }}</span>
+        <span class="stat-label">{{ label }}</span>
+        {% if change_text %}
+        <div class="stat-change {{ change_type }}">
+            {% if change_type == 'positive' %}
+                <i class="fas fa-arrow-up"></i>
+            {% elif change_type == 'negative' %}
+                <i class="fas fa-arrow-down"></i>
+            {% elif change_type == 'warning' %}
+                <i class="fas fa-exclamation-triangle"></i>
+            {% else %}
+                <i class="fas fa-info-circle"></i>
+            {% endif %}
+            {{ change_text }}
+        </div>
+        {% endif %}
+    </div>
+</div>
+{% endmacro %}

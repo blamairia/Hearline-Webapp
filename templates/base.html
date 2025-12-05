@@ -67,7 +67,7 @@
                 </a>
             </li>
             
-            <li class="nav-item" style="margin-top: auto; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <li class="nav-item nav-divider">
                 <a href="{{ url_for('create_patient') }}" class="nav-link {% if request.endpoint == 'create_patient' %}active{% endif %}">
                     <i class="fas fa-user-plus"></i>
                     <span class="nav-text">New Patient</span>
@@ -82,7 +82,7 @@
             </li>
             
             {% if current_user.is_authenticated %}
-            <li class="nav-item" style="margin-top: 1rem; border-top: 1px solid rgba(255,255,255,0.1); padding-top: 1rem;">
+            <li class="nav-item nav-divider secondary">
                 <a href="{{ url_for('user_management') }}" class="nav-link {% if request.endpoint == 'user_management' %}active{% endif %}">
                     <i class="fas fa-users-cog"></i>
                     <span class="nav-text">Users</span>

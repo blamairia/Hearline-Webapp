@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "includes/macros.html" import stat_card %}
 
 {% block title %}Doctor Dashboard - Heartline Medical{% endblock %}
 
@@ -24,57 +25,10 @@
 
     <!-- Stats Grid -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon">
-                <i class="fas fa-users"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ total_patients }}</span>
-                <span class="stat-label">My Patients</span>
-                <div class="stat-change positive">
-                    <i class="fas fa-arrow-up"></i> Active Database
-                </div>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon" style="color: var(--success-500);">
-                <i class="fas fa-clipboard-check"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ today_visits }}</span>
-                <span class="stat-label">Visits Today</span>
-                <div class="stat-change positive">
-                    <i class="fas fa-check"></i> Checked In
-                </div>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon" style="color: var(--warning-600);">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ today_appointments }}</span>
-                <span class="stat-label">Appointments Today</span>
-                <div class="stat-change warning">
-                    <i class="fas fa-clock"></i> Scheduled
-                </div>
-            </div>
-        </div>
-        
-        <div class="stat-card">
-            <div class="stat-icon" style="color: var(--info-500);">
-                <i class="fas fa-file-medical-alt"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ total_visits }}</span>
-                <span class="stat-label">Total Consultations</span>
-                <div class="stat-change info">
-                    <i class="fas fa-history"></i> All Time
-                </div>
-            </div>
-        </div>
+        {{ stat_card('fas fa-users', total_patients, 'My Patients', 'primary', 'Active Database', 'positive') }}
+        {{ stat_card('fas fa-clipboard-check', today_visits, 'Visits Today', 'success', 'Checked In', 'positive') }}
+        {{ stat_card('fas fa-calendar-alt', today_appointments, 'Appointments Today', 'warning', 'Scheduled', 'warning') }}
+        {{ stat_card('fas fa-file-medical-alt', total_visits, 'Total Consultations', 'info', 'All Time', 'neutral') }}
     </div>
 
     <div class="row">
@@ -86,17 +40,33 @@
                 </div>
                 <div class="card-body">
                     <div class="d-grid gap-3">
+                        <!-- Primary Action: New Visit (Most Common) -->
+                        <a href="{{ url_for('create_visit') }}" class="btn btn-primary btn-lg text-start shadow-sm">
+                            <div class="d-flex align-items-center">
+                                <div class="bg-white bg-opacity-25 rounded-circle p-2 me-3">
+                                    <i class="fas fa-file-medical fa-fw"></i>
+                                </div>
+                                <div>
+                                    <div class="fw-bold">Start New Visit</div>
+                                    <div class="small opacity-75" style="font-size: 0.75rem;">Check-in & Vitals</div>
+                                </div>
+                            </div>
+                        </a>
+
+                        <!-- Secondary Action: New Patient -->
                         <a href="{{ url_for('create_patient') }}" class="btn btn-outline-primary btn-lg text-start">
                             <i class="fas fa-user-plus fa-fw me-2"></i> Register New Patient
                         </a>
-                        <a href="{{ url_for('create_visit') }}" class="btn btn-outline-primary btn-lg text-start">
-                            <i class="fas fa-file-medical fa-fw me-2"></i> Start New Visit
-                        </a>
-                        <a href="{{ url_for('create_appointment') }}" class="btn btn-outline-primary btn-lg text-start">
+
+                        <!-- Tertiary Action: Schedule -->
+                        <a href="{{ url_for('create_appointment') }}" class="btn btn-light text-primary btn-lg text-start">
                             <i class="fas fa-calendar-plus fa-fw me-2"></i> Schedule Appointment
                         </a>
-                        <a href="{{ url_for('patients_table') }}" class="btn btn-outline-secondary btn-lg text-start">
-                            <i class="fas fa-search fa-fw me-2"></i> Search Records
+                        
+                        <hr class="my-1 text-muted opacity-25">
+
+                        <a href="{{ url_for('patients_table') }}" class="btn btn-link text-secondary text-decoration-none text-start px-0">
+                            <i class="fas fa-search fa-fw me-2"></i> Search Patient Records
                         </a>
                     </div>
                 </div>

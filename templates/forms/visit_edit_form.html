@@ -42,13 +42,13 @@
         <div class="page-header-content">
             <div class="page-title-section">
                 <h1 class="page-title">
-                    <i class="fas fa-edit text-info"></i>
+                    <i class="fas fa-edit text-light"></i>
                     Edit Visit #{{ visit.id }}
                 </h1>
                 <p class="page-subtitle">Update visit details for {{ visit.patient.first_name }} {{ visit.patient.last_name }}</p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-secondary">
+                <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-outline-light">
                     <i class="fas fa-arrow-left"></i> Cancel
                 </a>
             </div>

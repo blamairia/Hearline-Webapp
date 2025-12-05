@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% from "includes/macros.html" import stat_card %}
 
 {% block title %}Visits | Heartline Medical Clinic{% endblock %}
 
@@ -9,13 +10,13 @@
         <div class="page-header-content">
             <div class="page-title-section">
                 <h1 class="page-title">
-                    <i class="fas fa-clipboard-list text-info"></i>
+                    <i class="fas fa-clipboard-list text-light"></i>
                     Patient Visits
                 </h1>
                 <p class="page-subtitle">View and manage all patient consultations</p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('create_visit') }}" class="btn btn-primary">
+                <a href="{{ url_for('create_visit') }}" class="btn btn-primary shadow-sm">
                     <i class="fas fa-plus"></i>
                     <span>New Visit</span>
                 </a>
@@ -25,42 +26,10 @@
 
     <!-- Stats Cards -->
     <div class="stats-grid">
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--primary-50); color: var(--primary-500);">
-                <i class="fas fa-clipboard-list"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ pagination.total }}</span>
-                <span class="stat-label">Total Visits</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--success-50); color: var(--success-500);">
-                <i class="fas fa-check-circle"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ visits|selectattr('payment_status', 'equalto', 'paid')|list|length }}</span>
-                <span class="stat-label">Paid Visits</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--warning-50); color: var(--warning-600);">
-                <i class="fas fa-clock"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ visits|selectattr('payment_status', 'equalto', 'partial')|list|length + visits|selectattr('payment_status', 'equalto', 'unpaid')|list|length }}</span>
-                <span class="stat-label">Pending Payment</span>
-            </div>
-        </div>
-        <div class="stat-card">
-            <div class="stat-icon" style="background: var(--info-50); color: var(--info-500);">
-                <i class="fas fa-heartbeat"></i>
-            </div>
-            <div class="stat-content">
-                <span class="stat-value">{{ visits|selectattr('ecg_prediction')|list|length }}</span>
-                <span class="stat-label">With ECG</span>
-            </div>
-        </div>
+        {{ stat_card('fas fa-clipboard-list', pagination.total, 'Total Visits', 'primary') }}
+        {{ stat_card('fas fa-check-circle', visits|selectattr('payment_status', 'equalto', 'paid')|list|length, 'Paid Visits', 'success') }}
+        {{ stat_card('fas fa-clock', visits|selectattr('payment_status', 'equalto', 'partial')|list|length + visits|selectattr('payment_status', 'equalto', 'unpaid')|list|length, 'Pending Payment', 'warning') }}
+        {{ stat_card('fas fa-heartbeat', visits|selectattr('ecg_prediction')|list|length, 'With ECG', 'info') }}
     </div>
 
     <!-- Main Content Card -->

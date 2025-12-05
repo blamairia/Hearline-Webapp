@@ -16,7 +16,7 @@
         <div class="page-header-content">
             <div class="page-title-section">
                 <h1 class="page-title">
-                    <i class="fas fa-calendar-plus text-warning"></i>
+                    <i class="fas fa-calendar-plus text-light"></i>
                     {% if appointment %}Edit Appointment{% else %}Schedule New Appointment{% endif %}
                 </h1>
                 <p class="page-subtitle">
@@ -24,7 +24,7 @@
                 </p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('appointments_table') }}" class="btn btn-secondary">
+                <a href="{{ url_for('appointments_table') }}" class="btn btn-outline-light">
                     <i class="fas fa-arrow-left"></i> Back to List
                 </a>
             </div>

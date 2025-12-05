@@ -12,14 +12,14 @@
     <div class="page-header">
         <div class="page-header-content">
             <div class="page-title-section">
-                <h1 class="page-title">
-                    <i class="fas fa-file-medical text-info"></i>
+                                <h1 class="page-title">
+                    <i class="fas fa-notes-medical text-light"></i>
                     New Visit
                 </h1>
-                <p class="page-subtitle">Record a new patient visit and consultation details.</p>
+                <p class="page-subtitle">Record a new patient visit</p>
             </div>
             <div class="page-actions">
-                <a href="{{ url_for('index') }}" class="btn btn-secondary">
+                <a href="{{ url_for('patient_details', patient_id=patient.id) }}" class="btn btn-outline-light">
                     <i class="fas fa-arrow-left"></i> Cancel
                 </a>
             </div>
