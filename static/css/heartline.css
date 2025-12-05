@@ -354,6 +354,155 @@ h6 { font-size: 0.875rem; }
 }
 
 /* ==========================================
+   App Header (New Global Header)
+   ========================================== */
+.app-header {
+    height: 70px;
+    background: #ffffff;
+    border-bottom: 1px solid var(--border-color-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 var(--space-6);
+    position: sticky;
+    top: 0;
+    z-index: 999;
+    transition: background-color var(--transition-normal);
+}
+
+body.dark-mode .app-header {
+    background: #1e1e1e;
+    border-bottom-color: #333;
+}
+
+.header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--space-4);
+}
+
+.header-toggle {
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    font-size: 1.25rem;
+    cursor: pointer;
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    transition: all var(--transition-fast);
+}
+
+.header-toggle:hover {
+    background: var(--bg-hover);
+    color: var(--primary-500);
+}
+
+.header-search {
+    position: relative;
+    display: none; /* Hidden on mobile by default */
+}
+
+@media (min-width: 768px) {
+    .header-search {
+        display: block;
+        width: 300px;
+    }
+}
+
+.header-search i {
+    position: absolute;
+    left: var(--space-3);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--text-muted);
+    pointer-events: none;
+}
+
+.header-search .form-control {
+    padding-left: 2.5rem;
+    background: var(--bg-page);
+    border: 1px solid transparent;
+    border-radius: var(--radius-full);
+    font-size: 0.9rem;
+}
+
+.header-search .form-control:focus {
+    background: var(--bg-card);
+    border-color: var(--primary-300);
+    box-shadow: 0 0 0 3px rgba(0, 116, 217, 0.1);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.header-btn {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: transparent;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.header-btn:hover {
+    background: var(--bg-hover);
+    color: var(--primary-500);
+}
+
+.header-profile-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    background: transparent;
+    border: none;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.header-profile-btn:hover {
+    background: var(--bg-hover);
+}
+
+.header-profile-btn .avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 600;
+    font-size: 0.9rem;
+}
+
+.header-profile-btn .profile-info {
+    text-align: left;
+    line-height: 1.2;
+}
+
+.header-profile-btn .name {
+    display: block;
+    font-weight: 600;
+    font-size: 0.9rem;
+    color: var(--text-primary);
+}
+
+.header-profile-btn .role {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+/* ==========================================
    Main Content
    ========================================== */
 .main-content {
@@ -547,7 +696,7 @@ h6 { font-size: 0.875rem; }
     top: var(--space-4);
     right: var(--space-4);
     font-size: 2.5rem;
-    opacity: 0.1;
+    opacity: 0.8;
     color: var(--primary-500);
 }
 

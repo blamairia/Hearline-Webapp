@@ -1,0 +1,29 @@
+# Heartline Medical Project Rules
+
+## Project Overview
+- Flask (Python) backend
+- Jinja2 templating
+- Bootstrap 5 + Custom CSS (Heartline Design System)
+- SQLite/SQLAlchemy database
+
+## Coding Standards
+- Use 4 spaces for indentation in Python.
+- Use 2 spaces for indentation in HTML/CSS/JS.
+- Follow PEP 8 for Python code.
+- Use semantic HTML5 tags.
+- Use CSS variables for colors and spacing (defined in `static/css/heartline.css`).
+
+## Design System
+- Primary Color: #0074d9 (Medical Blue)
+- Font: 'Inter' for UI, 'JetBrains Mono' for code.
+- Dark Mode: Supported via `body.dark-mode` class.
+- Components: Use `templates/includes/` for reusable UI parts.
+
+## Git Workflow
+- Commit messages should be descriptive.
+- Stage files before committing.
+
+## Specific Instructions
+- When modifying templates, ensure accessibility (aria-labels, alt text).
+- When adding routes, ensure they are protected with `@login_required` if necessary.
+- Keep the `app.py` file organized; consider refactoring into blueprints if it grows too large.

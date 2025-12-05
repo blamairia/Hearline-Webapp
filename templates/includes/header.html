@@ -1,0 +1,56 @@
+<!-- Global App Header -->
+<header class="app-header">
+    <div class="header-left">
+        <button class="header-toggle" id="headerSidebarToggle">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="header-search">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search patients, visits..." class="form-control">
+        </div>
+    </div>
+
+    <div class="header-right">
+        <!-- Theme Toggle -->
+        <button class="header-btn theme-toggle-btn" id="headerThemeToggle" title="Toggle Theme">
+            <i class="fas fa-moon"></i>
+        </button>
+
+        <!-- Notifications -->
+        <div class="dropdown">
+            <button class="header-btn position-relative" data-bs-toggle="dropdown">
+                <i class="fas fa-bell"></i>
+                <span class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger border border-light p-1">
+                    <span class="visually-hidden">New alerts</span>
+                </span>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+                <li><h6 class="dropdown-header">Notifications</h6></li>
+                <li><a class="dropdown-item" href="#">New patient registered</a></li>
+                <li><a class="dropdown-item" href="#">Visit #1234 report ready</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-center small text-primary" href="#">View all</a></li>
+            </ul>
+        </div>
+
+        <!-- User Profile -->
+        <div class="dropdown ms-2">
+            <button class="header-profile-btn" data-bs-toggle="dropdown">
+                <div class="avatar bg-primary text-white">
+                    {{ current_user.first_name[0] if current_user.is_authenticated else 'U' }}
+                </div>
+                <div class="profile-info d-none d-md-block">
+                    <span class="name">{{ current_user.first_name }} {{ current_user.last_name }}</span>
+                    <span class="role">{{ current_user.role|capitalize if current_user.role else 'User' }}</span>
+                </div>
+                <i class="fas fa-chevron-down ms-2 text-muted small"></i>
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end shadow-lg border-0">
+                <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user me-2"></i> Profile</a></li>
+                <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-cog me-2"></i> Settings</a></li>
+                <li><hr class="dropdown-divider"></li>
+                <li><a class="dropdown-item text-danger" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt me-2"></i> Logout</a></li>
+            </ul>
+        </div>
+    </div>
+</header>
