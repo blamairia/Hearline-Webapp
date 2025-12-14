@@ -86,8 +86,7 @@ jobs:
               --max-replicas 1 \
               --registry-server ${{ steps.acr-info.outputs.login_server }} \
               --registry-username ${{ steps.acr-info.outputs.username }} \
-              --registry-password ${{ steps.acr-info.outputs.password }} \
-              --location $AZURE_LOCATION
+              --registry-password ${{ steps.acr-info.outputs.password }}
           fi
 
       - name: Show deployed endpoint
