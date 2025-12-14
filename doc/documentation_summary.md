@@ -23,12 +23,11 @@ This document provides a comprehensive summary of all documentation created for 
    - Error handling and status codes
    - SDK examples and integration guides
 
-3. **[Deployment Guide](deployment_guide.md)** - ✅ **Production Ready**
-   - Cloud deployment (Vercel, Heroku, AWS)
-   - Environment configuration
-   - Database setup and migration
-   - Security implementation
-   - Performance optimization and monitoring
+3. **[Azure Deployment Guide](../AZURE_DEPLOYMENT.md)** - ✅ **Always-On Container Apps**
+   - Azure Container Apps infrastructure steps
+   - GitHub Actions automation
+   - Custom domain + TLS guidance
+   - Operations quick reference
 
 4. **[Technical Architecture](technical_architecture.md)** - ✅ **Comprehensive Design**
    - High-level system architecture
@@ -131,9 +130,9 @@ Healthcare Management:
 - **[ECG Research Repository](https://github.com/blamairia/ecg-diagnosis)**: AI model implementation
 
 ### **🚀 For DevOps Teams**
-- **[Deployment Guide](deployment_guide.md)**: Production deployment
-- **[Environment Setup](deployment_guide.md#environment-configuration)**: Configuration guide
-- **[Security Implementation](deployment_guide.md#security-configuration)**: Security measures
+- **[Azure Deployment Guide](../AZURE_DEPLOYMENT.md)**: Production deployment
+- **[Environment Setup](../AZURE_DEPLOYMENT.md#1-provision-azure-resources-one-time)**: Configuration guide
+- **[Security Implementation](../AZURE_DEPLOYMENT.md#3-assign-the-main-domain)**: Public ingress & TLS notes
 
 ### **🔬 For Researchers**
 - **[ECG Research Repository](https://github.com/blamairia/ecg-diagnosis)**: Complete methodology

@@ -106,9 +106,9 @@
                             <div class="p-3 bg-light rounded border h-100">
                                 <div class="small text-muted mb-1">Role</div>
                                 <div>
-                                    <span class="badge rounded-pill {{ 'bg-success-subtle text-success' if current_user.role == 'Doctor' else 'bg-warning-subtle text-warning' }} border {{ 'border-success-subtle' if current_user.role == 'Doctor' else 'border-warning-subtle' }}">
-                                        {{ current_user.role }}
-                                    </span>
+                                     <span class="badge rounded-pill {{ 'bg-success-subtle text-success' if current_user.role == 'doctor' else 'bg-warning-subtle text-warning' }} border {{ 'border-success-subtle' if current_user.role == 'doctor' else 'border-warning-subtle' }}">
+                                         {{ current_user.role.title() }}
+                                     </span>
                                 </div>
                             </div>
                         </div>

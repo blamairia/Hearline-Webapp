@@ -1,128 +1,95 @@
-# Azure Deployment Guide - Heartline Webapp
+# Azure Container Deployment (Heartline Webapp)
 
-## Prerequisites
-- Azure SQL Database created: `heartline-webapp`
-- Azure Web App created (Python 3.11 runtime)
-- Git repository pushed to GitHub
+This guide keeps the Heartline Webapp running 24/7 on **Azure Container Apps** with a custom domain and a single GitHub Actions workflow.
 
-## Step 1: Configure Azure App Service
+---
 
-### 1.1 Set Environment Variables
-In Azure Portal → Your Web App → Configuration → Application Settings, paste the content from `azure-env-variables.json`:
+## 1. Provision Azure Resources (one time)
 
-```json
-[Copy the content from azure-env-variables.json file]
-```
-
-**⚠️ IMPORTANT**: Change the `SECRET_KEY` to a secure random string!
-
-### 1.2 Configure Startup Command
-In Azure Portal → Configuration → General Settings:
-- **Startup Command**: `/home/site/wwwroot/startup.sh`
-- **Always On**: Enable (to prevent cold starts)
-
-## Step 2: Deploy from GitHub
-
-### 2.1 Set up Deployment
-1. Go to Deployment Center in Azure Portal
-2. Choose **GitHub** as source
-3. Authorize and select:
-   - Organization: `blamairia`
-   - Repository: `Hearline-Webapp`
-   - Branch: `master` or `main`
-
-### 2.2 Deploy
-- Click **Save** to trigger initial deployment
-- Monitor logs in Deployment Center
-
-## Step 3: Verify Deployment
-
-### 3.1 Check Logs
 ```bash
-# View application logs
-az webapp log tail --name <your-app-name> --resource-group <your-rg>
+RG=portfolio
+LOCATION=germanywestcentral
+ACR_NAME=heartlineregistry
+LOG_ANALYTICS=heartline-logs
+CONTAINER_ENV=heartline-app-env
+APP_NAME=heartline-webapp
+
+# Resource group & registry
+az group create -n $RG -l $LOCATION
+az acr create -n $ACR_NAME -g $RG --sku Basic --location $LOCATION
+
+# Logging + Container Apps environment
+az monitor log-analytics workspace create -n $LOG_ANALYTICS -g $RG -l $LOCATION
+WORKSPACE_ID=$(az monitor log-analytics workspace show -n $LOG_ANALYTICS -g $RG --query customerId -o tsv)
+WORKSPACE_KEY=$(az monitor log-analytics workspace get-shared-keys -n $LOG_ANALYTICS -g $RG --query primarySharedKey -o tsv)
+az containerapp env create \
+  -g $RG \
+  -n $CONTAINER_ENV \
+  -l $LOCATION \
+  --logs-workspace-id $WORKSPACE_ID \
+  --logs-workspace-key $WORKSPACE_KEY
+
+# (Optional) First-time app create – env vars can be added later in the portal
+az containerapp create \
+  -g $RG \
+  -n $APP_NAME \
+  --environment $CONTAINER_ENV \
+  --image mcr.microsoft.com/azuredocs/containerapps-helloworld:latest \
+  --ingress external --target-port 8000 \
+  --min-replicas 1 --max-replicas 1
 ```
 
-### 3.2 Test Endpoints
-- Health check: `https://your-app.azurewebsites.net/health`
-- Login page: `https://your-app.azurewebsites.net/login`
+Add the required environment variables (DB credentials, `SECRET_KEY`, etc.) to the Container App under **Settings → Secrets & application settings**. Use `azure-env-variables.json` as the reference list.
 
-### 3.3 Default Credentials
-- Username: `admin`
-- Password: `admin`
+---
 
-**⚠️ Change these immediately after first login!**
+## 2. Configure GitHub Actions deployment
 
-## Step 4: Database Connection
+Workflow file: `.github/workflows/deploy_container_app.yml`
 
-The app uses the SSL certificates included in the repository:
-- `DigiCertGlobalRootG2.crt.pem`
-- `Microsoft RSA Root Certificate Authority 2017.crt`
+Create the following repository secrets (Settings → Secrets and variables → Actions):
 
-These are automatically used for secure Azure SQL connection.
+| Secret | Description |
+| --- | --- |
+| `AZURE_CLIENT_ID` | Service principal client ID with `Contributor` access |
+| `AZURE_TENANT_ID` | Azure AD tenant ID |
+| `AZURE_SUBSCRIPTION_ID` | Subscription ID where the resources live |
 
-## Troubleshooting
+The workflow assumes the resource names listed in the `env:` block. If your Azure names differ, edit that block accordingly.
 
-### 403 Forbidden
-- Check file permissions in startup.sh
-- Verify `www-data` or `nginx` user ownership
+### Deploy from Azure Portal (Source: Code or Artifact)
+When using **Deployment Center** in Azure Container Apps:
+1. Choose **Source = Code (GitHub)**, **Project scope = Heartline Webapp**.
+2. Select the existing workflow file `deploy_container_app.yml`.
+3. Azure will reuse this workflow instead of generating a new one, so you keep a single source of truth.
 
-### 502 Bad Gateway
-- Check if Gunicorn is running: `ps aux | grep gunicorn`
-- Verify port 8000 is configured
-- Check application logs for Python errors
+Every push to `main` (or manual dispatch) will:
+1. Build the Docker image.
+2. Push it to Azure Container Registry.
+3. Update the Container App with `min-replicas = 1` so the app is always warm.
 
-### Database Connection Errors
-- Verify firewall rules in Azure SQL allow Azure services
-- Check connection string in environment variables
-- Ensure SSL certificates are present
+---
 
-### Cold Start Issues
-- Enable **Always On** in App Service plan (Basic or higher)
-- The warmup page will show during cold starts
+## 3. Assign the main domain
 
-## Performance Optimization
+1. In the Azure Portal → Container Apps → **heartline-webapp** → **Custom domains**, add your domain (e.g., `app.yourdomain.com` or apex).  
+2. Create the required DNS records:
+   - CNAME pointing to the Container App default FQDN (e.g., `heartline-webapp.francecentral.azurecontainerapps.io`), or
+   - A/ TXT records if mapping the apex.
+3. Choose **Managed certificate** so Azure issues and renews TLS automatically.
+4. Set the new hostname as the default domain for the app.
 
-1. **Enable Always On**: Prevents cold starts (requires Basic tier+)
-2. **Scale Up**: For AI/ML workloads, consider B2 or higher
-3. **Application Insights**: Enable for monitoring and diagnostics
+📌 With ingress set to `external` and `min-replicas` pinned at 1, the container stays online without manual start/stop.
 
-## Security Checklist
+---
 
-- [ ] Change default admin password
-- [ ] Update SECRET_KEY in environment variables
-- [ ] Configure custom domain with SSL
-- [ ] Enable Azure AD authentication (optional)
-- [ ] Set up proper CORS if needed
-- [ ] Review and restrict database firewall rules
+## 4. Operations quick reference
 
-## Maintenance
+| Task | Command |
+| --- | --- |
+| Tail logs | `az containerapp logs show -n heartline-webapp -g portfolio --follow` |
+| Restart app | `az containerapp restart -n heartline-webapp -g portfolio` |
+| Scale (temporary) | `az containerapp revision set-mode --mode multiple --name heartline-webapp -g portfolio` |
+| Update env vars | Portal → Container Apps → Settings → Secrets/App settings → `Revision management → Create revision` |
 
-### Update Application
-```bash
-git push origin master
-# Azure auto-deploys from GitHub
-```
-
-### View Logs
-```bash
-az webapp log tail --name heartline-webapp --resource-group <rg-name>
-```
-
-### Restart App
-```bash
-az webapp restart --name heartline-webapp --resource-group <rg-name>
-```
-
-## Cost Estimation
-
-- **Basic B1 Plan**: ~$13/month (Always On included)
-- **Azure SQL Basic**: ~$5/month
-- **Total**: ~$18/month
-
-## Support
-
-For issues, check:
-1. Application logs in Azure Portal
-2. Deployment logs in Deployment Center
-3. Database connectivity test in Azure SQL Query Editor
+The app will now auto-build, auto-deploy, and remain reachable from your main portfolio link without any manual container start/stop. Keep this file as the single Azure deployment reference to avoid documentation sprawl.

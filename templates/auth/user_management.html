@@ -38,7 +38,7 @@
                 <i class="fas fa-user-md"></i>
             </div>
             <div class="stat-content">
-                <span class="stat-value">{{ users|selectattr('role', 'equalto', 'Doctor')|list|length }}</span>
+                <span class="stat-value">{{ users|selectattr('role', 'equalto', 'doctor')|list|length }}</span>
                 <span class="stat-label">Doctors</span>
             </div>
         </div>
@@ -47,7 +47,7 @@
                 <i class="fas fa-user-nurse"></i>
             </div>
             <div class="stat-content">
-                <span class="stat-value">{{ users|selectattr('role', 'equalto', 'Assistant')|list|length }}</span>
+                <span class="stat-value">{{ users|selectattr('role', 'equalto', 'assistant')|list|length }}</span>
                 <span class="stat-label">Assistants</span>
             </div>
         </div>
@@ -95,9 +95,9 @@
                                 </div>
                             </td>
                             <td>
-                                <span class="badge rounded-pill {{ 'bg-success-subtle text-success' if user.role == 'Doctor' else 'bg-warning-subtle text-warning' }} border {{ 'border-success-subtle' if user.role == 'Doctor' else 'border-warning-subtle' }}">
-                                    <i class="fas fa-{{ 'user-md' if user.role == 'Doctor' else 'user-nurse' }} me-1"></i>
-                                    {{ user.role }}
+                                <span class="badge rounded-pill {{ 'bg-success-subtle text-success' if user.role == 'doctor' else 'bg-warning-subtle text-warning' }} border {{ 'border-success-subtle' if user.role == 'doctor' else 'border-warning-subtle' }}">
+                                    <i class="fas fa-{{ 'user-md' if user.role == 'doctor' else 'user-nurse' }} me-1"></i>
+                                    {{ user.role.title() }}
                                 </span>
                             </td>
                             <td>
@@ -113,11 +113,13 @@
                             </td>
                             <td class="text-end pe-4">
                                 <div class="btn-group">
-                                    <a href="{{ url_for('edit_profile', user_id=user.id) }}" 
+                                    {% if current_user.id == user.id %}
+                                    <a href="{{ url_for('edit_profile') }}" 
                                        class="btn btn-sm btn-light text-primary" 
-                                       title="Edit User">
+                                       title="Edit Profile">
                                         <i class="fas fa-edit"></i>
                                     </a>
+                                    {% endif %}
                                     {% if current_user.id != user.id %}
                                     <button type="button" 
                                             class="btn btn-sm btn-light text-danger" 

@@ -1,0 +1,79 @@
+name: Deploy to Azure Container Apps
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_RESOURCE_GROUP: portfolio
+  CONTAINER_APP_NAME: heartline-webapp
+  CONTAINERAPPS_ENVIRONMENT: heartline-app-env
+  AZURE_CONTAINER_REGISTRY: heartlineregistry
+  IMAGE_NAME: heartline-webapp
+  AZURE_LOCATION: germanywestcentral
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      id-token: write
+      contents: read
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Log in to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Enable Container Apps extension
+        run: |
+          az extension add --name containerapp --upgrade
+          az provider register --namespace Microsoft.App --wait
+          az provider register --namespace Microsoft.OperationalInsights --wait
+
+      - name: Resolve container registry
+        run: |
+          echo "ACR_LOGIN_SERVER=$(az acr show --name $AZURE_CONTAINER_REGISTRY --query loginServer -o tsv)" >> $GITHUB_ENV
+
+      - name: Log in to Azure Container Registry
+        run: az acr login --name $AZURE_CONTAINER_REGISTRY
+
+      - name: Build container image
+        run: |
+          docker build \
+            --file Dockerfile \
+            --tag $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            .
+
+      - name: Push container image
+        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+
+      - name: Deploy to Azure Container Apps
+        run: |
+          az containerapp up \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --environment $CONTAINERAPPS_ENVIRONMENT \
+            --image $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            --ingress external \
+            --target-port 8000 \
+            --min-replicas 1 \
+            --max-replicas 1 \
+            --registry-server $ACR_LOGIN_SERVER \
+            --location $AZURE_LOCATION \
+            --query properties.configuration.ingress.fqdn -o tsv
+
+      - name: Show deployed endpoint
+        run: |
+          FQDN=$(az containerapp show \
+            --name $CONTAINER_APP_NAME \
+            --resource-group $AZURE_RESOURCE_GROUP \
+            --query properties.configuration.ingress.fqdn -o tsv)
+          echo "Deployed endpoint: https://${FQDN}" | tee -a $GITHUB_STEP_SUMMARY

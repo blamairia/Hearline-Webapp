@@ -9,7 +9,7 @@ This directory contains comprehensive technical documentation for the Hearline W
 ### 📋 **Main Documentation**
 - **[README.md](../README.md)** - Project overview and research article format
 - **[API Documentation](api_documentation.md)** - Complete API reference and integration guide
-- **[Deployment Guide](deployment_guide.md)** - Production deployment and configuration
+- **[Azure Deployment Guide](../AZURE_DEPLOYMENT.md)** - Production deployment and configuration
 - **[Research Methodology](research_methodology.md)** - Scientific approach and validation
 - **[Technical Architecture](technical_architecture.md)** - System design and implementation details
 
@@ -55,16 +55,16 @@ This directory contains comprehensive technical documentation for the Hearline W
 ### 🚀 **For DevOps and System Administrators**
 
 #### Deployment Documentation
-1. **[Deployment Guide](deployment_guide.md)** - Complete deployment procedures
-2. **[Environment Configuration](deployment_guide.md#environment-configuration)** - Setup and configuration
-3. **[Security Setup](deployment_guide.md#security-configuration)** - Production security measures
-4. **[Monitoring](deployment_guide.md#monitoring-and-logging)** - System monitoring and maintenance
+1. **[Azure Deployment Guide](../AZURE_DEPLOYMENT.md)** - Complete deployment procedures
+2. **[Environment Configuration](../AZURE_DEPLOYMENT.md#1-provision-azure-resources-one-time)** - Setup and configuration
+3. **[Security Setup](../AZURE_DEPLOYMENT.md#3-assign-the-main-domain)** - Production security measures
+4. **[Monitoring](../AZURE_DEPLOYMENT.md#4-operations-quick-reference)** - System monitoring and maintenance
 
 #### Operations Guides
-- **[Database Management](deployment_guide.md#database-setup)** - PostgreSQL setup and maintenance
-- **[Backup Procedures](deployment_guide.md#backup-and-recovery)** - Data protection strategies
-- **[Performance Optimization](deployment_guide.md#performance-optimization)** - System tuning
-- **[Troubleshooting](deployment_guide.md#troubleshooting)** - Common issues and solutions
+- **[Database Management](../README.md#-patient-management)** - PostgreSQL setup and maintenance overview
+- **[Backup Procedures](../AZURE_DEPLOYMENT.md#4-operations-quick-reference)** - Data protection strategies
+- **[Performance Optimization](../AZURE_DEPLOYMENT.md#1-provision-azure-resources-one-time)** - System tuning
+- **[Troubleshooting](../AZURE_DEPLOYMENT.md#4-operations-quick-reference)** - Common issues and solutions
 
 ### 🔬 **For Researchers and Data Scientists**
 
@@ -87,7 +87,7 @@ This directory contains comprehensive technical documentation for the Hearline W
 | Use Case | Primary Documentation | Additional Resources |
 |----------|----------------------|---------------------|
 | **Understanding the Project** | [README.md](../README.md) | [ECG Research Repository](https://github.com/blamairia/ecg-diagnosis) |
-| **Deploying to Production** | [Deployment Guide](deployment_guide.md) | [Technical Architecture](technical_architecture.md) |
+| **Deploying to Production** | [Azure Deployment Guide](../AZURE_DEPLOYMENT.md) | [Technical Architecture](technical_architecture.md) |
 | **API Integration** | [API Documentation](api_documentation.md) | [Technical Architecture](technical_architecture.md#api-architecture) |
 | **Research Analysis** | [ECG Research Repository](https://github.com/blamairia/ecg-diagnosis) | [Research Integration](research_methodology.md) |
 | **System Architecture** | [Technical Architecture](technical_architecture.md) | [Database Schema](technical_architecture.md#database-architecture) |
@@ -157,7 +157,7 @@ This directory contains comprehensive technical documentation for the Hearline W
 |----------|---------|--------------|--------|
 | README.md | 2.0 | June 2025 | ✅ Current |
 | API Documentation | 1.5 | June 2025 | ✅ Current |
-| Deployment Guide | 2.0 | June 2025 | ✅ Current |
+| Azure Deployment Guide | 1.0 | June 2025 | ✅ Current |
 | Research Methodology | 2.0 | June 2025 | ✅ Current |
 | Technical Architecture | 2.0 | June 2025 | ✅ Current |
 

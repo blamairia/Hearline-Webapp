@@ -2324,7 +2324,8 @@ def change_password():
 @role_required(['doctor', 'assistant'])
 def user_management():
     """User management page - will fetch data from API"""
-    return render_template('auth/user_management.html')
+    users = User.query.order_by(User.created_at.desc()).limit(50).all()
+    return render_template('auth/user_management.html', users=users)
 
 
 @app.route("/user/<int:user_id>/toggle-status", methods=["POST"])
@@ -2429,7 +2430,7 @@ def doctor_dashboard_stats():
         
         ecg_tests_week = Visit.query.filter(
             Visit.visit_date >= week_ago,
-            Visit.ecg_results.isnot(None)
+            Visit.ecg_prediction.isnot(None)
         ).count()
         
         # Quick stats
@@ -2778,7 +2779,7 @@ def list_users():
                 'is_active': user.is_active,
                 'last_login': user.last_login.isoformat() if user.last_login else None,
                 'created_at': user.created_at.isoformat(),
-                'doctor_profile_id': user.doctor_profile_id
+                'doctor_id': user.doctor_id
             })
         
         return jsonify({
@@ -2809,7 +2810,7 @@ def get_user(user_id):
             'last_name': user.last_name,
             'role': user.role,
             'is_active': user.is_active,
-            'doctor_profile_id': user.doctor_profile_id
+            'doctor_id': user.doctor_id
         })
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2828,13 +2829,11 @@ def update_user(user_id):
         user.last_name = request.form.get('last_name', user.last_name)
         user.role = request.form.get('role', user.role)
         user.is_active = request.form.get('is_active') == 'on'
-          # Handle doctor profile assignment
         if user.role == 'doctor':
-            doctor_profile_id = request.form.get('doctor_profile_id')
-            if doctor_profile_id:
-                user.doctor_profile_id = int(doctor_profile_id)
+            doctor_id = request.form.get('doctor_id')
+            user.doctor_id = int(doctor_id) if doctor_id else user.doctor_id
         else:
-            user.doctor_profile_id = None
+            user.doctor_id = None
         
         db.session.commit()
         

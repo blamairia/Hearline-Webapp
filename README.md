@@ -238,6 +238,9 @@ Hearline-Webapp/
 
 ## 🚀 Deployment
 
+### Azure Container Apps (Always-on demo)
+Use the GitHub Actions workflow described in [`AZURE_DEPLOYMENT.md`](AZURE_DEPLOYMENT.md) to build the Docker image, push it to Azure Container Registry, and update the Container App with a managed custom domain. This keeps a single replica online at all times so the app loads immediately from your main portfolio site.
+
 ### Using Nginx + Gunicorn
 
 1. **Install Gunicorn**
