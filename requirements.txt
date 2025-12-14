@@ -9,11 +9,11 @@ Flask-Login==0.6.3
 Flask-Bcrypt==1.0.1
 Flask-WTF==1.2.1
 flask-moment==1.0.5
-Flask-Caching>=2.1.0
 werkzeug==2.3.7
 
 # ============ Database ============
-psycopg2-binary>=2.9.9
+psycopg2-binary>=2.9.9   # retained for legacy Postgres deployments
+pyodbc>=5.1.0             # required for Azure SQL Server via ODBC
 
 # ============ Forms & Validation ============
 WTForms==3.1.0
@@ -27,5 +27,5 @@ wfdb==4.1.2
 # ============ Configuration ============
 python-dotenv==1.0.0
 
-# ============ Production (optional) ============
-# gunicorn==21.2.0
+# ============ Production ============
+gunicorn==21.2.0

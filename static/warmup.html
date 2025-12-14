@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Starting Up - Heartline</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        }
+        .container {
+            text-align: center;
+            color: white;
+        }
+        .heart {
+            font-size: 60px;
+            animation: heartbeat 1.5s ease-in-out infinite;
+            margin-bottom: 20px;
+        }
+        @keyframes heartbeat {
+            0%, 100% { transform: scale(1); }
+            10%, 30% { transform: scale(1.1); }
+            20%, 40% { transform: scale(1); }
+        }
+        h1 { font-size: 2rem; margin: 0 0 10px; }
+        p { font-size: 1.1rem; opacity: 0.9; }
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+    <script>
+        let attempts = 0;
+        const maxAttempts = 30;
+        
+        function checkServer() {
+            attempts++;
+            fetch(window.location.origin + '/health', { method: 'GET' })
+                .then(response => {
+                    if (response.ok) {
+                        window.location.href = window.location.origin;
+                    } else if (attempts < maxAttempts) {
+                        setTimeout(checkServer, 2000);
+                    }
+                })
+                .catch(() => {
+                    if (attempts < maxAttempts) {
+                        setTimeout(checkServer, 2000);
+                    }
+                });
+        }
+        
+        setTimeout(checkServer, 3000);
+    </script>
+</head>
+<body>
+    <div class="container">
+        <div class="heart">❤️</div>
+        <h1>Starting Heartline</h1>
+        <p>Initializing ECG analysis system...</p>
+        <div class="spinner"></div>
+    </div>
+</body>
+</html>

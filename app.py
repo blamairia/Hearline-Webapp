@@ -21,10 +21,11 @@ from urllib.parse import urlparse
 from functools import wraps
 
 from flask_moment import Moment # Add this import
-from flask_caching import Cache  # Add caching for performance
 
 from flask import jsonify, request
-from sqlalchemy import or_
+from sqlalchemy import or_, text, inspect
+from sqlalchemy.exc import SQLAlchemyError
+from urllib.parse import quote_plus
 
 from wtforms import (
     Form,
@@ -68,27 +69,56 @@ app = Flask(__name__)
 moment = Moment(app) # Add this line to initialize Flask-Moment
 app.config["SECRET_KEY"] = os.getenv("SECRET_KEY", "replace-this-with-a-secure-random-string")
 
-# ============ CACHING CONFIGURATION ============
-# Using SimpleCache (in-memory) - no Redis needed, perfect for demo
-app.config['CACHE_TYPE'] = 'SimpleCache'
-app.config['CACHE_DEFAULT_TIMEOUT'] = 3600  # 1 hour default cache
-cache = Cache(app)
-
 # Enable template auto-reloading for development
 app.config["TEMPLATES_AUTO_RELOAD"] = True
 app.jinja_env.auto_reload = True
 
 # Use environment variables for database connection
-DB_HOST = os.getenv("DB_HOST")
-DB_PORT = os.getenv("DB_PORT") 
-DB_USER = os.getenv("DB_USER")
-DB_PASSWORD = os.getenv("DB_PASSWORD")
-DB_NAME = os.getenv("DB_NAME")
+def build_database_uri():
+    direct_uri = os.getenv("DATABASE_URL")
+    if direct_uri:
+        return direct_uri
 
-if not all([DB_HOST, DB_PORT, DB_USER, DB_PASSWORD, DB_NAME]):
-    raise ValueError("Missing required database environment variables. Please check your .env file.")
+    db_engine = os.getenv("DB_ENGINE", "postgresql")
+    engine_name = db_engine.lower()
+    db_host = os.getenv("DB_HOST")
+    db_port = os.getenv("DB_PORT")
+    db_user = os.getenv("DB_USER") or os.getenv("DB_USERNAME")
+    db_password = os.getenv("DB_PASSWORD")
+    db_name = os.getenv("DB_NAME")
 
-app.config["SQLALCHEMY_DATABASE_URI"] = f"postgresql://{DB_USER}:{DB_PASSWORD}@{DB_HOST}:{DB_PORT}/{DB_NAME}?sslmode=require"
+    if not all([db_host, db_port, db_user, db_password, db_name]):
+        raise ValueError("Missing required database environment variables. Please check your .env file.")
+
+    if engine_name.startswith("mssql"):
+        driver = quote_plus(os.getenv("DB_DRIVER", "ODBC Driver 18 for SQL Server"))
+        encrypt = os.getenv("DB_ENCRYPT", "yes")
+        trust_cert = os.getenv("DB_TRUST_SERVER_CERTIFICATE", "no")
+        extra_options = os.getenv("DB_OPTIONS", "")
+
+        query_parts = [f"driver={driver}"]
+        if encrypt:
+            query_parts.append(f"Encrypt={encrypt}")
+        if trust_cert:
+            query_parts.append(f"TrustServerCertificate={trust_cert}")
+        if extra_options:
+            query_parts.append(extra_options.lstrip("?&"))
+
+        query_string = "&".join(query_parts)
+        return (
+            f"{db_engine}://{db_user}:{db_password}@{db_host}:{db_port}/"
+            f"{db_name}?{query_string}"
+        )
+
+    if engine_name.startswith("postgres"):
+        options = os.getenv("DB_OPTIONS", "sslmode=require").lstrip("?&")
+        uri = f"postgresql://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+        return f"{uri}?{options}" if options else uri
+
+    raise ValueError(f"Unsupported DB_ENGINE '{db_engine}'.")
+
+
+app.config["SQLALCHEMY_DATABASE_URI"] = build_database_uri()
 app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
@@ -114,39 +144,46 @@ login_manager.login_message_category = 'info'
 bcrypt.init_app(app)
 
 # ----------------------------------------
-# CACHED DATA FUNCTIONS - For Performance
+# DATABASE SCHEMA SAFETY NET
 # ----------------------------------------
 
-def get_cached_medications():
-    """
-    Get all medications - cached for 1 hour.
-    This is the biggest performance win (7000+ records).
-    """
-    cache_key = 'all_medications_choices'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-    
+def ensure_patient_phone_column():
+    """Ensure legacy patient tables include the phone column expected by the ORM."""
+    try:
+        inspector = inspect(db.engine)
+        column_names = {col["name"] for col in inspector.get_columns("patient")}
+        if "phone" in column_names:
+            return
+
+        with db.engine.begin() as connection:
+            connection.execute(text("ALTER TABLE patient ADD phone VARCHAR(20)"))
+    except SQLAlchemyError as exc:
+        app.logger.warning("Could not ensure patient.phone column: %s", exc)
+
+
+def bootstrap_schema_safeguards():
+    ensure_patient_phone_column()
+
+
+with app.app_context():
+    bootstrap_schema_safeguards()
+
+# ----------------------------------------
+# DATA LOADING HELPERS
+# ----------------------------------------
+
+def get_medication_choices():
+    """Return ordered medication choices for select fields."""
     meds = Medicament.query.order_by(Medicament.nom_com).all()
-    med_choices = [(m.num_enr, f"{m.nom_com} ({m.dosage}{m.unite})") for m in meds]
-    cache.set(cache_key, med_choices, timeout=3600)  # 1 hour
-    return med_choices
+    return [(m.num_enr, f"{m.nom_com} ({m.dosage}{m.unite})") for m in meds]
 
 
-def get_cached_dashboard_stats():
-    """
-    Get dashboard statistics - cached for 5 minutes.
-    Since this is a demo, data doesn't change often.
-    """
-    cache_key = 'dashboard_stats'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-    
+def get_dashboard_stats():
+    """Aggregate counts for dashboard widgets."""
     from datetime import date
+
     today = date.today()
-    
-    stats = {
+    return {
         'total_patients': Patient.query.count(),
         'total_visits': Visit.query.count(),
         'total_appointments': Appointment.query.count(),
@@ -156,69 +193,27 @@ def get_cached_dashboard_stats():
             Appointment.state == 'scheduled'
         ).count(),
     }
-    cache.set(cache_key, stats, timeout=300)  # 5 minutes
-    return stats
 
 
-def get_cached_recent_visits(limit=5, doctor_id=None):
-    """Get recent visits - cached for 2 minutes."""
-    cache_key = f'recent_visits_{doctor_id}_{limit}'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-    
+def get_recent_visits(limit=5, doctor_id=None):
+    """Return most recent visits, optionally filtered by doctor."""
     query = Visit.query
     if doctor_id:
         query = query.filter(Visit.doctor_id == doctor_id)
-    visits = query.order_by(Visit.visit_date.desc()).limit(limit).all()
-    cache.set(cache_key, visits, timeout=120)  # 2 minutes
-    return visits
+    return query.order_by(Visit.visit_date.desc()).limit(limit).all()
 
 
-def get_cached_upcoming_appointments(limit=5, doctor_id=None):
-    """Get upcoming appointments - cached for 2 minutes."""
-    cache_key = f'upcoming_appointments_{doctor_id}_{limit}'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-    
+def get_upcoming_appointments(limit=5, doctor_id=None):
+    """Return upcoming appointments for dashboards."""
     query = Appointment.query.filter(Appointment.date >= datetime.now())
     if doctor_id:
         query = query.filter(Appointment.doctor_id == doctor_id)
-    appointments = query.order_by(Appointment.date).limit(limit).all()
-    cache.set(cache_key, appointments, timeout=120)  # 2 minutes
-    return appointments
+    return query.order_by(Appointment.date).limit(limit).all()
 
 
-def get_cached_patients_list():
-    """Get all patients - cached for 5 minutes."""
-    cache_key = 'all_patients_list'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return cached
-    
-    patients = Patient.query.order_by(Patient.last_name, Patient.first_name).all()
-    cache.set(cache_key, patients, timeout=300)  # 5 minutes
-    return patients
-
-
-def prewarm_cache():
-    """Pre-warm cache on startup for instant first request."""
-    print("🔥 Pre-warming cache...")
-    try:
-        # These will cache the results
-        meds = get_cached_medications()
-        print(f"   ✓ Cached {len(meds)} medications")
-        
-        stats = get_cached_dashboard_stats()
-        print(f"   ✓ Cached dashboard stats: {stats['total_patients']} patients, {stats['total_visits']} visits")
-        
-        patients = get_cached_patients_list()
-        print(f"   ✓ Cached {len(patients)} patients")
-        
-        print("✅ Cache pre-warmed successfully!")
-    except Exception as e:
-        print(f"⚠️ Cache pre-warm failed (non-critical): {e}")
+def get_patients_list():
+    """Return all patients ordered alphabetically."""
+    return Patient.query.order_by(Patient.last_name, Patient.first_name).all()
 
 
 # ----------------------------------------
@@ -288,6 +283,15 @@ load_onnx_model()
 @login_manager.user_loader
 def load_user(user_id):
     return User.query.get(int(user_id))
+
+
+# ----------------------------------------
+# HEALTH CHECK ENDPOINT (for Azure/monitoring)
+# ----------------------------------------
+@app.route('/health')
+def health_check():
+    """Simple health check endpoint for load balancers and monitoring"""
+    return jsonify({"status": "healthy", "service": "heartline-webapp"}), 200
 
 
 # ----------------------------------------
@@ -482,8 +486,8 @@ def create_visit():
     # Note: Patient selection now uses AJAX search, no need to populate choices
     # The patient_id will be set by the searchable dropdown via JavaScript
 
-    # Populate medicament choices for each PrescriptionForm - CACHED for performance
-    med_choices = get_cached_medications()
+    # Populate medicament choices for each PrescriptionForm
+    med_choices = get_medication_choices()
     for subform in form.prescriptions:
         subform.medicament_num_enr.choices = med_choices
 
@@ -1190,8 +1194,8 @@ def edit_visit(visit_id):
         for p in Patient.query.order_by(Patient.first_name, Patient.last_name).all()
     ]
 
-    # ──────────── 2) Prepare Medicament choices for prescriptions - CACHED ────────────
-    med_choices = get_cached_medications()
+    # ──────────── 2) Prepare Medicament choices for prescriptions ────────────
+    med_choices = get_medication_choices()
 
     # ──────────── 3) ONLY pre-populate existing prescriptions & documents on GET ────────────
     if request.method == "GET":
@@ -2377,16 +2381,14 @@ def index():
 @app.route("/dashboard")
 @login_required
 def dashboard():
-    """Main dashboard - role-specific content - OPTIMIZED with caching"""
+    """Main dashboard with role-specific content."""
     
-    # Get cached statistics for instant loading
-    stats = get_cached_dashboard_stats()
+    stats = get_dashboard_stats()
     
     # Recent activity based on role
     if current_user.is_doctor():
-        # Doctor-specific dashboard data - cached
-        recent_visits = get_cached_recent_visits(limit=5, doctor_id=current_user.doctor_id)
-        doctor_appointments = get_cached_upcoming_appointments(limit=5, doctor_id=current_user.doctor_id)
+        recent_visits = get_recent_visits(limit=5, doctor_id=current_user.doctor_id)
+        doctor_appointments = get_upcoming_appointments(limit=5, doctor_id=current_user.doctor_id)
         
         return render_template('dashboard/doctor_dashboard.html',
                              total_patients=stats['total_patients'],
@@ -2397,9 +2399,8 @@ def dashboard():
                              recent_visits=recent_visits,
                              upcoming_appointments=doctor_appointments)
     else:
-        # Assistant dashboard - general overview - cached
-        recent_visits = get_cached_recent_visits(limit=5)
-        upcoming_appointments = get_cached_upcoming_appointments(limit=5)
+        recent_visits = get_recent_visits(limit=5)
+        upcoming_appointments = get_upcoming_appointments(limit=5)
         
         return render_template('dashboard/assistant_dashboard.html',
                              total_patients=stats['total_patients'],
@@ -2411,26 +2412,20 @@ def dashboard():
                              upcoming_appointments=upcoming_appointments)
 
 # ----------------------------------------
-# Dashboard API Endpoints - CACHED for performance
+# Dashboard API Endpoints
 # ----------------------------------------
 
 @app.route('/api/dashboard/doctor/stats')
 @login_required
 @doctor_required
 def doctor_dashboard_stats():
-    """Get doctor dashboard statistics - CACHED"""
-    cache_key = 'doctor_dashboard_stats'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get doctor dashboard statistics."""
     try:
         from datetime import date, timedelta
         today = date.today()
         week_ago = today - timedelta(days=7)
         
-        # Use cached stats for basic counts
-        stats = get_cached_dashboard_stats()
+        stats = get_dashboard_stats()
         
         ecg_tests_week = Visit.query.filter(
             Visit.visit_date >= week_ago,
@@ -2456,7 +2451,6 @@ def doctor_dashboard_stats():
             'follow_ups': 3,
             'new_patients_week': new_patients_week
         }
-        cache.set(cache_key, result, timeout=300)  # 5 minutes
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2465,18 +2459,12 @@ def doctor_dashboard_stats():
 @login_required
 @assistant_required
 def assistant_dashboard_stats():
-    """Get assistant dashboard statistics - CACHED"""
-    cache_key = 'assistant_dashboard_stats'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get assistant dashboard statistics."""
     try:
         from datetime import date, timedelta
         today = date.today()
         
-        # Use cached stats
-        stats = get_cached_dashboard_stats()
+        stats = get_dashboard_stats()
         
         result = {
             'patients_registered': stats['total_patients'],
@@ -2488,7 +2476,6 @@ def assistant_dashboard_stats():
             'calls_change': 8,
             'time_change': -5
         }
-        cache.set(cache_key, result, timeout=300)  # 5 minutes
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2496,12 +2483,7 @@ def assistant_dashboard_stats():
 @app.route('/api/dashboard/recent-activity')
 @login_required
 def dashboard_recent_activity():
-    """Get recent activity for dashboard - CACHED"""
-    cache_key = 'dashboard_recent_activity'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get recent activity for dashboard."""
     try:
         activities = []
         
@@ -2515,7 +2497,7 @@ def dashboard_recent_activity():
             })
         
         # Recent visits (last 3)
-        recent_visits = get_cached_recent_visits(limit=3)
+        recent_visits = get_recent_visits(limit=3)
         for visit in recent_visits:
             activities.append({
                 'type': 'visit_completed',
@@ -2527,7 +2509,6 @@ def dashboard_recent_activity():
         activities.sort(key=lambda x: x['timestamp'], reverse=True)
         
         result = activities[:10]
-        cache.set(cache_key, result, timeout=120)  # 2 minutes
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2535,12 +2516,7 @@ def dashboard_recent_activity():
 @app.route('/api/dashboard/today-schedule')
 @login_required
 def dashboard_today_schedule():
-    """Get today's schedule for dashboard - CACHED"""
-    cache_key = 'dashboard_today_schedule'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get today's schedule for dashboard."""
     try:
         from datetime import date
         today = date.today()
@@ -2558,7 +2534,6 @@ def dashboard_today_schedule():
                 'visit_type': apt.purpose or 'General Visit'
             })
         
-        cache.set(cache_key, schedule, timeout=120)  # 2 minutes
         return jsonify(schedule)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2566,12 +2541,7 @@ def dashboard_today_schedule():
 @app.route('/api/dashboard/visits-chart')
 @login_required
 def dashboard_visits_chart():
-    """Get visits chart data for last 7 days - CACHED"""
-    cache_key = 'dashboard_visits_chart'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get visits chart data for last 7 days."""
     try:
         from datetime import date, timedelta
         
@@ -2594,7 +2564,6 @@ def dashboard_visits_chart():
             'labels': dates,
             'visits': visits_count
         }
-        cache.set(cache_key, result, timeout=300)  # 5 minutes
         return jsonify(result)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2602,12 +2571,7 @@ def dashboard_visits_chart():
 @app.route('/api/dashboard/patient-queue')
 @login_required
 def dashboard_patient_queue():
-    """Get patient queue for assistant dashboard - CACHED"""
-    cache_key = 'dashboard_patient_queue'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get patient queue for assistant dashboard."""
     try:
         from datetime import date
         today = date.today()
@@ -2628,7 +2592,6 @@ def dashboard_patient_queue():
                 'status': status
             })
         
-        cache.set(cache_key, queue, timeout=60)  # 1 minute
         return jsonify(queue)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2636,18 +2599,11 @@ def dashboard_patient_queue():
 @app.route('/api/dashboard/notifications')
 @login_required
 def dashboard_notifications():
-    """Get notifications for dashboard - CACHED"""
-    cache_key = 'dashboard_notifications'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get notifications for dashboard."""
     try:
         notifications = []
         
         # Mock notifications - in a real app, these would come from a notifications table
-        from datetime import datetime, timedelta
-        
         notifications = [
             {
                 'type': 'appointment',
@@ -2666,7 +2622,6 @@ def dashboard_notifications():
             }
         ]
         
-        cache.set(cache_key, notifications, timeout=300)  # 5 minutes (mock data)
         return jsonify(notifications)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2675,12 +2630,7 @@ def dashboard_notifications():
 @login_required
 @assistant_required
 def dashboard_productivity_chart():
-    """Get productivity chart data for assistant dashboard - CACHED"""
-    cache_key = 'dashboard_productivity_chart'
-    cached = cache.get(cache_key)
-    if cached is not None:
-        return jsonify(cached)
-    
+    """Get productivity chart data for assistant dashboard."""
     try:
         # Mock productivity data
         data = {
@@ -2688,7 +2638,6 @@ def dashboard_productivity_chart():
             'values': [15, 23, 12, 8]
         }
         
-        cache.set(cache_key, data, timeout=300)  # 5 minutes
         return jsonify(data)
     except Exception as e:
         return jsonify({'error': str(e)}), 500
@@ -2956,7 +2905,8 @@ def analyze_ecg_by_visit(visit_id):
                             "name": class_names.get(max_prob_abbr_stored, max_prob_abbr_stored),
                             "probability": max_prob_value_stored
                         },
-                        "summary": f"Primary finding: {class_names.get(max_prob_abbr_stored, max_prob_abbr_stored)} ({max_prob_value_stored:.1%} confidence) (cached)"                    }
+                        "summary": f"Primary finding: {class_names.get(max_prob_abbr_stored, max_prob_abbr_stored)} ({max_prob_value_stored:.1%} confidence)"
+                    }
                     return jsonify(response)
 
         if not visit.ecg_mat or not visit.ecg_hea:
@@ -3113,9 +3063,9 @@ if __name__ == "__main__":
         if not admin:
             admin = User(
                 username="admin",
-                email="admin@example.com",
+                email="admin@heartline.com",
                 first_name="Admin",
-                last_name="User",
+                last_name="Heartline",
                 role="doctor",
                 is_active=True
             )
@@ -3126,7 +3076,6 @@ if __name__ == "__main__":
         else:
             print("✅ Demo admin user already exists: admin / admin")
         
-        # Pre-warm cache for instant first request
-        prewarm_cache()
-        
-    app.run(host='0.0.0.0', debug=True)
+    # Use environment variable to determine debug mode
+    debug_mode = os.getenv("FLASK_DEBUG", "False").lower() in ("true", "1", "yes")
+    app.run(host='0.0.0.0', port=8000, debug=debug_mode)

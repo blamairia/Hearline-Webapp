@@ -73,11 +73,14 @@ coverage.xml
 instance/
 .webassets-cache
 
+# ============ Persistent Cache ============
+.cache/
+*.pkl
+*.joblib
+
 # ============ AI/ML Models ============
 # Keep ONNX model, ignore PyTorch models
 *.pth
-*.pkl
-*.joblib
 *.h5
 *.hdf5
 # Note: resnet34_model.onnx is tracked
@@ -119,6 +122,7 @@ config.py
 config_local.py
 local_config.py
 secrets.py
+azure-env-variables.json
 
 # ============ SSL Certificates ============
 *.pem
