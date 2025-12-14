@@ -50,17 +50,26 @@
         
         function checkServer() {
             attempts++;
-            fetch(window.location.origin + '/health', { method: 'GET' })
+            fetch(window.location.origin + '/health', { 
+                method: 'GET',
+                cache: 'no-cache'
+            })
                 .then(response => {
-                    if (response.ok) {
-                        window.location.href = window.location.origin;
+                    // Only redirect if we get a successful 200 response
+                    if (response.ok && response.status === 200) {
+                        window.location.href = window.location.origin + '/login';
                     } else if (attempts < maxAttempts) {
                         setTimeout(checkServer, 2000);
+                    } else {
+                        // After max attempts, try to load login page anyway
+                        window.location.href = window.location.origin + '/login';
                     }
                 })
                 .catch(() => {
                     if (attempts < maxAttempts) {
                         setTimeout(checkServer, 2000);
+                    } else {
+                        window.location.href = window.location.origin + '/login';
                     }
                 });
         }
