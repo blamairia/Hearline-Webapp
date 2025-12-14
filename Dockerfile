@@ -26,7 +26,7 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
 
 # Copy SSL certificates for Azure SQL
 COPY DigiCertGlobalRootG2.crt.pem /app/
-COPY "Microsoft RSA Root Certificate Authority 2017.crt" /app/
+COPY Microsoft\ RSA\ Root\ Certificate\ Authority\ 2017.crt /app/
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
