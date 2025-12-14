@@ -125,10 +125,6 @@ secrets.py
 azure-env-variables.json
 
 # ============ SSL Certificates ============
-*.pem
-*.key
-*.crt
-*.cert
 
 # ============ Archives ============
 *.zip

@@ -25,6 +25,8 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy SSL certificates for Azure SQL
+COPY DigiCertGlobalRootG2.crt.pem /app/
+COPY Microsoft\ RSA\ Root\ Certificate\ Authority\ 2017.crt /app/
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
@@ -45,13 +47,5 @@ EXPOSE 8000
 HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
     CMD curl -f http://localhost:8000/health || exit 1
 
-# Run with gunicorn
-CMD ["gunicorn", \
-     "--bind=0.0.0.0:8000", \
-     "--workers=2", \
-     "--threads=2", \
-     "--timeout=120", \
-     "--access-logfile=-", \
-     "--error-logfile=-", \
-     "--log-level=info", \
-     "app:app"]
+# Run with gunicorn via startup script
+CMD ["bash", "/app/startup.sh"]
