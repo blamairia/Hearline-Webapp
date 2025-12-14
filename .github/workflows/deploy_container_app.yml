@@ -32,43 +32,63 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
-      - name: Enable Container Apps extension
+      - name: Ensure Container Apps extension
         run: |
           az extension add --name containerapp --upgrade
           az provider register --namespace Microsoft.App --wait
           az provider register --namespace Microsoft.OperationalInsights --wait
+          az provider register --namespace Microsoft.ContainerRegistry --wait
 
       - name: Resolve container registry
+        id: acr-info
         run: |
-          echo "ACR_LOGIN_SERVER=$(az acr show --name $AZURE_CONTAINER_REGISTRY --query loginServer -o tsv)" >> $GITHUB_ENV
+          LOGIN_SERVER=$(az acr show --name $AZURE_CONTAINER_REGISTRY --query loginServer -o tsv)
+          USERNAME=$(az acr credential show --name $AZURE_CONTAINER_REGISTRY --query username -o tsv)
+          PASSWORD=$(az acr credential show --name $AZURE_CONTAINER_REGISTRY --query passwords[0].value -o tsv)
+          echo "login_server=$LOGIN_SERVER" >> $GITHUB_OUTPUT
+          echo "username=$USERNAME" >> $GITHUB_OUTPUT
+          echo "password=$PASSWORD" >> $GITHUB_OUTPUT
+          echo "ACR_LOGIN_SERVER=$LOGIN_SERVER" >> $GITHUB_ENV
 
-      - name: Log in to Azure Container Registry
-        run: az acr login --name $AZURE_CONTAINER_REGISTRY
+      - name: Docker login
+        run: |
+          echo "${{ steps.acr-info.outputs.password }}" | docker login ${{ steps.acr-info.outputs.login_server }} \
+            --username "${{ steps.acr-info.outputs.username }}" --password-stdin
 
       - name: Build container image
         run: |
           docker build \
             --file Dockerfile \
-            --tag $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
+            --tag ${{ steps.acr-info.outputs.login_server }}/$IMAGE_NAME:${{ github.sha }} \
             .
 
       - name: Push container image
-        run: docker push $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }}
+        run: docker push ${{ steps.acr-info.outputs.login_server }}/$IMAGE_NAME:${{ github.sha }}
 
       - name: Deploy to Azure Container Apps
         run: |
-          az containerapp up \
-            --name $CONTAINER_APP_NAME \
-            --resource-group $AZURE_RESOURCE_GROUP \
-            --environment $CONTAINERAPPS_ENVIRONMENT \
-            --image $ACR_LOGIN_SERVER/$IMAGE_NAME:${{ github.sha }} \
-            --ingress external \
-            --target-port 8000 \
-            --min-replicas 1 \
-            --max-replicas 1 \
-            --registry-server $ACR_LOGIN_SERVER \
-            --location $AZURE_LOCATION \
-            --query properties.configuration.ingress.fqdn -o tsv
+          set -euo pipefail
+          IMAGE="${{ steps.acr-info.outputs.login_server }}/$IMAGE_NAME:${{ github.sha }}"
+          if az containerapp show --name $CONTAINER_APP_NAME --resource-group $AZURE_RESOURCE_GROUP >/dev/null 2>&1; then
+            az containerapp update \
+              --name $CONTAINER_APP_NAME \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --image "$IMAGE"
+          else
+            az containerapp create \
+              --name $CONTAINER_APP_NAME \
+              --resource-group $AZURE_RESOURCE_GROUP \
+              --environment $CONTAINERAPPS_ENVIRONMENT \
+              --image "$IMAGE" \
+              --ingress external \
+              --target-port 8000 \
+              --min-replicas 1 \
+              --max-replicas 1 \
+              --registry-server ${{ steps.acr-info.outputs.login_server }} \
+              --registry-username ${{ steps.acr-info.outputs.username }} \
+              --registry-password ${{ steps.acr-info.outputs.password }} \
+              --location $AZURE_LOCATION
+          fi
 
       - name: Show deployed endpoint
         run: |
