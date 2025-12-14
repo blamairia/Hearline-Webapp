@@ -152,3 +152,7 @@ node_modules/
 
 # ============ Jupyter ============
 .ipynb_checkpoints/
+
+# ============ Docker ============
+*.tar
+docker-compose.override.yml

@@ -1,0 +1,62 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Git
+.git/
+.gitignore
+
+# Environment files
+.env
+.env.*
+*.env
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+instance/
+
+# Uploads (will be created in container)
+uploads/
+
+# Cache
+.cache/
+*.pkl
+
+# Documentation
+*.md
+!README.md
+
+# Tests
+tests/
+.pytest_cache/
+
+# Logs
+*.log
+logs/
+
+# Azure deployment files (not needed in container)
+azure-env-variables.json
+startup.sh
+nginx.conf
+AZURE_DEPLOYMENT.md
+AZURE_COST_OPTIONS.md
+
+# Node modules (if any)
+node_modules/
