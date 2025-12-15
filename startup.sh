@@ -4,7 +4,7 @@ set -e
 echo "=== Azure Flask Heartline Startup BEGIN ==="
 
 # Always run from app root
-cd /home/site/wwwroot
+cd /app || cd /home/site/wwwroot || true
 
 #######################################
 # Apply nginx config
@@ -49,6 +49,13 @@ with app.app_context():
         print(f'❌ Database error: {e}')
         exit(1)
 " || echo "⚠️ Database initialization had issues, continuing..."
+
+echo "Checking/Importing Medicaments..."
+python3 import_medicaments.py || echo "⚠️ Medicament import failed"
+
+echo "Checking/Creating Demo Data..."
+python3 create_demo_data.py || echo "⚠️ Demo data creation failed"
+
 
 #######################################
 # Start Gunicorn (Production WSGI server)

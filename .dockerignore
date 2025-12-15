@@ -53,8 +53,6 @@ logs/
 
 # Azure deployment files (not needed in container)
 azure-env-variables.json
-startup.sh
-nginx.conf
 AZURE_DEPLOYMENT.md
 AZURE_COST_OPTIONS.md
 

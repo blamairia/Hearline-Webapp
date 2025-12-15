@@ -168,6 +168,22 @@ def create_demo_data():
             assistant.set_password('demo123')
             db.session.add(assistant)
             print("   ✓ Created assistant user")
+            
+        # Create admin user
+        admin_exists = User.query.filter_by(username='admin').first()
+        if not admin_exists:
+            admin = User(
+                username='admin',
+                email='admin@heartline.dz',
+                first_name='Admin',
+                last_name='Administrator',
+                role='doctor', # Admin usually has highest privilege, mapping to doctor for now or if role exists
+                is_active=True
+            )
+            admin.set_password('admin')
+            db.session.add(admin)
+            print("   ✓ Created admin user (admin/admin)")
+
         
         db.session.commit()
         
@@ -189,8 +205,8 @@ def create_demo_data():
             age = random.randint(25, 80)
             birth_date = datetime.now() - timedelta(days=age*365 + random.randint(0, 365))
             
-            # Generate unique email
-            email = f"{first_name.lower()}.{last_name.lower()}@email.dz" if random.random() > 0.3 else None
+            # Generate unique email (SQL Server UNIQUE constraint doesn't allow multiple NULLs)
+            email = f"{first_name.lower()}.{last_name.lower()}.{i}@heartline.dz"
             
             # Check if patient exists by name and birth date OR by email
             existing = None

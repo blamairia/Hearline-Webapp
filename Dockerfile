@@ -24,9 +24,10 @@ RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - \
     && ACCEPT_EULA=Y apt-get install -y msodbcsql18 \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy SSL certificates for Azure SQL
-COPY DigiCertGlobalRootG2.crt.pem /app/
-COPY Microsoft\ RSA\ Root\ Certificate\ Authority\ 2017.crt /app/
+# Copy and install SSL certificates for Azure SQL
+COPY DigiCertGlobalRootG2.crt.pem /usr/local/share/ca-certificates/DigiCertGlobalRootG2.crt
+COPY ["Microsoft RSA Root Certificate Authority 2017.crt", "/usr/local/share/ca-certificates/Microsoft_RSA_Root_Certificate_Authority_2017.crt"]
+RUN update-ca-certificates
 
 # Copy requirements and install Python dependencies
 COPY requirements.txt .
