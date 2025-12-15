@@ -372,7 +372,7 @@ class VisitDocumentForm(Form):
 
 # --- Form for Visit (with nested prescriptions + documents) ---
 class VisitForm(FlaskForm):
-    patient_id = IntegerField("Patient", validators=[validators.DataRequired()])
+    patient_id = SelectField("Patient", coerce=int, validators=[validators.DataRequired()])
     visit_date = DateTimeField(
         "Visit Date & Time",
         default=datetime.utcnow,
@@ -483,8 +483,27 @@ def create_visit():
     """
     form = VisitForm()
 
-    # Note: Patient selection now uses AJAX search, no need to populate choices
-    # The patient_id will be set by the searchable dropdown via JavaScript
+    # Dynamic Choice Validation Logic
+    # 1. On GET: We don't preload all patients (performance).
+    # 2. On POST: 'patient_id' has a value. We must populate 'choices' with that value
+    #    so valid_on_submit() passes.
+    
+    if request.method == "POST":
+        pid = request.form.get("patient_id")
+        if pid:
+            try:
+                p = Patient.query.get(int(pid))
+                if p:
+                    form.patient_id.choices = [(p.id, f"{p.first_name} {p.last_name}")]
+                else:
+                    form.patient_id.choices = []
+            except ValueError:
+                form.patient_id.choices = []
+        else:
+            form.patient_id.choices = []
+    else:
+        # Initial state: empty choices (will be populated via AJAX)
+        form.patient_id.choices = []
 
     # Populate medicament choices for each PrescriptionForm
     med_choices = get_medication_choices()
@@ -856,6 +875,52 @@ def api_ecg_details(visit_id):
     }
     
     return jsonify({"success": True, "analysis": analysis})
+
+@app.route("/api/patients/search")
+@login_required
+def search_patients_api():
+    """
+    API endpoint for server-side patient search (Tom Select).
+    Query params:
+      q: search term
+      page: page number (default 1)
+    """
+    query = request.args.get('q', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 20
+    
+    # Base query
+    sql_query = Patient.query
+    
+    if query:
+        # Search by name or phone
+        pattern = f"%{query}%"
+        sql_query = sql_query.filter(
+            or_(
+                Patient.first_name.ilike(pattern),
+                Patient.last_name.ilike(pattern),
+                Patient.phone.like(pattern)
+            )
+        )
+    
+    # Pagination
+    pagination = sql_query.order_by(Patient.last_name, Patient.first_name).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    results = []
+    for p in pagination.items:
+        results.append({
+            "id": p.id,
+            "text": f"{p.first_name} {p.last_name} (DOB: {p.date_of_birth})",
+            "info": f"ID: {p.id}"
+        })
+        
+    return jsonify({
+        "results": results,
+        "pagination": {"more": pagination.has_next}
+    })
+
 
 @app.route("/visit/<int:visit_id>/analyze_ecg", methods=["POST"])
 @login_required
@@ -1486,20 +1551,23 @@ def patients_table():
     # Build query
     query = Patient.query
     
-    # Apply search filter
+    # Apply search filter (Multi-term fuzzy search)
     if search:
-        pattern = f'%{search}%'
-        query = query.filter(
-            or_(
-                Patient.first_name.ilike(pattern),
-                Patient.last_name.ilike(pattern),
-                Patient.phone.ilike(pattern),
-                Patient.email.ilike(pattern)
+        terms = search.split()
+        for term in terms:
+            pattern = f'%{term}%'
+            query = query.filter(
+                or_(
+                    Patient.first_name.ilike(pattern),
+                    Patient.last_name.ilike(pattern),
+                    Patient.phone.ilike(pattern),
+                    Patient.email.ilike(pattern)
+                )
             )
-        )
     
-    # Get paginated results
-    pagination = query.order_by(Patient.last_name, Patient.first_name).paginate(
+    # Get paginated results - Default to Newest (Desc ID)
+    # If no specific sort requested, order by ID descending (newest first)
+    pagination = query.order_by(Patient.id.desc()).paginate(
         page=page, per_page=per_page, error_out=False
     )
     

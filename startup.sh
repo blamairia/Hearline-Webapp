@@ -68,8 +68,9 @@ with app.app_context():
     echo "Checking/Importing Medicaments..."
     python3 import_medicaments.py || echo "⚠️ Medicament import failed"
 
-    echo "Checking/Creating Demo Data..."
-    python3 create_demo_data.py || echo "⚠️ Demo data creation failed"
+    # Demo data creation disabled - run manually if needed
+    # echo "Checking/Creating Demo Data..."
+    # python3 create_demo_data.py || echo "⚠️ Demo data creation failed"
 ) &
 
 # Wait for Gunicorn to be ready

@@ -169,7 +169,8 @@
                                 {% for p in prescriptions %}
                                 <tr>
                                     <td>{{ p.medicament.nom_com }}</td>
-                                    <td>{{ p.dosage_instructions }}</td>
+                                    <td class="text-truncate" style="max-width: 200px;"
+                                        title="{{ p.dosage_instructions }}">{{ p.dosage_instructions }}</td>
                                     <td>{{ p.quantity }}</td>
                                 </tr>
                                 {% endfor %}

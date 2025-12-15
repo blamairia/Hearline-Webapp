@@ -106,7 +106,10 @@ def create_demo_data():
         
         print(f"\n✅ Found {med_count} medications in database")
         
-        # Create doctors if needed
+        # Avoid duplication
+        if Patient.query.first():
+            print("\n⚠️ Data already exists in database. Skipping generation.")
+            return
         print("\n👨‍⚕️ Creating Doctors...")
         doctors = []
         
