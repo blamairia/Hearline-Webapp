@@ -27,7 +27,8 @@
     <div class="stats-grid">
         {{ stat_card('fas fa-users', total_patients, 'My Patients', 'primary', 'Active Database', 'positive') }}
         {{ stat_card('fas fa-clipboard-check', today_visits, 'Visits Today', 'success', 'Checked In', 'positive') }}
-        {{ stat_card('fas fa-calendar-alt', today_appointments, 'Appointments Today', 'warning', 'Scheduled', 'warning') }}
+        {{ stat_card('fas fa-calendar-alt', today_appointments, 'Appointments Today', 'warning', 'Scheduled', 'warning')
+        }}
         {{ stat_card('fas fa-file-medical-alt', total_visits, 'Total Consultations', 'info', 'All Time', 'neutral') }}
     </div>
 
@@ -59,13 +60,15 @@
                         </a>
 
                         <!-- Tertiary Action: Schedule -->
-                        <a href="{{ url_for('create_appointment') }}" class="btn btn-light text-primary btn-lg text-start">
+                        <a href="{{ url_for('create_appointment') }}"
+                            class="btn btn-light text-primary btn-lg text-start">
                             <i class="fas fa-calendar-plus fa-fw me-2"></i> Schedule Appointment
                         </a>
-                        
+
                         <hr class="my-1 text-muted opacity-25">
 
-                        <a href="{{ url_for('patients_table') }}" class="btn btn-link text-secondary text-decoration-none text-start px-0">
+                        <a href="{{ url_for('patients_table') }}"
+                            class="btn btn-link text-secondary text-decoration-none text-start px-0">
                             <i class="fas fa-search fa-fw me-2"></i> Search Patient Records
                         </a>
                     </div>
@@ -101,30 +104,32 @@
                                                 {{ visit.patient.first_name[0] }}{{ visit.patient.last_name[0] }}
                                             </div>
                                             <div>
-                                                <div class="fw-bold">{{ visit.patient.first_name }} {{ visit.patient.last_name }}</div>
+                                                <div class="fw-bold">{{ visit.patient.first_name }} {{
+                                                    visit.patient.last_name }}</div>
                                                 <small class="text-muted">#{{ visit.patient.id }}</small>
                                             </div>
                                         </div>
                                     </td>
                                     <td>
                                         {% if visit.ecg_data %}
-                                            <span class="badge badge-info"><i class="fas fa-heartbeat"></i> ECG</span>
+                                        <span class="badge badge-info"><i class="fas fa-heartbeat"></i> ECG</span>
                                         {% else %}
-                                            <span class="badge badge-light"><i class="fas fa-user-md"></i> Consult</span>
+                                        <span class="badge badge-light"><i class="fas fa-user-md"></i> Consult</span>
                                         {% endif %}
                                     </td>
                                     <td>{{ moment(visit.visit_date).fromNow() }}</td>
                                     <td>
                                         {% if visit.payment_status == 'paid' %}
-                                            <span class="badge badge-success">Paid</span>
+                                        <span class="badge badge-success">Paid</span>
                                         {% elif visit.payment_status == 'partial' %}
-                                            <span class="badge badge-warning">Partial</span>
+                                        <span class="badge badge-warning">Partial</span>
                                         {% else %}
-                                            <span class="badge badge-danger">Unpaid</span>
+                                        <span class="badge badge-danger">Unpaid</span>
                                         {% endif %}
                                     </td>
                                     <td>
-                                        <a href="{{ url_for('visit_details', visit_id=visit.id) }}" class="btn btn-sm btn-outline-primary">
+                                        <a href="{{ url_for('visit_details', visit_id=visit.id) }}"
+                                            class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i>
                                         </a>
                                     </td>
@@ -144,7 +149,7 @@
             </div>
         </div>
     </div>
-    
+
     <!-- Upcoming Appointments -->
     <div class="card">
         <div class="card-header d-flex justify-content-between align-items-center">
@@ -168,11 +173,12 @@
                         {% for apt in upcoming_appointments %}
                         <tr>
                             <td>
-                                <div class="fw-bold">{{ apt.appointment_date.strftime('%H:%M') }}</div>
-                                <small class="text-muted">{{ apt.appointment_date.strftime('%b %d') }}</small>
+                                <div class="fw-bold">{{ apt.date.strftime('%H:%M') }}</div>
+                                <small class="text-muted">{{ apt.date.strftime('%b %d') }}</small>
                             </td>
                             <td>
-                                <a href="{{ url_for('patient_details', patient_id=apt.patient.id) }}" class="text-decoration-none">
+                                <a href="{{ url_for('patient_details', patient_id=apt.patient.id) }}"
+                                    class="text-decoration-none">
                                     {{ apt.patient.first_name }} {{ apt.patient.last_name }}
                                 </a>
                             </td>
@@ -182,7 +188,8 @@
                                 <span class="badge badge-primary">Scheduled</span>
                             </td>
                             <td>
-                                <a href="{{ url_for('edit_appointment', appointment_id=apt.id) }}" class="btn btn-sm btn-outline-secondary">
+                                <a href="{{ url_for('edit_appointment', appointment_id=apt.id) }}"
+                                    class="btn btn-sm btn-outline-secondary">
                                     <i class="fas fa-edit"></i>
                                 </a>
                             </td>

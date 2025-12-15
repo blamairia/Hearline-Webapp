@@ -38,28 +38,7 @@ pip install -r requirements.txt
 #######################################
 # Database initialization
 #######################################
-echo "Initializing database..."
-python3 -c "
-from app import app, db
-with app.app_context():
-    try:
-        db.create_all()
-        print('✅ Database tables created/verified')
-    except Exception as e:
-        print(f'❌ Database error: {e}')
-        exit(1)
-" || echo "⚠️ Database initialization had issues, continuing..."
-
-echo "Checking/Importing Medicaments..."
-python3 import_medicaments.py || echo "⚠️ Medicament import failed"
-
-echo "Checking/Creating Demo Data..."
-python3 create_demo_data.py || echo "⚠️ Demo data creation failed"
-
-
-#######################################
 # Start Gunicorn (Production WSGI server)
-#######################################
 echo "Starting Gunicorn..."
 gunicorn --bind=0.0.0.0:8000 \
          --workers=4 \
@@ -69,6 +48,29 @@ gunicorn --bind=0.0.0.0:8000 \
          --error-logfile=- \
          --log-level=info \
          app:app &
+
+# Wait for Gunicorn to start
+sleep 5
+
+# Run Database tasks in background so they don't block container startup
+(
+    echo "Initializing database..."
+    python3 -c "
+from app import app, db
+with app.app_context():
+    try:
+        db.create_all()
+        print('✅ Database tables created/verified')
+    except Exception as e:
+        print(f'❌ Database error: {e}')
+" || echo "⚠️ Database initialization had issues"
+
+    echo "Checking/Importing Medicaments..."
+    python3 import_medicaments.py || echo "⚠️ Medicament import failed"
+
+    echo "Checking/Creating Demo Data..."
+    python3 create_demo_data.py || echo "⚠️ Demo data creation failed"
+) &
 
 # Wait for Gunicorn to be ready
 sleep 3

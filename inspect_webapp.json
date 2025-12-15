@@ -1,0 +1,287 @@
+[
+    {
+        "Id": "5ed4c18e67a208452c9b7dd4729872066ed59839763380dd12866f8794eb0787",
+        "Created": "2025-12-15T14:07:11.027652364Z",
+        "Path": "bash",
+        "Args": [
+            "/app/startup.sh"
+        ],
+        "State": {
+            "Status": "running",
+            "Running": true,
+            "Paused": false,
+            "Restarting": false,
+            "OOMKilled": false,
+            "Dead": false,
+            "Pid": 60635,
+            "ExitCode": 0,
+            "Error": "",
+            "StartedAt": "2025-12-15T14:52:32.81727778Z",
+            "FinishedAt": "2025-12-15T14:52:32.594644147Z",
+            "Health": {
+                "Status": "starting",
+                "FailingStreak": 0,
+                "Log": [
+                    {
+                        "Start": "2025-12-15T15:52:42.989041277+01:00",
+                        "End": "2025-12-15T15:52:43.051233534+01:00",
+                        "ExitCode": 1,
+                        "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\ncurl: (7) Failed to connect to localhost port 8000: Connection refused\n"
+                    },
+                    {
+                        "Start": "2025-12-15T15:52:48.052032792+01:00",
+                        "End": "2025-12-15T15:52:48.10709041+01:00",
+                        "ExitCode": 1,
+                        "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\ncurl: (7) Failed to connect to localhost port 8000: Connection refused\n"
+                    },
+                    {
+                        "Start": "2025-12-15T15:52:53.107519051+01:00",
+                        "End": "2025-12-15T15:52:53.169646528+01:00",
+                        "ExitCode": 1,
+                        "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\ncurl: (7) Failed to connect to localhost port 8000: Connection refused\n"
+                    },
+                    {
+                        "Start": "2025-12-15T15:52:58.170472354+01:00",
+                        "End": "2025-12-15T15:52:58.226779479+01:00",
+                        "ExitCode": 1,
+                        "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\ncurl: (7) Failed to connect to localhost port 8000: Connection refused\n"
+                    },
+                    {
+                        "Start": "2025-12-15T15:53:03.227659661+01:00",
+                        "End": "2025-12-15T15:53:03.28056158+01:00",
+                        "ExitCode": 1,
+                        "Output": "  % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current\n                                 Dload  Upload   Total   Spent    Left  Speed\n\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\r  0     0    0     0    0     0      0      0 --:--:-- --:--:-- --:--:--     0\ncurl: (7) Failed to connect to localhost port 8000: Connection refused\n"
+                    }
+                ]
+            }
+        },
+        "Image": "sha256:f6e12ca5678de3b692224983b6530e299516f98ba11196ad60996a8a4711f8db",
+        "ResolvConfPath": "/var/lib/docker/containers/5ed4c18e67a208452c9b7dd4729872066ed59839763380dd12866f8794eb0787/resolv.conf",
+        "HostnamePath": "/var/lib/docker/containers/5ed4c18e67a208452c9b7dd4729872066ed59839763380dd12866f8794eb0787/hostname",
+        "HostsPath": "/var/lib/docker/containers/5ed4c18e67a208452c9b7dd4729872066ed59839763380dd12866f8794eb0787/hosts",
+        "LogPath": "/var/lib/docker/containers/5ed4c18e67a208452c9b7dd4729872066ed59839763380dd12866f8794eb0787/5ed4c18e67a208452c9b7dd4729872066ed59839763380dd12866f8794eb0787-json.log",
+        "Name": "/heartline-webapp",
+        "RestartCount": 0,
+        "Driver": "overlayfs",
+        "Platform": "linux",
+        "MountLabel": "",
+        "ProcessLabel": "",
+        "AppArmorProfile": "docker-default",
+        "ExecIDs": null,
+        "HostConfig": {
+            "Binds": null,
+            "ContainerIDFile": "",
+            "LogConfig": {
+                "Type": "json-file",
+                "Config": {}
+            },
+            "NetworkMode": "bridge",
+            "PortBindings": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "",
+                        "HostPort": "8090"
+                    }
+                ]
+            },
+            "RestartPolicy": {
+                "Name": "no",
+                "MaximumRetryCount": 0
+            },
+            "AutoRemove": false,
+            "VolumeDriver": "",
+            "VolumesFrom": null,
+            "ConsoleSize": [
+                13,
+                139
+            ],
+            "CapAdd": null,
+            "CapDrop": null,
+            "CgroupnsMode": "private",
+            "Dns": null,
+            "DnsOptions": [],
+            "DnsSearch": [],
+            "ExtraHosts": null,
+            "GroupAdd": null,
+            "IpcMode": "private",
+            "Cgroup": "",
+            "Links": null,
+            "OomScoreAdj": 0,
+            "PidMode": "",
+            "Privileged": false,
+            "PublishAllPorts": false,
+            "ReadonlyRootfs": false,
+            "SecurityOpt": null,
+            "UTSMode": "",
+            "UsernsMode": "",
+            "ShmSize": 67108864,
+            "Runtime": "runc",
+            "Isolation": "",
+            "CpuShares": 0,
+            "Memory": 0,
+            "NanoCpus": 0,
+            "CgroupParent": "",
+            "BlkioWeight": 0,
+            "BlkioWeightDevice": [],
+            "BlkioDeviceReadBps": [],
+            "BlkioDeviceWriteBps": [],
+            "BlkioDeviceReadIOps": [],
+            "BlkioDeviceWriteIOps": [],
+            "CpuPeriod": 0,
+            "CpuQuota": 0,
+            "CpuRealtimePeriod": 0,
+            "CpuRealtimeRuntime": 0,
+            "CpusetCpus": "",
+            "CpusetMems": "",
+            "Devices": [],
+            "DeviceCgroupRules": null,
+            "DeviceRequests": null,
+            "MemoryReservation": 0,
+            "MemorySwap": 0,
+            "MemorySwappiness": null,
+            "OomKillDisable": null,
+            "PidsLimit": null,
+            "Ulimits": [],
+            "CpuCount": 0,
+            "CpuPercent": 0,
+            "IOMaximumIOps": 0,
+            "IOMaximumBandwidth": 0,
+            "MaskedPaths": [
+                "/proc/acpi",
+                "/proc/asound",
+                "/proc/interrupts",
+                "/proc/kcore",
+                "/proc/keys",
+                "/proc/latency_stats",
+                "/proc/sched_debug",
+                "/proc/scsi",
+                "/proc/timer_list",
+                "/proc/timer_stats",
+                "/sys/devices/virtual/powercap",
+                "/sys/firmware",
+                "/sys/devices/system/cpu/cpu0/thermal_throttle",
+                "/sys/devices/system/cpu/cpu1/thermal_throttle",
+                "/sys/devices/system/cpu/cpu2/thermal_throttle",
+                "/sys/devices/system/cpu/cpu3/thermal_throttle",
+                "/sys/devices/system/cpu/cpu4/thermal_throttle",
+                "/sys/devices/system/cpu/cpu5/thermal_throttle",
+                "/sys/devices/system/cpu/cpu6/thermal_throttle",
+                "/sys/devices/system/cpu/cpu7/thermal_throttle"
+            ],
+            "ReadonlyPaths": [
+                "/proc/bus",
+                "/proc/fs",
+                "/proc/irq",
+                "/proc/sys",
+                "/proc/sysrq-trigger"
+            ]
+        },
+        "Storage": {
+            "RootFS": {
+                "Snapshot": {
+                    "Name": "overlayfs"
+                }
+            }
+        },
+        "Mounts": [],
+        "Config": {
+            "Hostname": "5ed4c18e67a2",
+            "Domainname": "",
+            "User": "",
+            "AttachStdin": false,
+            "AttachStdout": false,
+            "AttachStderr": false,
+            "ExposedPorts": {
+                "8000/tcp": {}
+            },
+            "Tty": false,
+            "OpenStdin": false,
+            "StdinOnce": false,
+            "Env": [
+                "DB_ENGINE=mssql+pyodbc",
+                "DB_DRIVER=ODBC Driver 18 for SQL Server",
+                "DB_ENCRYPT=yes",
+                "DB_USERNAME=blamairia",
+                "FLASK_ENV=production",
+                "SECRET_KEY=heartline-secret-key-change-this-in-production-2024",
+                "DB_HOST=blamairia.database.windows.net",
+                "PYTHONUNBUFFERED=1",
+                "SCM_DO_BUILD_DURING_DEPLOYMENT=false",
+                "WEBSITES_PORT=8080",
+                "DB_PORT=1433",
+                "DB_PASSWORD=Billel159",
+                "DB_NAME=heartline-webapp",
+                "DB_TRUST_SERVER_CERTIFICATE=no",
+                "FLASK_APP=app.py",
+                "PATH=/usr/local/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin",
+                "LANG=C.UTF-8",
+                "GPG_KEY=A035C8C19219BA821ECEA86B64E628F8D684696D",
+                "PYTHON_VERSION=3.11.13",
+                "PYTHON_SHA256=8fb5f9fbc7609fa822cb31549884575db7fd9657cbffb89510b5d7975963a83a"
+            ],
+            "Cmd": [
+                "bash",
+                "/app/startup.sh"
+            ],
+            "Healthcheck": {
+                "Test": [
+                    "CMD-SHELL",
+                    "curl -f http://localhost:8000/health || exit 1"
+                ],
+                "Interval": 30000000000,
+                "Timeout": 10000000000,
+                "StartPeriod": 40000000000,
+                "Retries": 3
+            },
+            "Image": "heartline-webapp:local",
+            "Volumes": null,
+            "WorkingDir": "/app",
+            "Entrypoint": null,
+            "Labels": {}
+        },
+        "NetworkSettings": {
+            "SandboxID": "df04a4271146509dbdbd6acd98c3e038fee6ce3d31700e11d23b5ea316e82af6",
+            "SandboxKey": "/var/run/docker/netns/df04a4271146",
+            "Ports": {
+                "8000/tcp": [
+                    {
+                        "HostIp": "0.0.0.0",
+                        "HostPort": "8090"
+                    },
+                    {
+                        "HostIp": "::",
+                        "HostPort": "8090"
+                    }
+                ]
+            },
+            "Networks": {
+                "bridge": {
+                    "IPAMConfig": null,
+                    "Links": null,
+                    "Aliases": null,
+                    "DriverOpts": null,
+                    "GwPriority": 0,
+                    "NetworkID": "9ed7800715c7533d45792a80fe3ae19f3d1e3233af44be7152e5043431d94079",
+                    "EndpointID": "2e7e95ef4e3e7645d496f6e3ee7f32c9a0139f98463d6700c52e216c220718c0",
+                    "Gateway": "172.17.0.1",
+                    "IPAddress": "172.17.0.3",
+                    "MacAddress": "ee:bd:c5:4b:2c:48",
+                    "IPPrefixLen": 16,
+                    "IPv6Gateway": "",
+                    "GlobalIPv6Address": "",
+                    "GlobalIPv6PrefixLen": 0,
+                    "DNSNames": null
+                }
+            }
+        },
+        "ImageManifestDescriptor": {
+            "mediaType": "application/vnd.oci.image.manifest.v1+json",
+            "digest": "sha256:00fc5dd83256cf3958bb9188f3a0e31e912452fd9a9c5e3240eea473ce054a50",
+            "size": 2959,
+            "platform": {
+                "architecture": "amd64",
+                "os": "linux"
+            }
+        }
+    }
+]
