@@ -23,7 +23,7 @@ from functools import wraps
 from flask_moment import Moment # Add this import
 
 from flask import jsonify, request
-from sqlalchemy import or_, text, inspect
+from sqlalchemy import or_, text, inspect, cast, Date
 from sqlalchemy.exc import SQLAlchemyError
 from urllib.parse import quote_plus
 
@@ -187,9 +187,9 @@ def get_dashboard_stats():
         'total_patients': Patient.query.count(),
         'total_visits': Visit.query.count(),
         'total_appointments': Appointment.query.count(),
-        'today_visits': Visit.query.filter(db.func.date(Visit.visit_date) == today).count(),
+        'today_visits': Visit.query.filter(cast(Visit.visit_date, Date) == today).count(),
         'today_appointments': Appointment.query.filter(
-            db.func.date(Appointment.date) == today,
+            cast(Appointment.date, Date) == today,
             Appointment.state == 'scheduled'
         ).count(),
     }
@@ -1645,7 +1645,7 @@ def appointments_table():
         'scheduled': Appointment.query.filter_by(state='scheduled').count(),
         'completed': Appointment.query.filter_by(state='completed').count(),
         'today': Appointment.query.filter(
-            db.func.date(Appointment.date) == date.today()
+            cast(Appointment.date, Date) == date.today()
         ).count()
     }
     
@@ -2523,7 +2523,7 @@ def dashboard_today_schedule():
         today = date.today()
         
         appointments = Appointment.query.filter(
-            db.func.date(Appointment.date) == today,
+            cast(Appointment.date, Date) == today,
             Appointment.state == 'scheduled'
         ).order_by(Appointment.date).limit(10).all()
         
@@ -2557,7 +2557,7 @@ def dashboard_visits_chart():
             
             # Count visits for this day
             count = Visit.query.filter(
-                db.func.date(Visit.visit_date) == day
+                cast(Visit.visit_date, Date) == day
             ).count()
             visits_count.append(count)
         
@@ -2579,7 +2579,7 @@ def dashboard_patient_queue():
         
         # Get today's appointments that are scheduled or in progress
         appointments = Appointment.query.filter(
-            db.func.date(Appointment.date) == today,
+            cast(Appointment.date, Date) == today,
             Appointment.state.in_(['scheduled', 'in_progress'])
         ).order_by(Appointment.date).all()
         
