@@ -355,7 +355,7 @@ class PrescriptionForm(Form):
         choices=[],  # will populate in view
         validators=[validators.DataRequired()],
     )
-    dosage_instructions = TextAreaField("Dosage / Instructions", validators=[validators.DataRequired()])
+    dosage_instructions = StringField("Dosage / Instructions", validators=[validators.DataRequired()])
     quantity = IntegerField("Quantity", validators=[validators.DataRequired(), validators.NumberRange(min=1)])
 
 
@@ -914,6 +914,51 @@ def search_patients_api():
             "id": p.id,
             "text": f"{p.first_name} {p.last_name} (DOB: {p.date_of_birth})",
             "info": f"ID: {p.id}"
+        })
+        
+    return jsonify({
+        "results": results,
+        "pagination": {"more": pagination.has_next}
+    })
+
+
+@app.route("/api/medications/search")
+@login_required
+def search_medications_api():
+    """
+    API endpoint for server-side medication search (Tom Select).
+    Query params:
+      q: search term
+      page: page number (default 1)
+    """
+    query = request.args.get('q', '').strip()
+    page = request.args.get('page', 1, type=int)
+    per_page = 30
+    
+    # Base query
+    sql_query = Medicament.query
+    
+    if query:
+        # Search by commercial name or DCI
+        pattern = f"%{query}%"
+        sql_query = sql_query.filter(
+            or_(
+                Medicament.nom_com.ilike(pattern),
+                Medicament.dci.ilike(pattern)
+            )
+        )
+    
+    # Pagination
+    pagination = sql_query.order_by(Medicament.nom_com).paginate(
+        page=page, per_page=per_page, error_out=False
+    )
+    
+    results = []
+    for m in pagination.items:
+        results.append({
+            "id": m.num_enr,
+            "text": f"{m.nom_com} ({m.dosage}{m.unite})",
+            "info": f"DCI: {m.dci}"
         })
         
     return jsonify({

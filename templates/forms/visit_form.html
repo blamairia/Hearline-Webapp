@@ -182,7 +182,7 @@
                                 <div class="row g-3">
                                     <div class="col-md-6">
                                         <label class="form-label">Medication</label>
-                                        {{ p_form.medicament_num_enr(class="form-select") }}
+                                        {{ p_form.medicament_num_enr(class="form-select medication-select") }}
                                     </div>
                                     <div class="col-md-4">
                                         <label class="form-label">Instructions</label>
@@ -247,7 +247,7 @@
         <div class="row g-3">
             <div class="col-md-6">
                 <label class="form-label">Medication</label>
-                <select name="prescriptions-__prefix__-medicament_num_enr" class="form-select">
+                <select name="prescriptions-__prefix__-medicament_num_enr" class="form-select medication-select">
                     {% if form.prescriptions[0].medicament_num_enr.choices %}
                     {% for choice in form.prescriptions[0].medicament_num_enr.choices %}
                     <option value="{{ choice[0] }}">{{ choice[1] }}</option>
@@ -309,6 +309,44 @@
             }
         });
 
+        // --- Tom Select for Medication Dropdowns ---
+        function initMedicationSelect(element) {
+            new TomSelect(element, {
+                valueField: 'id',
+                labelField: 'text',
+                searchField: 'text',
+                placeholder: "Search for a medication...",
+                maxOptions: 15,
+                load: function (query, callback) {
+                    var url = '{{ url_for("search_medications_api") }}?q=' + encodeURIComponent(query);
+                    fetch(url)
+                        .then(response => response.json())
+                        .then(json => {
+                            callback(json.results);
+                        }).catch(() => {
+                            callback();
+                        });
+                },
+                dropdownParent: 'body',
+                render: {
+                    option: function (data, escape) {
+                        return '<div>' +
+                            '<span class="title">' + escape(data.text) + '</span>' +
+                            '</div>';
+                    },
+                    item: function (data, escape) {
+                        return '<div>' + escape(data.text) + '</div>';
+                    }
+                }
+            });
+        }
+
+        // Initialize existing medication selects
+        document.querySelectorAll('.medication-select').forEach(function (el) {
+            initMedicationSelect(el);
+        });
+
+
         // --- Flatpickr Logic ---
         flatpickr(".flatpickr-datetime", {
             enableTime: true,
@@ -328,6 +366,12 @@
             const container = document.getElementById('prescriptions-container');
             const newRow = template.replace(/__prefix__/g, prescriptionCount++);
             container.insertAdjacentHTML('beforeend', newRow);
+
+            // Initialize Tom Select on the newly added medication dropdown
+            const newSelects = container.querySelectorAll('.medication-select:not(.tomselected)');
+            newSelects.forEach(function (el) {
+                initMedicationSelect(el);
+            });
         });
     }
 
