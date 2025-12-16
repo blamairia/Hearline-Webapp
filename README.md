@@ -101,6 +101,39 @@ Heartline is a full-featured cardiology practice management system that combines
 
 ---
 
+## 📸 Screenshots
+
+### Visit Form with Demo ECG Files
+
+The visit form features a streamlined interface for creating patient visits with integrated ECG analysis. Demo ECG files are provided for quick testing of the AI analysis system.
+
+![Visit Form - Demo ECG Files](doc/screenshots/visit_form_demo_files.png)
+
+**Key features shown:**
+- 🎯 Searchable patient selection with Tom Select  
+- 📁 Demo ECG files for instant testing
+- 📅 Date/time pickers for visit scheduling
+- 💊 Medication autocomplete with 7000+ drugs
+- 🎨 Color-coded cardiac conditions
+- 🖱️ Drag-and-drop ECG file upload
+
+### Live ECG Waveform Visualization
+
+Real-time visualization of 12-lead ECG recordings with authentic ECG paper-style grid and color-coded leads.
+
+![ECG Waveform Visualization](doc/screenshots/ecg_waveform_visualization.png)
+
+**Technical details:**
+- 📊 Chart.js powered visualization
+- 🎨 12 distinct lead colors
+- 📏 Standard ECG paper grid (0.2s × 0.5mV)
+- ⚡ Optimized rendering with disabled animations
+- 🔍 Interactive with zoom/pan capabilities
+
+> **Demo Recording**: See the visit form in action → [visit_form_demo.webp](doc/screenshots/visit_form_demo.webp)
+
+---
+
 ## 🛠 Installation
 
 ### Prerequisites
