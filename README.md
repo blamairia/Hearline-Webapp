@@ -28,6 +28,22 @@ Heartline is a full-featured cardiology practice management system that combines
 - **🔐 Role-Based Access**: Doctor and assistant role separation
 - **📊 Real-time Analytics**: Dashboard with clinical insights
 
+### 🆕 Recent Updates (December 2024)
+
+- **✨ Visit Form Refactoring**: Completely modernized visit creation interface
+  - Modular JavaScript architecture (4 separate modules)
+  - Fixed infinite loop bug in demo ECG loading
+  - Reduced code complexity by 55% (986 → 431 lines)
+  - Improved error handling and loading states
+  
+- **🎨 Enhanced UX**: 
+  - Tom Select integration for patient/medication search
+  - Drag-and-drop ECG file upload
+  - Live ECG analysis preview with waveform visualization
+  - Color-coded demo files for all 9 cardiac conditions
+
+- **🐳 Production-Ready Docker**: Complete containerization with environment-based configuration
+
 ---
 
 ## 🧠 AI ECG Analysis System
@@ -101,40 +117,195 @@ Heartline is a full-featured cardiology practice management system that combines
 
 ---
 
-## 📸 Screenshots
+## 📸 Complete Feature Showcase
 
-### Visit Form with Demo ECG Files
+### 🔐 Authentication & Dashboard
 
-The visit form features a streamlined interface for creating patient visits with integrated ECG analysis. Demo ECG files are provided for quick testing of the AI analysis system.
+**Login System with Role-Based Access**
 
-![Visit Form - Demo ECG Files](doc/screenshots/visit_form_demo_files.png)
+![Login Flow](doc/screenshots/login_authentication_1765881935076.webp)
 
-**Key features shown:**
-- 🎯 Searchable patient selection with Tom Select  
-- 📁 Demo ECG files for instant testing
-- 📅 Date/time pickers for visit scheduling
-- 💊 Medication autocomplete with 7000+ drugs
-- 🎨 Color-coded cardiac conditions
-- 🖱️ Drag-and-drop ECG file upload
+Clean, secure authentication with session management and role-based permissions (Doctor/Assistant).
 
-### Live ECG Waveform Visualization
+![Login Page](doc/screenshots/login_page_1765881965115.png)
 
-Real-time visualization of 12-lead ECG recordings with authentic ECG paper-style grid and color-coded leads.
+**Doctor Dashboard - Real-time Analytics**
 
-![ECG Waveform Visualization](doc/screenshots/ecg_waveform_visualization.png)
+![Dashboard Overview](doc/screenshots/doctor_dashboard_1765881995635.webp)
 
-**Technical details:**
-- 📊 Chart.js powered visualization
-- 🎨 12 distinct lead colors
-- 📏 Standard ECG paper grid (0.2s × 0.5mV)
-- ⚡ Optimized rendering with disabled animations
-- 🔍 Interactive with zoom/pan capabilities
-
-> **Demo Recording**: See the visit form in action → [visit_form_demo.webp](doc/screenshots/visit_form_demo.webp)
+Comprehensive dashboard featuring:
+- 👥 Patient statistics and demographics  
+- 📊 ECG analysis trends and success rates
+- 📅 Today's appointments and queue
+- 🔔 Recent activity feed
+- ⚡ Quick actions for common tasks
 
 ---
 
-## 🛠 Installation
+### 👥 Patient Management System
+
+**Advanced Patient Search & Management**
+
+![Patient Management](doc/screenshots/patient_management_1765882011514.webp)
+
+Full-featured patient management with:
+- 🔍 Real-time search and filtering
+- 👤 Detailed patient profiles
+- 📝 Visit history tracking
+- 💳 Payment status monitoring
+
+![Patient Table](doc/screenshots/patient_table_search_1765882026289.png)  
+*Searchable patient table with pagination*
+
+![Patient Search](doc/screenshots/patient_search_results_1765882037230.png)  
+*Instant search results*
+
+![Patient Details](doc/screenshots/patient_details_page_1765882053650.png)  
+*Comprehensive patient profile with visit history*
+
+---
+
+### 🏥 Visit Creation with AI ECG Analysis
+
+**Streamlined Visit Documentation**
+
+![Visit Creation & ECG](doc/screenshots/visit_creation_ecg_1765882078982.webp)
+
+The visit form features our revolutionary modular architecture with:
+- 🎯 Tom Select patient search with server-side pagination  
+- 📁 Demo ECG files for instant AI testing
+- 📅 Flatpickr date/time pickers
+- 💊 Medication autocomplete (7000+ drugs)
+- � Document attachments support
+- 🎨 Drag-and-drop ECG file upload
+
+![Visit Form - Patient Selected](doc/screenshots/visit_form_patient_selected_1765882106821.png)  
+*Visit form with patient selected via Tom Select*
+
+**Demo ECG Files for Instant Testing**
+
+![Demo ECG Section](doc/screenshots/visit_form_demo_ecg_section_1765882114572.png)
+
+Pre-loaded ECG files representing all 9 cardiac conditions:
+- 🎨 Color-coded by condition type
+- 🔄 Multiple variants per condition
+- 🖱️ Drag-and-drop to upload area
+- ⚡ One-click "Use This File" button
+
+**Live ECG Analysis with Waveform Visualization**
+
+![ECG Analysis Results](doc/screenshots/visit_form_ecg_analysis_results_1765882126984.png)
+
+Real-time AI analysis featuring:
+- 📊 12-lead ECG waveform with Chart.js
+- 🎨 Authentic ECG paper-style grid (0.2s × 0.5mV)
+- 🏆 Primary diagnosis with confidence score
+- 📈 Complete probability distribution across all 9 classes
+- 🎨 Color-coded confidence levels (green/yellow/red)
+
+![ECG Waveform Visualization](doc/screenshots/ecg_waveform_visualization.png)  
+*Detailed 12-lead ECG visualization with color-coded leads*
+
+---
+
+### 📋 ECG History & Analytics
+
+Track all ECG analyses performed in the system with advanced filtering and export capabilities.
+
+![ECG History](doc/screenshots/ecg_history_table_1765882145732.webp)
+
+**Features:**
+- 📊 Complete analysis history
+- 🔍 Filter by patient, date, diagnosis
+- 📈 Confidence score tracking
+- 📥 CSV export for research
+- 🔬 Detailed probability breakdowns
+
+---
+
+### 📅 Appointment Management
+
+**Scheduling & Queue System**
+
+![Appointments](doc/screenshots/appointments_management_1765882303248.webp)
+
+Comprehensive appointment system with:
+- � Calendar-based scheduling
+- 👨‍⚕️ Doctor assignment
+- ⏱️ Status tracking (scheduled/completed/cancelled)
+- 📋 Daily queue management
+- 🔔 Automated reminders
+
+---
+
+## 🐳 Docker Setup (Production-Ready)
+
+### Quick Start with Docker
+
+**Build the Image:**
+```bash
+cd "Hearline-Webapp"
+docker build -t heartline-webapp:local .
+```
+
+**Run with Docker:**
+```bash
+# Option 1: Use the provided script
+bash run_docker.sh
+
+# Option 2: Manual docker run
+docker run -d \
+  --name heartline-webapp \
+  -p 8090:8000 \
+  -e SECRET_KEY="your-secret-key" \
+  -e DB_ENGINE="mssql+pyodbc" \
+  -e DB_HOST="your-db-host" \
+  -e DB_PORT="1433" \
+  -e DB_USERNAME="your-username" \
+  -e DB_PASSWORD="your-password" \
+  -e DB_NAME="heartline-webapp" \
+  -e DB_DRIVER="ODBC Driver 18 for SQL Server" \
+  heartline-webapp:local
+```
+
+**Access the Application:**
+```
+http://localhost:8090
+Default credentials: admin / admin
+```
+
+### Docker Environment Variables
+
+| Variable | Description | Example |
+|----------|-------------|---------|
+| `SECRET_KEY` | Flask secret key for sessions | `heartline-secret-2024` |
+| `DB_ENGINE` | Database engine | `mssql+pyodbc` or `postgresql` |
+| `DB_HOST` | Database server hostname | `localhost` or `db.example.com` |
+| `DB_PORT` | Database port | `1433` (MSSQL) or `5432` (PostgreSQL) |
+| `DB_USERNAME` | Database username | `sa` or `postgres` |
+| `DB_PASSWORD` | Database password | `your-password` |
+| `DB_NAME` | Database name | `heartline-webapp` |
+| `DB_DRIVER` | ODBC driver (MSSQL only) | `ODBC Driver 18 for SQL Server` |
+
+### Container Management
+
+```bash
+# View logs
+docker logs heartline-webapp
+
+# Stop container
+docker stop heartline-webapp
+
+# Remove container
+docker rm heartline-webapp
+
+# Rebuild and restart
+docker build -t heartline-webapp:local . && bash run_docker.sh
+```
+
+---
+
+## 🛠 Local Development Setup
 
 ### Prerequisites
 
