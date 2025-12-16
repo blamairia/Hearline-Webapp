@@ -165,46 +165,61 @@ Full-featured patient management with:
 
 ---
 
-### 🏥 Visit Creation with AI ECG Analysis
+### 🏥 Visit Management System
 
-**Streamlined Visit Documentation**
+**All Visits Table**
 
-![Visit Creation & ECG](doc/screenshots/visit_creation_ecg_1765882078982.webp)
+![All Visits Table](doc/screenshots/all_visits_table.png)
 
-The visit form features our revolutionary modular architecture with:
+Comprehensive visit tracking with:
+- 📋 Complete visit history for all patients
+- 🔍 Search and filter capabilities
+- 📊 Payment status tracking
+- 👁️ Quick access to visit details
+- ✏️ Edit and manage visits
+
+---
+
+**Visit Details Page**
+
+![Visit Details](doc/screenshots/visit_details.png)
+
+Detailed visit information featuring:
+- 👤 Patient demographics and visit information
+- 📊 **12-lead ECG waveform visualization** with authentic ECG paper-style grid
+- 🧠 AI-powered diagnosis with confidence scores
+- 💊 Prescription details and medications
+- 📄 Attached documents and medical records
+- 📈 Complete probability distribution across all 9 cardiac conditions
+
+---
+
+**Create New Visit**
+
+![Create Visit](doc/screenshots/create_visit.png)
+
+Streamlined visit creation with our revolutionary modular architecture:
 - 🎯 Tom Select patient search with server-side pagination  
-- 📁 Demo ECG files for instant AI testing
+- 📁 Demo ECG files for instant AI testing (all 9 cardiac conditions)
 - 📅 Flatpickr date/time pickers
-- 💊 Medication autocomplete (7000+ drugs)
-- � Document attachments support
+- 💊 Medication autocomplete (7000+ Algerian drugs)
+- 📎 Document attachments support
 - 🎨 Drag-and-drop ECG file upload
+- 📊 **Live ECG waveform visualization** with real-time AI analysis
+- 🏆 Instant diagnosis with confidence scores
 
-![Visit Form - Patient Selected](doc/screenshots/visit_form_patient_selected_1765882106821.png)  
-*Visit form with patient selected via Tom Select*
+---
 
-**Demo ECG Files for Instant Testing**
+**Edit Visit**
 
-![Demo ECG Section](doc/screenshots/visit_form_demo_ecg_section_1765882114572.png)
+![Edit Visit](doc/screenshots/edit_visit.png)
 
-Pre-loaded ECG files representing all 9 cardiac conditions:
-- 🎨 Color-coded by condition type
-- 🔄 Multiple variants per condition
-- 🖱️ Drag-and-drop to upload area
-- ⚡ One-click "Use This File" button
-
-**Live ECG Analysis with Waveform Visualization**
-
-![ECG Analysis Results](doc/screenshots/visit_form_ecg_analysis_results_1765882126984.png)
-
-Real-time AI analysis featuring:
-- 📊 12-lead ECG waveform with Chart.js
-- 🎨 Authentic ECG paper-style grid (0.2s × 0.5mV)
-- 🏆 Primary diagnosis with confidence score
-- 📈 Complete probability distribution across all 9 classes
-- 🎨 Color-coded confidence levels (green/yellow/red)
-
-![ECG Waveform Visualization](doc/screenshots/ecg_waveform_visualization.png)  
-*Detailed 12-lead ECG visualization with color-coded leads*
+Edit existing visits with:
+- ✏️ Update patient information and visit details
+- 📊 **View and analyze ECG waveforms**
+- 💊 Modify prescriptions and medications
+- 📄 Add or remove attachments
+- 🔄 Re-analyze ECG files with updated AI models
 
 ---
 
@@ -212,14 +227,16 @@ Real-time AI analysis featuring:
 
 Track all ECG analyses performed in the system with advanced filtering and export capabilities.
 
-![ECG History](doc/screenshots/ecg_history_table_1765882145732.webp)
+![ECG History](doc/screenshots/ecg_history.png)
 
 **Features:**
-- 📊 Complete analysis history
-- 🔍 Filter by patient, date, diagnosis
-- 📈 Confidence score tracking
-- 📥 CSV export for research
-- 🔬 Detailed probability breakdowns
+- 📊 Complete analysis history for all patients
+- 🔍 Filter by patient, date, diagnosis, and confidence level
+- 📈 Confidence score tracking with color-coded indicators
+- 📥 CSV export for research and analysis
+- 🔬 Detailed probability breakdowns for all 9 cardiac conditions
+- 👁️ Quick access to visit details and ECG waveforms
+- 📅 Chronological tracking of ECG analyses
 
 ---
 

@@ -123,6 +123,8 @@ config_local.py
 local_config.py
 secrets.py
 azure-env-variables.json
+inspect_app.json
+
 
 # ============ SSL Certificates ============
 
@@ -152,4 +154,3 @@ node_modules/
 # ============ Docker ============
 *.tar
 docker-compose.override.yml
-inspect_app.json
