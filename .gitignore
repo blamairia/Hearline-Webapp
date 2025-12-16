@@ -152,3 +152,4 @@ node_modules/
 # ============ Docker ============
 *.tar
 docker-compose.override.yml
+inspect_app.json
