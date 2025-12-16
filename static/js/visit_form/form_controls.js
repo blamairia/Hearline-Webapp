@@ -130,7 +130,7 @@ class FormControls {
 
         flatpickr(".flatpickr-datetime", {
             enableTime: true,
-            dateFormat: "Y-m-d H:i",
+            dateFormat: "Y-m-d\\TH:i",  // Changed from "Y-m-d H:i" to match WTForms format %Y-%m-%dT%H:%M
             time_24hr: true
         });
     }

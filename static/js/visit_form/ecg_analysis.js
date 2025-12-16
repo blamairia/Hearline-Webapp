@@ -255,3 +255,71 @@ class ECGAnalysis {
 if (typeof module !== 'undefined' && module.exports) {
     module.exports = ECGAnalysis;
 }
+
+/**
+ * Global function to render ECG waveform on a canvas
+ * Used by visit_details.html to display ECG waveforms
+ */
+window.renderECGWaveform = function(canvas, signals, samplingRate, timeAxis) {
+    if (!canvas || !signals || signals.length === 0) {
+        console.error('Invalid parameters for ECG rendering');
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+    const leadNames = ['I', 'II', 'III', 'aVR', 'aVL', 'aVF', 'V1', 'V2', 'V3', 'V4', 'V5', 'V6'];
+    const leads = leadNames.slice(0, signals.length);
+    const leadColors = {
+        'I': '#e74c3c', 'II': '#3498db', 'III': '#2ecc71',
+        'aVR': '#f39c12', 'aVL': '#9b59b6', 'aVF': '#1abc9c',
+        'V1': '#e67e22', 'V2': '#34495e', 'V3': '#16a085',
+        'V4': '#c0392b', 'V5': '#8e44ad', 'V6': '#27ae60'
+    };
+
+    const verticalSpacing = 3;
+    const datasets = leads.map((lead, idx) => {
+        const offset = -(idx * verticalSpacing);
+        return {
+            label: lead,
+            data: signals[idx].map((value, i) => ({ x: timeAxis[i], y: value + offset })),
+            borderColor: leadColors[lead],
+            borderWidth: 1.5,
+            fill: false,
+            pointRadius: 0,
+            tension: 0
+        };
+    });
+
+    const duration = timeAxis[timeAxis.length - 1];
+    new Chart(ctx, {
+        type: 'line',
+        data: { datasets },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            animation: false,
+            plugins: {
+                legend: { display: true, position: 'top', labels: { boxWidth: 15, font: { size: 11 }, padding: 10 } },
+                title: { display: true, text: `ECG Recording (${duration.toFixed(1)}s at ${samplingRate}Hz)`, font: { size: 14, weight: 'bold' } },
+                tooltip: { enabled: false }
+            },
+            scales: {
+                x: {
+                    type: 'linear',
+                    display: true,
+                    title: { display: true, text: 'Time (seconds)', font: { size: 12, weight: 'bold' } },
+                    grid: { color: '#ffcccc', lineWidth: 0.5 },
+                    ticks: { stepSize: 0.2, font: { size: 10 } }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    title: { display: true, text: 'Amplitude (mV)', font: { size: 12, weight: 'bold' } },
+                    grid: { color: '#ffcccc', lineWidth: 0.5 },
+                    ticks: { stepSize: 0.5, font: { size: 10 } }
+                }
+            },
+            interaction: { mode: 'nearest', axis: 'x', intersect: false }
+        }
+    });
+};

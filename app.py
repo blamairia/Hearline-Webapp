@@ -353,10 +353,10 @@ class PrescriptionForm(Form):
     medicament_num_enr = SelectField(
         "Medicament (num_enr)",
         choices=[],  # will populate in view
-        validators=[validators.DataRequired()],
+        validators=[validators.Optional()],  # Changed from DataRequired to allow empty rows
     )
-    dosage_instructions = StringField("Dosage / Instructions", validators=[validators.DataRequired()])
-    quantity = IntegerField("Quantity", validators=[validators.DataRequired(), validators.NumberRange(min=1)])
+    dosage_instructions = StringField("Dosage / Instructions", validators=[validators.Optional()])  # Changed from DataRequired
+    quantity = IntegerField("Quantity", validators=[validators.Optional(), validators.NumberRange(min=1)])
 
 
 # --- Subform for Visit Documents (blood/MRI/X-Ray) ---
@@ -364,7 +364,7 @@ class VisitDocumentForm(Form):
     doc_type = SelectField(
         "Document Type",
         choices=[("blood","Blood Work"), ("mri","MRI Scan"), ("xray","X-Ray Scan")],
-        validators=[validators.DataRequired()],
+        validators=[validators.Optional()],  # Changed from DataRequired to allow empty rows
     )
     file_path = FileField("Upload File (PDF / Image)", validators=[validators.Optional()])
     notes = TextAreaField("Notes", validators=[validators.Optional()])
@@ -526,25 +526,16 @@ def create_visit():
         demo_file_id = request.form.get("demo_file_id", "").strip()
         
         if demo_file_id:
-            # User selected a demo file - copy from demo_ecg_files directory
-            import shutil
+            # User selected a demo file - reference from demo_ecg_files directory
             demo_dir = os.path.join(BASE_DIR, "demo_ecg_files")
             
             demo_mat = os.path.join(demo_dir, f"{demo_file_id}.mat")
             demo_hea = os.path.join(demo_dir, f"{demo_file_id}.hea")
             
             if os.path.exists(demo_mat) and os.path.exists(demo_hea):
-                # Copy demo files to ECG directory with unique names
-                import time
-                timestamp = int(time.time())
-                mat_dest = os.path.join(ECG_DIR, f"demo_{demo_file_id}_{timestamp}.mat")
-                hea_dest = os.path.join(ECG_DIR, f"demo_{demo_file_id}_{timestamp}.hea")
-                
-                shutil.copy2(demo_mat, mat_dest)
-                shutil.copy2(demo_hea, hea_dest)
-                
-                v.ecg_mat = mat_dest
-                v.ecg_hea = hea_dest
+                # Save paths to demo files (don't copy, use original location)
+                v.ecg_mat = demo_mat
+                v.ecg_hea = demo_hea
                 flash(f"Demo ECG file {demo_file_id} loaded successfully.", "info")
             else:
                 flash(f"Demo file {demo_file_id} not found.", "warning")
@@ -1566,20 +1557,42 @@ def edit_visit(visit_id):
         visit.payment_status    = form.payment_status.data
         visit.payment_remaining = form.payment_remaining.data
 
-        # 5b) Handle ECG file uploads (optional replacements)
-        mat_file = form.ecg_mat.data
-        if mat_file:
-            mat_filename = secure_filename(mat_file.filename)
-            mat_dest     = os.path.join(ECG_DIR, mat_filename)
-            mat_file.save(mat_dest)
-            visit.ecg_mat = mat_dest
+        # 5b) Handle ECG file uploads (manual or demo)
+        demo_file_id = request.form.get("demo_file_id", "").strip()
+        
+        # Initialize these variables to avoid UnboundLocalError later
+        mat_file = None
+        hea_file = None
+        
+        if demo_file_id:
+            # User selected a demo file - reference from demo_ecg_files directory
+            demo_dir = os.path.join(BASE_DIR, "demo_ecg_files")
+            
+            demo_mat = os.path.join(demo_dir, f"{demo_file_id}.mat")
+            demo_hea = os.path.join(demo_dir, f"{demo_file_id}.hea")
+            
+            if os.path.exists(demo_mat) and os.path.exists(demo_hea):
+                # Save paths to demo files (don't copy, use original location)
+                visit.ecg_mat = demo_mat
+                visit.ecg_hea = demo_hea
+                flash(f"Demo ECG file {demo_file_id} loaded successfully.", "info")
+            else:
+                flash(f"Demo file {demo_file_id} not found.", "warning")
+        else:
+            # Manual file upload (optional replacements)
+            mat_file = form.ecg_mat.data
+            if mat_file:
+                mat_filename = secure_filename(mat_file.filename)
+                mat_dest     = os.path.join(ECG_DIR, mat_filename)
+                mat_file.save(mat_dest)
+                visit.ecg_mat = mat_dest
 
-        hea_file = form.ecg_hea.data
-        if hea_file:
-            hea_filename = secure_filename(hea_file.filename)
-            hea_dest     = os.path.join(ECG_DIR, hea_filename)
-            hea_file.save(hea_dest)
-            visit.ecg_hea = hea_dest
+            hea_file = form.ecg_hea.data
+            if hea_file:
+                hea_filename = secure_filename(hea_file.filename)
+                hea_dest     = os.path.join(ECG_DIR, hea_filename)
+                hea_file.save(hea_dest)
+                visit.ecg_hea = hea_dest
 
         # 5c) Delete ALL existing prescriptions in DB, then re-insert from form entries
         existing_prescriptions = Prescription.query.filter_by(visit_id=visit.id).all()
