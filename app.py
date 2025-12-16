@@ -522,20 +522,48 @@ def create_visit():
             payment_remaining= form.payment_remaining.data,
         )
 
-        # 2) Handle ECG file uploads (optional)
-        mat_file = form.ecg_mat.data
-        if mat_file:
-            filename = secure_filename(mat_file.filename)
-            mat_dest = os.path.join(ECG_DIR, filename)
-            mat_file.save(mat_dest)
-            v.ecg_mat = mat_dest
+        # 2) Handle ECG file uploads (manual or demo)
+        demo_file_id = request.form.get("demo_file_id", "").strip()
+        
+        if demo_file_id:
+            # User selected a demo file - copy from demo_ecg_files directory
+            import shutil
+            demo_dir = os.path.join(BASE_DIR, "demo_ecg_files")
+            
+            demo_mat = os.path.join(demo_dir, f"{demo_file_id}.mat")
+            demo_hea = os.path.join(demo_dir, f"{demo_file_id}.hea")
+            
+            if os.path.exists(demo_mat) and os.path.exists(demo_hea):
+                # Copy demo files to ECG directory with unique names
+                import time
+                timestamp = int(time.time())
+                mat_dest = os.path.join(ECG_DIR, f"demo_{demo_file_id}_{timestamp}.mat")
+                hea_dest = os.path.join(ECG_DIR, f"demo_{demo_file_id}_{timestamp}.hea")
+                
+                shutil.copy2(demo_mat, mat_dest)
+                shutil.copy2(demo_hea, hea_dest)
+                
+                v.ecg_mat = mat_dest
+                v.ecg_hea = hea_dest
+                flash(f"Demo ECG file {demo_file_id} loaded successfully.", "info")
+            else:
+                flash(f"Demo file {demo_file_id} not found.", "warning")
+        else:
+            # Manual file upload
+            mat_file = form.ecg_mat.data
+            if mat_file:
+                filename = secure_filename(mat_file.filename)
+                mat_dest = os.path.join(ECG_DIR, filename)
+                mat_file.save(mat_dest)
+                v.ecg_mat = mat_dest
 
-        hea_file = form.ecg_hea.data
-        if hea_file:
-            filename = secure_filename(hea_file.filename)
-            hea_dest = os.path.join(ECG_DIR, filename)
-            hea_file.save(hea_dest)
-            v.ecg_hea = hea_dest
+            hea_file = form.ecg_hea.data
+            if hea_file:
+                filename = secure_filename(hea_file.filename)
+                hea_dest = os.path.join(ECG_DIR, filename)
+                hea_file.save(hea_dest)
+                v.ecg_hea = hea_dest
+
 
         db.session.add(v)
         db.session.flush()  # flush so v.id becomes available for children
@@ -965,6 +993,191 @@ def search_medications_api():
         "results": results,
         "pagination": {"more": pagination.has_next}
     })
+
+
+@app.route("/api/demo_ecg_files")
+@login_required
+def list_demo_ecg_files():
+    """
+    API endpoint to list available demo ECG files.
+    Returns metadata for each demo file including class and description.
+    """
+    # Define ECG class metadata
+    ecg_classes = {
+        "SNR": {
+            "name": "Sinus Rhythm",
+            "description": "Normal heart rhythm",
+            "color": "success",
+            "files": ["A0002", "A0016"]
+        },
+        "AF": {
+            "name": "Atrial Fibrillation",
+            "description": "Irregular, rapid atrial activation",
+            "color": "danger",
+            "files": ["A0003", "A0004"]
+        },
+        "IAVB": {
+            "name": "AV Block",
+            "description": "Impaired conduction between atria and ventricles",
+            "color": "warning",
+            "files": ["A0039", "A0042"]
+        },
+        "LBBB": {
+            "name": "Left Bundle Branch Block",
+            "description": "Delayed left ventricular activation",
+            "color": "info",
+            "files": ["A0011", "A0018"]
+        },
+        "RBBB": {
+            "name": "Right Bundle Branch Block",
+            "description": "Delayed right ventricular activation",
+            "color": "primary",
+            "files": ["A0001", "A0006"]
+        },
+        "PAC": {
+            "name": "Premature Atrial Contraction",
+            "description": "Early atrial beats",
+            "color": "secondary",
+            "files": ["A0047", "A0049"]
+        },
+        "PVC": {
+            "name": "Premature Ventricular Contraction",
+            "description": "Early ventricular beats",
+            "color": "dark",
+            "files": ["A0005", "A0012"]
+        },
+        "STD": {
+            "name": "ST Depression",
+            "description": "Potential ischemia indicator",
+            "color": "warning",
+            "files": ["A0008", "A0013"]
+        },
+        "STE": {
+            "name": "ST Elevation",
+            "description": "Potential myocardial infarction indicator",
+            "color": "danger",
+            "files": ["A0021", "A0032"]
+        }
+    }
+    
+    # Build response with file availability check
+    demo_files = []
+    demo_dir = os.path.join(BASE_DIR, "demo_ecg_files")
+    
+    for class_abbr, class_info in ecg_classes.items():
+        for file_id in class_info["files"]:
+            mat_path = os.path.join(demo_dir, f"{file_id}.mat")
+            hea_path = os.path.join(demo_dir, f"{file_id}.hea")
+            
+            # Only include if both files exist
+            if os.path.exists(mat_path) and os.path.exists(hea_path):
+                demo_files.append({
+                    "id": file_id,
+                    "class_abbr": class_abbr,
+                    "class_name": class_info["name"],
+                    "description": class_info["description"],
+                    "color": class_info["color"],
+                    "mat_file": f"{file_id}.mat",
+                    "hea_file": f"{file_id}.hea"
+                })
+    
+    return jsonify({"demo_files": demo_files})
+
+
+@app.route("/api/analyze_demo_ecg/<file_id>")
+@login_required
+def analyze_demo_ecg_live(file_id):
+    """
+    Live ECG analysis for demo files - returns prediction without saving to database.
+    Used for preview/demonstration purposes.
+    """
+    import shutil
+    
+    if not ort_session:
+        return jsonify({"success": False, "error": "ECG analysis model not loaded"}), 500
+    
+    demo_dir = os.path.join(BASE_DIR, "demo_ecg_files")
+    demo_mat = os.path.join(demo_dir, f"{file_id}.mat")
+    demo_hea = os.path.join(demo_dir, f"{file_id}.hea")
+    
+    if not os.path.exists(demo_mat) or not os.path.exists(demo_hea):
+        return jsonify({"success": False, "error": "Demo file not found"}), 404
+    
+    try:
+        # Read ECG data
+        rec_basename = file_id
+        record = wfdb.rdrecord(os.path.join(demo_dir, rec_basename))
+        sig_all = record.p_signal  # shape [n_samples, n_leads]
+        nsteps, nleads = sig_all.shape
+        
+        # Prepare signal for model
+        if nsteps >= 15000:
+            clipped = sig_all[-15000:, :]
+        else:
+            clipped = sig_all
+        
+        buffered = np.zeros((15000, nleads), dtype=np.float32)
+        buffered[-clipped.shape[0]:, :] = clipped
+        x_np = buffered.T  # shape [12, 15000]
+        
+        # Run inference
+        prediction = predict_ecg_onnx(x_np)
+        
+        # Class names for display
+        class_names = {
+            "SNR": "Sinus Rhythm",
+            "AF": "Atrial Fibrillation",
+            "IAVB": "AV Block",
+            "LBBB": "Left Bundle Branch Block",
+            "RBBB": "Right Bundle Branch Block",
+            "PAC": "Premature Atrial Contraction",
+            "PVC": "Premature Ventricular Contraction",
+            "STD": "ST Depression",
+            "STE": "ST Elevation"
+        }
+        
+        # Find primary diagnosis
+        max_prob_abbr = max(prediction, key=prediction.get)
+        max_prob_value = prediction[max_prob_abbr]
+        
+        # Prepare ECG signal data for visualization with proper scaling
+        # Get metadata from WFDB record
+        sample_rate = record.fs  # Should be 500 Hz
+        
+        # Display a realistic 10-second strip (5000 samples at 500Hz)
+        display_samples = min(5000, x_np.shape[1])
+        start_idx = max(0, (x_np.shape[1] - display_samples) // 2)  # Take middle segment
+        
+        # Use original sig_all data which is already in mV from wfdb
+        # Extract the display segment for all 12 leads
+        ecg_mv = sig_all[start_idx:start_idx + display_samples, :].T.tolist()  # 12 leads x display_samples in mV
+        
+        # Create time axis in seconds
+        time_axis = [(i / sample_rate) for i in range(display_samples)]
+        
+        ecg_data = {
+            "leads": ["I", "II", "III", "aVR", "aVL", "aVF", "V1", "V2", "V3", "V4", "V5", "V6"],
+            "signals": ecg_mv,  # 12 leads x display_samples in mV
+            "time": time_axis,  # Time in seconds
+            "sample_rate": int(sample_rate),
+            "duration": display_samples / sample_rate  # Duration in seconds
+        }
+        
+        return jsonify({
+            "success": True,
+            "file_id": file_id,
+            "prediction": prediction,
+            "class_names": class_names,
+            "primary_diagnosis": {
+                "abbreviation": max_prob_abbr,
+                "name": class_names.get(max_prob_abbr, max_prob_abbr),
+                "probability": max_prob_value
+            },
+            "ecg_data": ecg_data
+        })
+        
+    except Exception as e:
+        return jsonify({"success": False, "error": str(e)}), 500
 
 
 @app.route("/visit/<int:visit_id>/analyze_ecg", methods=["POST"])
