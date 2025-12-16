@@ -114,9 +114,10 @@
                 <i class="fas fa-heartbeat me-1"></i> ECG Analysis
             </h6>
             {% if not ecg_analysis %}
-            <form action="{{ url_for('analyze_existing_ecg', visit_id=visit.id) }}" method="POST" class="d-inline">
-                <button type="submit" class="btn btn-sm btn-info">Run Analysis</button>
-            </form>
+            <button id="run-analysis-btn" class="btn btn-sm btn-info">
+                <span class="btn-text">Run Analysis</span>
+                <span class="spinner-border spinner-border-sm d-none" role="status" aria-hidden="true"></span>
+            </button>
             {% endif %}
         </div>
         <div class="card-body">
@@ -263,6 +264,67 @@
                 console.error('Failed to fetch waveform:', error);
                 canvas.parentElement.innerHTML = '<div class="alert alert-danger">Failed to load ECG data.</div>';
             });
+    });
+</script>
+{% endif %}
+
+{% if visit.ecg_mat and visit.ecg_hea and not ecg_analysis %}
+<script>
+    // Auto-run ECG analysis on first page load if files exist but no analysis
+    document.addEventListener('DOMContentLoaded', function () {
+        const runAnalysisBtn = document.getElementById('run-analysis-btn');
+
+        // Function to run ECG analysis
+        function runECGAnalysis() {
+            if (runAnalysisBtn) {
+                const btnText = runAnalysisBtn.querySelector('.btn-text');
+                const spinner = runAnalysisBtn.querySelector('.spinner-border');
+
+                btnText.classList.add('d-none');
+                spinner.classList.remove('d-none');
+                runAnalysisBtn.disabled = true;
+            }
+
+            // Run analysis via POST request
+            fetch('{{ url_for("analyze_existing_ecg", visit_id=visit.id) }}', {
+                method: 'POST'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Reload page to show analysis results
+                        location.reload();
+                    } else {
+                        alert('Analysis failed: ' + (data.error || 'Unknown error'));
+                        if (runAnalysisBtn) {
+                            const btnText = runAnalysisBtn.querySelector('.btn-text');
+                            const spinner = runAnalysisBtn.querySelector('.spinner-border');
+                            btnText.classList.remove('d-none');
+                            spinner.classList.add('d-none');
+                            runAnalysisBtn.disabled = false;
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.error('Analysis error:', error);
+                    alert('Failed to run analysis. Please try again.');
+                    if (runAnalysisBtn) {
+                        const btnText = runAnalysisBtn.querySelector('.btn-text');
+                        const spinner = runAnalysisBtn.querySelector('.spinner-border');
+                        btnText.classList.remove('d-none');
+                        spinner.classList.add('d-none');
+                        runAnalysisBtn.disabled = false;
+                    }
+                });
+        }
+
+        // Auto-run analysis on page load
+        runECGAnalysis();
+
+        // Also attach to button click for manual retry
+        if (runAnalysisBtn) {
+            runAnalysisBtn.addEventListener('click', runECGAnalysis);
+        }
     });
 </script>
 {% endif %}
