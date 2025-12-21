@@ -11,6 +11,8 @@
 
 [Features](#-features) • [Installation](#-installation) • [Usage](#-usage) • [API](#-api-endpoints) • [License](#-license)
 
+🌐 **[Live Demo](https://heartline.blamairia.me/)** — *Login: admin / admin*
+
 </div>
 
 ---
@@ -122,8 +124,6 @@ Heartline is a full-featured cardiology practice management system that combines
 ### 🔐 Authentication & Dashboard
 
 **Login System with Role-Based Access**
-
-![Login Flow](doc/screenshots/login_authentication_1765881935076.webp)
 
 Clean, secure authentication with session management and role-based permissions (Doctor/Assistant).
 
@@ -244,10 +244,8 @@ Track all ECG analyses performed in the system with advanced filtering and expor
 
 **Scheduling & Queue System**
 
-![Appointments](doc/screenshots/appointments_management_1765882303248.webp)
-
 Comprehensive appointment system with:
-- � Calendar-based scheduling
+- 📆 Calendar-based scheduling
 - 👨‍⚕️ Doctor assignment
 - ⏱️ Status tracking (scheduled/completed/cancelled)
 - 📋 Daily queue management
@@ -458,9 +456,6 @@ Hearline-Webapp/
 ---
 
 ## 🚀 Deployment
-
-### Azure Container Apps (Always-on demo)
-Use the GitHub Actions workflow described in [`AZURE_DEPLOYMENT.md`](AZURE_DEPLOYMENT.md) to build the Docker image, push it to Azure Container Registry, and update the Container App with a managed custom domain. This keeps a single replica online at all times so the app loads immediately from your main portfolio site.
 
 ### Using Nginx + Gunicorn
 
