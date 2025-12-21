@@ -531,8 +531,11 @@ This project is proprietary software developed for Heartline.
 ## 👤 Author
 
 **Billel Lamairia**
-- GitHub: [@blamairia](https://github.com/blamairia)
-- Location: Annaba, Algeria
+- 🐙 GitHub: [@blamairia](https://github.com/blamairia)
+- 💼 LinkedIn: [Billel Lamairia](https://www.linkedin.com/in/billel-lamairia-94141723b)
+- 📧 Email: [blamairia@gmail.com](mailto:blamairia@gmail.com)
+- 📱 Phone: +213 668 673 666
+- 📍 Location: Annaba, Algeria
 
 ---
 
