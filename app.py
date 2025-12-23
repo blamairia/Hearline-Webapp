@@ -119,7 +119,16 @@ def build_database_uri():
 
 
 app.config["SQLALCHEMY_DATABASE_URI"] = build_database_uri()
-app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {"pool_pre_ping": True}
+# Azure SQL needs: pre_ping to check connections, recycle to avoid stale connections, timeout for slow wakeup
+app.config["SQLALCHEMY_ENGINE_OPTIONS"] = {
+    "pool_pre_ping": True,           # Check if connection is valid before using
+    "pool_recycle": 300,             # Recycle connections every 5 min (Azure SQL timeout is ~30 min)
+    "pool_size": 5,                  # Number of persistent connections
+    "max_overflow": 10,              # Additional connections when pool is full
+    "connect_args": {
+        "timeout": 30,               # Connection timeout in seconds (Azure can be slow on first connect)
+    }
+}
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 # Folders where uploads will be saved
