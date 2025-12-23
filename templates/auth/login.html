@@ -4,109 +4,483 @@
 
 {% block extra_css %}
 <style>
-/* Hide sidebar/nav for login page */
-#sidebar, .sidebar, nav, .navbar, .main-nav { display: none !important; }
-/* Remove reserved sidebar space and toggle on login */
-.main-content, #mainContent { margin-left: 0 !important; background: transparent !important; }
-.content-wrapper { padding: 0 !important; }
-.sidebar-toggle, #sidebarToggle { display: none !important; }
+  /* Hide sidebar/nav for login page */
+  #sidebar,
+  .sidebar,
+  nav,
+  .navbar,
+  .main-nav {
+    display: none !important;
+  }
 
-/* Artistic full-screen background with animated gradient blobs */
-.login-wrap {
-  position: relative;
-  min-height: 100vh;
-  overflow: hidden;
-  background: radial-gradient(1200px 800px at -10% -20%, rgba(0,148,255,0.25), transparent 60%),
-              radial-gradient(1000px 700px at 110% 110%, rgba(0,180,255,0.25), transparent 60%),
-              linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
-}
-.bg-blob {
-  position: absolute;
-  filter: blur(40px);
-  opacity: .5;
-  border-radius: 50%;
-  animation: float 14s ease-in-out infinite;
-}
-.bg-blob.one { width: 420px; height: 420px; background: #5ea3ff; top: -120px; left: -120px; animation-delay: 0s; }
-.bg-blob.two { width: 360px; height: 360px; background: #00c2ff; bottom: -120px; right: -80px; animation-delay: 2s; }
-.bg-blob.three { width: 280px; height: 280px; background: #79ffe1; top: 20%; right: 20%; animation-delay: 4s; opacity: .35; }
-@keyframes float { 0%, 100% { transform: translateY(0) translateX(0); } 50% { transform: translateY(-20px) translateX(10px); } }
+  .main-content,
+  #mainContent {
+    margin-left: 0 !important;
+    background: transparent !important;
+  }
 
-/* Inline SVG illustration behind content */
-.bg-illustration { position: absolute; inset: 0; z-index: 0; opacity: .22; pointer-events: none; }
+  .content-wrapper {
+    padding: 0 !important;
+  }
 
-/* Split layout: hero + form */
-.login-grid {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  grid-template-columns: 1.2fr 1fr;
-  gap: 2rem;
-  padding: 4.25rem clamp(1.5rem, 6vw, 72px);
-}
-.hero-pane {
-  color: #ffffff;
-  align-self: center;
-  padding: 1.25rem clamp(1.5rem, 6vw, 72px);
-}
-.hero-inner { display: grid; grid-template-columns: 1fr; gap: 1.25rem; align-items: center; }
-.brand-row { display: flex; align-items: center; gap: .75rem; }
-.brand-logo { width: 44px; height: 44px; object-fit: contain; filter: drop-shadow(0 8px 24px rgba(0,0,0,.25)); }
-.app-title { font-size: clamp(2.4rem, 5.2vw, 3.8rem); font-weight: 800; letter-spacing: .5px; margin: 0 0 .5rem 0; }
-.hero-title {
-  font-weight: 800;
-  line-height: 1.1;
-  margin: 0 0 .9rem 0;
-  font-size: clamp(2rem, 4.5vw, 3.2rem);
-}
-.hero-sub {
-  opacity: .92;
-  font-size: 1.1rem;
-}
-.hero-points { margin-top: 1.5rem; display: grid; gap: .6rem; }
-.hero-points .point { display: flex; align-items: center; gap: .6rem; opacity: .95; }
-.hero-points .point i { width: 28px; height: 28px; display: inline-flex; align-items: center; justify-content: center; border-radius: 50%; background: rgba(255,255,255,.15); }
-.hero-illustration { display: none; }
+  .sidebar-toggle,
+  #sidebarToggle {
+    display: none !important;
+  }
 
-.form-pane { display: flex; align-items: center; justify-content: center; }
-.glass-card {
-  width: 100%;
-  max-width: 440px;
-  background: rgba(255,255,255,0.12);
-  border: 1px solid rgba(255,255,255,0.35);
-  border-radius: 16px;
-  padding: 1.5rem;
-  box-shadow: 0 20px 40px rgba(0,0,0,.25);
-  backdrop-filter: blur(10px);
-}
-.glass-card .card-inner { background: rgba(255,255,255,0.9); border-radius: 12px; padding: 1.25rem 1.25rem 1.35rem; }
-.brand-badge { width: 64px; height: 64px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; color: #fff; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); box-shadow: 0 8px 24px rgba(102,126,234,.35); }
-.login-heading { font-weight: 700; margin: .75rem 0 .25rem 0; }
-.login-note { color: #6c757d; margin-bottom: .75rem; }
+  /* Artistic full-screen background with animated gradient blobs */
+  .login-wrap {
+    position: relative;
+    min-height: 100vh;
+    overflow-x: hidden;
+    overflow-y: auto;
+    background: radial-gradient(1200px 800px at -10% -20%, rgba(0, 148, 255, 0.25), transparent 60%),
+      radial-gradient(1000px 700px at 110% 110%, rgba(0, 180, 255, 0.25), transparent 60%),
+      linear-gradient(135deg, #0074d9 0%, #00b4ff 100%);
+  }
 
-.form-group { margin-bottom: .9rem; }
-.form-control { border-radius: 10px; padding: .8rem .9rem; border: 1px solid #e6e8f0; }
-.form-control:focus { border-color: #667eea; box-shadow: 0 0 0 .12rem rgba(102,126,234,.18); }
+  .bg-blob {
+    position: absolute;
+    filter: blur(40px);
+    opacity: .5;
+    border-radius: 50%;
+    animation: float 14s ease-in-out infinite;
+  }
 
-.btn-gradient-primary { background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: #fff; border: 0; border-radius: 10px; box-shadow: 0 8px 18px rgba(102,126,234,.28); }
-.btn-gradient-primary:hover { background: linear-gradient(135deg, #764ba2 0%, #667eea 100%); color: #fff; transform: translateY(-1px); }
-.w-100 { width: 100%; }
+  .bg-blob.one {
+    width: 420px;
+    height: 420px;
+    background: #5ea3ff;
+    top: -120px;
+    left: -120px;
+    animation-delay: 0s;
+  }
 
-@media (max-width: 992px) {
-  .login-grid { grid-template-columns: 1fr; padding: 2.5rem clamp(1rem, 5vw, 32px); }
-  .hero-pane { text-align: center; padding-right: 0; }
-  .hero-inner { grid-template-columns: 1fr; }
-  .hero-points { justify-items: center; }
-}
+  .bg-blob.two {
+    width: 360px;
+    height: 360px;
+    background: #00c2ff;
+    bottom: -120px;
+    right: -80px;
+    animation-delay: 2s;
+  }
 
-@keyframes fadeInUp {
-    from { opacity: 0; transform: translateY(20px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-.fade-in-up {
+  .bg-blob.three {
+    width: 280px;
+    height: 280px;
+    background: #79ffe1;
+    top: 20%;
+    right: 20%;
+    animation-delay: 4s;
+    opacity: .35;
+  }
+
+  @keyframes float {
+
+    0%,
+    100% {
+      transform: translateY(0) translateX(0);
+    }
+
+    50% {
+      transform: translateY(-20px) translateX(10px);
+    }
+  }
+
+  /* Inline SVG illustration behind content */
+  .bg-illustration {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+    opacity: .22;
+    pointer-events: none;
+  }
+
+  /* Split layout: hero + form */
+  .login-grid {
+    position: relative;
+    z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    min-height: 100vh;
+    padding: 2rem clamp(1rem, 4vw, 4rem);
+    align-items: center;
+  }
+
+  .hero-pane {
+    color: #ffffff;
+    padding: 1rem;
+  }
+
+  .hero-inner {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+  }
+
+  .brand-row {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+  }
+
+  .brand-logo {
+    width: 44px;
+    height: 44px;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 24px rgba(0, 0, 0, .25));
+  }
+
+  .app-title {
+    font-size: clamp(1.8rem, 4vw, 3rem);
+    font-weight: 800;
+    letter-spacing: .5px;
+    margin: 0;
+  }
+
+  .hero-title {
+    font-weight: 800;
+    line-height: 1.15;
+    margin: 0;
+    font-size: clamp(1.5rem, 3.5vw, 2.5rem);
+  }
+
+  .hero-sub {
+    opacity: .92;
+    font-size: clamp(0.9rem, 2vw, 1.1rem);
+    line-height: 1.6;
+  }
+
+  .hero-points {
+    margin-top: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+  }
+
+  .hero-points .point {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    opacity: .95;
+    font-size: 0.95rem;
+  }
+
+  .hero-points .point i {
+    width: 28px;
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, .15);
+    font-size: 0.75rem;
+  }
+
+  .hero-illustration {
+    display: none;
+  }
+
+  /* Form Pane */
+  .form-pane {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Glass Card - Polished */
+  .glass-card {
+    width: 100%;
+    max-width: 420px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+    border-radius: 20px;
+    padding: 1.25rem;
+    box-shadow:
+      0 25px 50px rgba(0, 0, 0, .2),
+      0 0 0 1px rgba(255, 255, 255, 0.1) inset;
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  /* Card Inner - Clean white */
+  .glass-card .card-inner {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 14px;
+    padding: 1.75rem 1.5rem;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, .08);
+  }
+
+  .brand-badge {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    box-shadow: 0 8px 24px rgba(102, 126, 234, .35);
+  }
+
+  .login-heading {
+    font-weight: 700;
+    font-size: 1.5rem;
+    margin: 0 0 0.25rem 0;
+    color: #1a1a2e;
+  }
+
+  .login-note {
+    color: #6c757d;
+    margin-bottom: 1rem;
+    font-size: 0.95rem;
+  }
+
+  /* Form Controls - Polished */
+  .form-group {
+    margin-bottom: 1rem;
+  }
+
+  .form-label {
+    font-weight: 600;
+    font-size: 0.875rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: block;
+  }
+
+  .form-control {
+    width: 100%;
+    border-radius: 10px;
+    padding: 0.875rem 1rem;
+    border: 2px solid #e8ecf4;
+    font-size: 1rem;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+  }
+
+  .form-control:focus {
+    border-color: #667eea;
+    background: #fff;
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, .12);
+    outline: none;
+  }
+
+  .form-control::placeholder {
+    color: #a0aec0;
+  }
+
+  /* Checkbox */
+  .form-check {
+    margin-bottom: 1.25rem;
+  }
+
+  .form-check-input {
+    width: 18px;
+    height: 18px;
+    border-radius: 4px;
+  }
+
+  .form-check-label {
+    font-size: 0.9rem;
+    color: #555;
+  }
+
+  /* Button - Gradient */
+  .btn-gradient-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: 0;
+    border-radius: 12px;
+    padding: 1rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 600;
+    box-shadow: 0 8px 24px rgba(102, 126, 234, .3);
+    transition: all 0.3s ease;
+    cursor: pointer;
+  }
+
+  .btn-gradient-primary:hover {
+    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(102, 126, 234, .4);
+  }
+
+  .w-100 {
+    width: 100%;
+  }
+
+  /* Demo credentials box */
+  .alert-primary {
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.08) 0%, rgba(118, 75, 162, 0.08) 100%) !important;
+    border: 1px solid rgba(102, 126, 234, 0.2) !important;
+    border-radius: 12px;
+    padding: 1rem;
+  }
+
+  /* Footer */
+  .portfolio-footer {
+    margin-top: 1.5rem;
+    text-align: center;
+  }
+
+  .portfolio-footer small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+  }
+
+  /* ===== TABLET (768px - 1024px) ===== */
+  @media (max-width: 1024px) {
+    .login-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      padding: 1.5rem;
+      min-height: auto;
+      align-items: start;
+    }
+
+    .hero-pane {
+      text-align: center;
+      padding: 1rem 0 0 0;
+    }
+
+    .hero-inner {
+      align-items: center;
+    }
+
+    .brand-row {
+      justify-content: center;
+    }
+
+    .hero-points {
+      align-items: center;
+    }
+
+    .hero-sub {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .glass-card {
+      max-width: 400px;
+    }
+  }
+
+  /* ===== MOBILE (< 768px) ===== */
+  @media (max-width: 768px) {
+    .login-wrap {
+      min-height: 100%;
+      padding-bottom: 2rem;
+    }
+
+    .login-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      padding: 1rem;
+      min-height: auto;
+    }
+
+    .hero-pane {
+      padding: 0.5rem 0;
+    }
+
+    .app-title {
+      font-size: 1.75rem;
+    }
+
+    .hero-title {
+      font-size: 1.25rem;
+    }
+
+    .hero-sub {
+      font-size: 0.9rem;
+    }
+
+    .hero-points {
+      display: none;
+    }
+
+    /* Hide on small mobile for space */
+
+    .glass-card {
+      max-width: 100%;
+      padding: 0.75rem;
+      border-radius: 16px;
+    }
+
+    .glass-card .card-inner {
+      padding: 1.25rem 1rem;
+      border-radius: 12px;
+    }
+
+    .login-heading {
+      font-size: 1.25rem;
+    }
+
+    .form-control {
+      padding: 0.75rem 0.875rem;
+      font-size: 0.95rem;
+    }
+
+    .btn-gradient-primary {
+      padding: 0.875rem 1rem;
+      font-size: 0.95rem;
+    }
+  }
+
+  /* ===== VERY SMALL SCREENS (< 480px) ===== */
+  @media (max-width: 480px) {
+    .login-grid {
+      padding: 0.75rem;
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+    }
+
+    .app-title {
+      font-size: 1.5rem;
+    }
+
+    .hero-title {
+      font-size: 1.1rem;
+    }
+
+    .glass-card .card-inner {
+      padding: 1rem 0.875rem;
+    }
+
+    .alert-primary {
+      flex-direction: column;
+      text-align: center;
+      gap: 0.5rem;
+    }
+
+    .alert-primary i {
+      margin: 0 !important;
+    }
+  }
+
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  .fade-in-up {
     animation: fadeInUp 0.8s ease-out forwards;
     opacity: 0;
-}
+  }
 </style>
 {% endblock %}
 
@@ -116,40 +490,45 @@
   <svg class="bg-illustration" viewBox="0 0 1440 900" preserveAspectRatio="none" aria-hidden="true">
     <defs>
       <linearGradient id="waveGrad" x1="0" y1="0" x2="1" y2="1">
-        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35"/>
-        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05"/>
+        <stop offset="0%" stop-color="#ffffff" stop-opacity="0.35" />
+        <stop offset="100%" stop-color="#ffffff" stop-opacity="0.05" />
       </linearGradient>
       <linearGradient id="cardioGrad" x1="0" y1="0" x2="1" y2="0">
-        <stop offset="0%" stop-color="#ff6b6b"/>
-        <stop offset="100%" stop-color="#ffd93d"/>
+        <stop offset="0%" stop-color="#ff6b6b" />
+        <stop offset="100%" stop-color="#ffd93d" />
       </linearGradient>
       <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-        <feGaussianBlur stdDeviation="4" result="coloredBlur"/>
+        <feGaussianBlur stdDeviation="4" result="coloredBlur" />
         <feMerge>
-          <feMergeNode in="coloredBlur"/>
-          <feMergeNode in="SourceGraphic"/>
+          <feMergeNode in="coloredBlur" />
+          <feMergeNode in="SourceGraphic" />
         </feMerge>
       </filter>
     </defs>
     <!-- soft waves -->
-    <path d="M0,720 C240,680 360,760 560,740 C760,720 880,640 1100,660 C1260,674 1360,700 1440,720 L1440,900 L0,900 Z" fill="url(#waveGrad)"/>
-    <path d="M0,540 C220,580 360,520 560,540 C760,560 940,620 1140,600 C1280,586 1380,560 1440,540 L1440,900 L0,900 Z" fill="url(#waveGrad)" opacity=".6"/>
+    <path d="M0,720 C240,680 360,760 560,740 C760,720 880,640 1100,660 C1260,674 1360,700 1440,720 L1440,900 L0,900 Z"
+      fill="url(#waveGrad)" />
+    <path d="M0,540 C220,580 360,520 560,540 C760,560 940,620 1140,600 C1280,586 1380,560 1440,540 L1440,900 L0,900 Z"
+      fill="url(#waveGrad)" opacity=".6" />
     <!-- heartbeat line -->
-    <path d="M-40 420 L 120 420 L 180 420 L 220 360 L 260 480 L 300 420 L 380 420 L 440 420 L 480 360 L 520 480 L 560 420 L 640 420 L 700 420 L 740 370 L 780 470 L 820 420 L 900 420 L 960 420 L 1000 360 L 1040 480 L 1080 420 L 1160 420 L 1240 420 L 1300 360 L 1340 480 L 1380 420 L 1500 420" stroke="url(#cardioGrad)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#glow)" opacity=".8"/>
+    <path
+      d="M-40 420 L 120 420 L 180 420 L 220 360 L 260 480 L 300 420 L 380 420 L 440 420 L 480 360 L 520 480 L 560 420 L 640 420 L 700 420 L 740 370 L 780 470 L 820 420 L 900 420 L 960 420 L 1000 360 L 1040 480 L 1080 420 L 1160 420 L 1240 420 L 1300 360 L 1340 480 L 1380 420 L 1500 420"
+      stroke="url(#cardioGrad)" stroke-width="3.5" fill="none" stroke-linecap="round" stroke-linejoin="round"
+      filter="url(#glow)" opacity=".8" />
     <!-- decorative dots/rings -->
     <g opacity=".55">
-      <circle cx="120" cy="160" r="3" fill="#ffffff"/>
-      <circle cx="280" cy="200" r="2" fill="#ffffff"/>
-      <circle cx="320" cy="140" r="2" fill="#ffffff"/>
-      <circle cx="980" cy="220" r="3" fill="#ffffff"/>
-      <circle cx="1120" cy="160" r="2" fill="#ffffff"/>
-      <circle cx="1320" cy="260" r="2" fill="#ffffff"/>
+      <circle cx="120" cy="160" r="3" fill="#ffffff" />
+      <circle cx="280" cy="200" r="2" fill="#ffffff" />
+      <circle cx="320" cy="140" r="2" fill="#ffffff" />
+      <circle cx="980" cy="220" r="3" fill="#ffffff" />
+      <circle cx="1120" cy="160" r="2" fill="#ffffff" />
+      <circle cx="1320" cy="260" r="2" fill="#ffffff" />
     </g>
     <g opacity=".35" stroke="#ffffff" fill="none">
-      <circle cx="260" cy="680" r="18"/>
-      <circle cx="260" cy="680" r="8"/>
-      <circle cx="1240" cy="760" r="14"/>
-      <circle cx="1240" cy="760" r="6"/>
+      <circle cx="260" cy="680" r="18" />
+      <circle cx="260" cy="680" r="8" />
+      <circle cx="1240" cy="760" r="14" />
+      <circle cx="1240" cy="760" r="6" />
     </g>
   </svg>
 
@@ -168,7 +547,8 @@
             <h1 class="app-title mb-0">Heartline</h1>
           </div>
           <h2 class="hero-title">Care that connects. Insights that empower.</h2>
-          <div class="hero-sub">Secure access to real‑time ECG insights, streamlined visits, and a modern patient experience—all in one place.</div>
+          <div class="hero-sub">Secure access to real‑time ECG insights, streamlined visits, and a modern patient
+            experience—all in one place.</div>
           <div class="hero-points">
             <div class="point"><i class="fas fa-bolt"></i> Fast, secure sign‑in</div>
             <div class="point"><i class="fas fa-wave-square"></i> Integrated ECG analysis</div>
@@ -189,10 +569,10 @@
           <div class="alert alert-primary bg-primary-subtle border-0 mb-4 d-flex align-items-center" role="alert">
             <i class="fas fa-info-circle text-primary me-3 fs-4"></i>
             <div>
-                <div class="fw-bold text-primary mb-1">Portfolio Demo Access</div>
-                <div class="small text-primary-emphasis">
-                    Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>admin</strong>
-                </div>
+              <div class="fw-bold text-primary mb-1">Portfolio Demo Access</div>
+              <div class="small text-primary-emphasis">
+                Username: <strong>admin</strong> &nbsp;|&nbsp; Password: <strong>admin</strong>
+              </div>
             </div>
           </div>
 
@@ -203,7 +583,7 @@
               {{ form.username.label(class="form-label") }}
               {{ form.username(class="form-control", placeholder="Enter your username") }}
               {% for error in form.username.errors %}
-                <div class="text-danger mt-1">{{ error }}</div>
+              <div class="text-danger mt-1">{{ error }}</div>
               {% endfor %}
             </div>
 
@@ -211,7 +591,7 @@
               {{ form.password.label(class="form-label") }}
               {{ form.password(class="form-control", placeholder="Enter your password") }}
               {% for error in form.password.errors %}
-                <div class="text-danger mt-1">{{ error }}</div>
+              <div class="text-danger mt-1">{{ error }}</div>
               {% endfor %}
             </div>
 
@@ -243,12 +623,12 @@
 
 {% block extra_js %}
 <script>
-// Auto-focus on the username field
-document.addEventListener('DOMContentLoaded', function() {
-  const usernameField = document.getElementById('username');
-  if (usernameField) {
-    usernameField.focus();
-  }
-});
+  // Auto-focus on the username field
+  document.addEventListener('DOMContentLoaded', function () {
+    const usernameField = document.getElementById('username');
+    if (usernameField) {
+      usernameField.focus();
+    }
+  });
 </script>
 {% endblock %}
