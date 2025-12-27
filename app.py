@@ -304,6 +304,144 @@ def health_check():
 
 
 # ----------------------------------------
+# DATABASE WAKE-UP HANDLING (Azure SQL Serverless)
+# ----------------------------------------
+# Azure SQL Serverless databases auto-pause after inactivity (default 60 min).
+# When the first request comes in, the database takes 30-60 seconds to wake up.
+# During this time, connections fail with error 40613. This code handles that
+# gracefully by showing a loading page instead of a 500 error.
+
+import pyodbc
+from time import sleep
+
+# Track if we've already detected a cold start in this request cycle
+_db_wakeup_in_progress = False
+
+def is_database_waking_up_error(error):
+    """
+    Check if the error is an Azure SQL Serverless database wake-up error.
+    Error 40613: Database is not currently available.
+    """
+    error_str = str(error).lower()
+    return (
+        '40613' in error_str or
+        'not currently available' in error_str or
+        'please retry the connection' in error_str
+    )
+
+
+def check_database_connection():
+    """
+    Test if the database is available by executing a simple query.
+    Returns (True, None) if available, (False, error_message) if not.
+    """
+    try:
+        # Use a simple query to test connectivity
+        result = db.session.execute(text('SELECT 1'))
+        result.close()
+        db.session.commit()
+        return True, None
+    except Exception as e:
+        db.session.rollback()
+        if is_database_waking_up_error(e):
+            return False, "Database is waking up from sleep mode"
+        # Re-raise non-wakeup errors
+        raise
+
+
+@app.route('/db-wakeup-page')
+def db_wakeup_page():
+    """
+    Display a loading page while the database wakes up.
+    This page auto-refreshes and checks database status via JavaScript.
+    """
+    next_url = request.args.get('next', '/')
+    return render_template('db_wakeup.html', next_url=next_url)
+
+
+@app.route('/db-wakeup-check')
+def db_wakeup_check():
+    """
+    API endpoint that JavaScript polls to check if the database is ready.
+    Returns JSON: {"status": "ready"} or {"status": "waking_up"}
+    """
+    try:
+        is_ready, _ = check_database_connection()
+        if is_ready:
+            return jsonify({"status": "ready"})
+        else:
+            return jsonify({"status": "waking_up"})
+    except Exception as e:
+        app.logger.warning(f"Database check failed: {e}")
+        return jsonify({"status": "waking_up", "error": str(e)})
+
+
+# List of routes that should NOT trigger database check (to avoid infinite loops)
+SKIP_DB_CHECK_ROUTES = {
+    'db_wakeup_page',
+    'db_wakeup_check', 
+    'health_check',
+    'static',
+}
+
+
+@app.before_request
+def check_database_before_request():
+    """
+    Before each request, check if the database is available.
+    If the database is waking up, redirect to the loading page.
+    """
+    # Skip check for certain routes
+    if request.endpoint in SKIP_DB_CHECK_ROUTES:
+        return None
+    
+    # Skip for static files
+    if request.path.startswith('/static'):
+        return None
+    
+    # Skip if this is an AJAX/API request (let it fail naturally for proper error handling)
+    if request.is_json or request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        return None
+    
+    try:
+        is_ready, error_msg = check_database_connection()
+        if not is_ready:
+            app.logger.info(f"Database not ready, redirecting to wake-up page: {error_msg}")
+            next_url = request.full_path if request.query_string else request.path
+            return redirect(url_for('db_wakeup_page', next=next_url))
+    except Exception as e:
+        # If it's a different error, let normal error handling take over
+        if is_database_waking_up_error(e):
+            app.logger.info(f"Database waking up error caught: {e}")
+            next_url = request.full_path if request.query_string else request.path
+            return redirect(url_for('db_wakeup_page', next=next_url))
+        # Don't catch other database errors here - let them propagate
+        pass
+    
+    return None
+
+
+@app.errorhandler(SQLAlchemyError)
+def handle_database_error(error):
+    """
+    Handle SQLAlchemy errors, specifically catching database wake-up errors.
+    """
+    db.session.rollback()
+    
+    if is_database_waking_up_error(error):
+        app.logger.warning(f"Database wake-up error caught in error handler: {error}")
+        next_url = request.full_path if request.query_string else request.path
+        return redirect(url_for('db_wakeup_page', next=next_url))
+    
+    # For other database errors, show a generic error page or re-raise
+    app.logger.error(f"Database error: {error}")
+    return render_template('db_wakeup.html', 
+                          next_url='/',
+                          error=True,
+                          error_message="A database error occurred. Please try again."), 500
+
+
+# ----------------------------------------
 # ROLE-BASED ACCESS CONTROL DECORATORS
 # ----------------------------------------
 
